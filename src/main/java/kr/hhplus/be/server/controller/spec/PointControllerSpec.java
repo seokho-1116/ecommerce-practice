@@ -57,7 +57,8 @@ public interface PointControllerSpec {
       )
   })
   CommonResponseWrapper<ChargePointResponse> chargePoint(
-      @Parameter(in = ParameterIn.QUERY, description = "사용자 아이디", required = true) long id);
+      @Parameter(in = ParameterIn.QUERY, description = "사용자 아이디", required = true) long id,
+      @Parameter(in = ParameterIn.QUERY, description = "충전할 포인트", required = true) long amount);
 
   @Operation(
       summary = "포인트 조회",
