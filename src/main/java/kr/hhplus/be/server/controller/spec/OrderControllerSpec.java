@@ -1,7 +1,10 @@
 package kr.hhplus.be.server.controller.spec;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
@@ -46,7 +49,7 @@ public interface OrderControllerSpec {
               )
           )
       })
-  CommonResponseWrapper<OrderResponse> createOrder(OrderRequest request);
+  CommonResponseWrapper<OrderResponse> createOrder(@RequestBody OrderRequest request);
 
   @Operation(
       summary = "주문 결제",
@@ -82,6 +85,7 @@ public interface OrderControllerSpec {
               )
           )
       })
-  CommonResponseWrapper<OrderPaymentResponse> paymentOrder(long orderId,
-      OrderPaymentRequest request);
+  CommonResponseWrapper<OrderPaymentResponse> paymentOrder(
+      @Parameter(in = ParameterIn.PATH, description = "주문 아이디", required = true) long orderId,
+      @RequestBody OrderPaymentRequest request);
 }

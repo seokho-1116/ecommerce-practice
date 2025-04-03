@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import kr.hhplus.be.server.controller.response.CurrentPointResponse;
@@ -57,8 +58,8 @@ public interface PointControllerSpec {
       )
   })
   CommonResponseWrapper<ChargePointResponse> chargePoint(
-      @Parameter(in = ParameterIn.QUERY, description = "사용자 아이디", required = true) long id,
-      @Parameter(in = ParameterIn.QUERY, description = "충전할 포인트", required = true) long amount);
+      @Parameter(in = ParameterIn.PATH, description = "사용자 아이디", required = true) long id,
+      @RequestBody long amount);
 
   @Operation(
       summary = "포인트 조회",
@@ -93,5 +94,5 @@ public interface PointControllerSpec {
       )
   })
   CommonResponseWrapper<CurrentPointResponse> findPoint(
-      @Parameter(in = ParameterIn.QUERY, description = "사용자 아이디", required = true) long id);
+      @Parameter(in = ParameterIn.PATH, description = "사용자 아이디", required = true) long id);
 }
