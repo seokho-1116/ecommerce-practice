@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.ProductSummaryResponse;
-import kr.hhplus.be.server.controller.response.TopSellingProductResponse;
-import kr.hhplus.be.server.controller.response.TopSellingProductResponse.TopSellingProduct;
+import kr.hhplus.be.server.controller.response.TopSellingProductsResponse;
+import kr.hhplus.be.server.controller.response.TopSellingProductsResponse.TopSellingProductResponse;
 import kr.hhplus.be.server.controller.spec.ProductControllerSpec;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,13 +68,13 @@ public class ProductController implements ProductControllerSpec {
   }
 
   @GetMapping("/top-selling")
-  public CommonResponseWrapper<TopSellingProductResponse> findTopSellingProducts() {
+  public CommonResponseWrapper<TopSellingProductsResponse> findTopSellingProducts() {
     return CommonResponseWrapper.ok(
-        new TopSellingProductResponse(
+        new TopSellingProductsResponse(
             LocalDateTime.now(),
             LocalDateTime.now().minusDays(4),
             List.of(
-                new TopSellingProduct(
+                new TopSellingProductResponse(
                     1L,
                     1L,
                     1L,

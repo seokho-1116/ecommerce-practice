@@ -9,6 +9,7 @@ import java.util.List;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.ErrorResponse;
 import kr.hhplus.be.server.controller.response.ProductSummaryResponse;
+import kr.hhplus.be.server.controller.response.TopSellingProductsResponse;
 
 public interface ProductControllerSpec {
 
@@ -58,5 +59,5 @@ public interface ProductControllerSpec {
           )
       )
   })
-  CommonResponseWrapper<ProductSummaryResponse> findTopSellingProducts();
+  CommonResponseWrapper<TopSellingProductsResponse> findTopSellingProducts();
 }
