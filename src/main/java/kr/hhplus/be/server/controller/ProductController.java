@@ -1,8 +1,11 @@
 package kr.hhplus.be.server.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.ProductSummaryResponse;
+import kr.hhplus.be.server.controller.response.TopSellingProductResponse;
+import kr.hhplus.be.server.controller.response.TopSellingProductResponse.TopSellingProduct;
 import kr.hhplus.be.server.controller.spec.ProductControllerSpec;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +61,28 @@ public class ProductController implements ProductControllerSpec {
                         400L,
                         40L
                     )
+                )
+            )
+        )
+    );
+  }
+
+  @GetMapping("/top-selling")
+  public CommonResponseWrapper<TopSellingProductResponse> findTopSellingProducts() {
+    return CommonResponseWrapper.ok(
+        new TopSellingProductResponse(
+            LocalDateTime.now(),
+            LocalDateTime.now().minusDays(4),
+            List.of(
+                new TopSellingProduct(
+                    1L,
+                    1L,
+                    1L,
+                    "상품1",
+                    "상품1 설명",
+                    1000L,
+                    100L,
+                    10L
                 )
             )
         )
