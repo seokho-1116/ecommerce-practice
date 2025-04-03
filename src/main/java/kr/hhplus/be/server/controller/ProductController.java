@@ -3,13 +3,14 @@ package kr.hhplus.be.server.controller;
 import java.util.List;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.ProductSummaryResponse;
+import kr.hhplus.be.server.controller.spec.ProductControllerSpec;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/products")
-public class ProductController {
+public class ProductController implements ProductControllerSpec {
 
   @GetMapping
   public CommonResponseWrapper<List<ProductSummaryResponse>> findAllProducts() {
