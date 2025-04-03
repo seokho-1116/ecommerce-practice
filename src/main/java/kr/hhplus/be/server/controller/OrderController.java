@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController implements OrderControllerSpec {
 
   @PostMapping
-  public CommonResponseWrapper<OrderResponse> createOrder(OrderRequest request) {
+  public CommonResponseWrapper<OrderResponse> createOrder(@RequestBody OrderRequest request) {
     return CommonResponseWrapper.ok(
         new OrderResponse(
             1L,
