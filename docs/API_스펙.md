@@ -1,5 +1,16 @@
 # API Spec
 
+1. [공통 성공 응답](#공통-성공-응답)
+2. [공통 실패 응답](#공통-실패-응답)
+3. [잔액 충전](#잔액-충전)
+4. [잔액 조회](#잔액-조회)
+5. [상품 목록 조회](#상품-목록-조회)
+6. [선착순 쿠폰 발급](#선착순-쿠폰-발급)
+7. [보유 쿠폰 목록 조회](#보유-쿠폰-목록-조회)
+8. [주문](#주문)
+9. [결제](#결제)
+10. [상위 상품 조회](#상위-상품-조회)
+
 ## 공통 성공 응답
 
 ```json
@@ -85,56 +96,76 @@
 
 ```json
 {
-  "resultCode": "00",
-  "message": "success",
-  "data": {
-    "products": [
-      {
-        "id": 1001,
-        "name": "스마트폰 A",
-        "description": "최신 스마트폰 A 모델",
-        "basePrice": 800000,
-        "options": [
-          {
-            "id": 10011,
-            "name": "블랙/128GB",
-            "description": "블랙 색상, 128GB 저장공간",
-            "additionalPrice": 0,
-            "inventory": 150
-          },
-          {
-            "id": 10012,
-            "name": "화이트/256GB",
-            "description": "화이트 색상, 256GB 저장공간",
-            "additionalPrice": 200000,
-            "inventory": 75
-          }
-        ]
-      },
-      {
-        "id": 1002,
-        "name": "노트북 B",
-        "description": "고성능 노트북 B 모델",
-        "basePrice": 1200000,
-        "options": [
-          {
-            "id": 10021,
-            "name": "i5/8GB/256GB",
-            "description": "인텔 i5, 8GB RAM, 256GB SSD",
-            "additionalPrice": 0,
-            "inventory": 50
-          },
-          {
-            "id": 10022,
-            "name": "i7/16GB/512GB",
-            "description": "인텔 i7, 16GB RAM, 512GB SSD",
-            "additionalPrice": 400000,
-            "inventory": 30
-          }
-        ]
-      }
-    ]
-  }
+  "resultCode": "SUCCESS",
+  "message": "상품 목록 조회 성공",
+  "data": [
+    {
+      "id": 1,
+      "name": "아메리카노",
+      "description": "깔끔하고 깊은 맛의 에스프레소에 물을 더한 커피",
+      "basePrice": 4500,
+      "options": [
+        {
+          "id": 1,
+          "name": "ICE",
+          "description": "차갑게 즐기는 아메리카노",
+          "additionalPrice": 500,
+          "inventory": 100
+        },
+        {
+          "id": 2,
+          "name": "HOT",
+          "description": "뜨겁게 즐기는 아메리카노",
+          "additionalPrice": 0,
+          "inventory": 100
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "카페라떼",
+      "description": "에스프레소와 스팀 밀크가 어우러진 부드러운 커피",
+      "basePrice": 5000,
+      "options": [
+        {
+          "id": 3,
+          "name": "ICE",
+          "description": "차갑게 즐기는 카페라떼",
+          "additionalPrice": 500,
+          "inventory": 80
+        },
+        {
+          "id": 4,
+          "name": "HOT",
+          "description": "뜨겁게 즐기는 카페라떼",
+          "additionalPrice": 0,
+          "inventory": 80
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "바닐라 라떼",
+      "description": "바닐라 시럽이 첨가된 달콤한 라떼",
+      "basePrice": 5500,
+      "options": [
+        {
+          "id": 5,
+          "name": "ICE",
+          "description": "차갑게 즐기는 바닐라 라떼",
+          "additionalPrice": 500,
+          "inventory": 70
+        },
+        {
+          "id": 6,
+          "name": "HOT",
+          "description": "뜨겁게 즐기는 바닐라 라떼",
+          "additionalPrice": 0,
+          "inventory": 70
+        }
+      ]
+    }
+  ]
 }
 
 ```
@@ -159,19 +190,19 @@
 
 ```json
 {
-  "resultCode": "00",
-  "message": "success",
+  "resultCode": "SUCCESS",
+  "message": "쿠폰 발급 성공",
   "data": {
-    "couponId": 1230,
-    "userId": 1234,
-    "userCouponId": 9876,
-    "name": "봄맞이 할인 쿠폰",
-    "discountRate": 10,
-    "discountAmount": null,
-    "couponType": "PERCENTAGE",
-    "fromTs": "2025-04-01T00:00:00Z",
-    "toTs": "2025-04-30T23:59:59Z",
-    "createdAt": "2025-04-04T15:10:22Z"
+    "userId": 1001,
+    "couponId": 10,
+    "userCouponId": 504,
+    "couponName": "봄맞이 이벤트 쿠폰",
+    "discountRate": 0.0,
+    "discountAmount": 2000,
+    "couponType": "FIXED",
+    "from": "2025-04-04T00:00:00Z",
+    "to": "2025-05-04T23:59:59Z",
+    "createdAt": "2025-04-04T15:20:30Z"
   }
 }
 
@@ -185,36 +216,43 @@
 
 ```json
 {
-  "resultCode": "00",
-  "message": "success",
-  "data": {
-    "coupons": [
-      {
-        "userCouponId": 9876,
-        "couponId": 1230,
-        "name": "봄맞이 할인 쿠폰",
-        "discountRate": 10,
-        "discountAmount": null,
-        "couponType": "PERCENTAGE",
-        "fromTs": "2025-04-01T00:00:00Z",
-        "toTs": "2025-04-30T23:59:59Z",
-        "isUsed": false,
-        "createdAt": "2025-04-04T15:10:22Z"
-      },
-      {
-        "userCouponId": 9875,
-        "couponId": 1229,
-        "name": "신규 회원 할인",
-        "discountRate": null,
-        "discountAmount": 10000,
-        "couponType": "FIXED",
-        "fromTs": "2025-03-15T00:00:00Z",
-        "toTs": "2025-05-15T23:59:59Z",
-        "isUsed": false,
-        "createdAt": "2025-03-20T10:45:12Z"
-      }
-    ]
-  }
+  "resultCode": "SUCCESS",
+  "message": "쿠폰 목록 조회 성공",
+  "data": [
+    {
+      "userId": 1001,
+      "userCouponId": 501,
+      "couponName": "신규 가입 할인",
+      "discountRate": 10.0,
+      "discountAmount": 0,
+      "couponType": "PERCENTAGE",
+      "from": "2025-01-01T00:00:00Z",
+      "to": "2025-12-31T23:59:59Z",
+      "createdAt": "2025-03-15T10:30:00Z"
+    },
+    {
+      "userId": 1001,
+      "userCouponId": 502,
+      "couponName": "생일 축하 쿠폰",
+      "discountRate": 0.0,
+      "discountAmount": 3000,
+      "couponType": "FIXED",
+      "from": "2025-04-01T00:00:00Z",
+      "to": "2025-04-30T23:59:59Z",
+      "createdAt": "2025-04-01T00:00:00Z"
+    },
+    {
+      "userId": 1001,
+      "userCouponId": 503,
+      "couponName": "VIP 회원 특별 할인",
+      "discountRate": 15.0,
+      "discountAmount": 0,
+      "couponType": "PERCENTAGE",
+      "from": "2025-04-01T00:00:00Z",
+      "to": "2025-04-30T23:59:59Z",
+      "createdAt": "2025-04-01T00:00:00Z"
+    }
+  ]
 }
 
 ```
@@ -245,51 +283,55 @@
 
 ```json
 {
-  "resultCode": "00",
-  "message": "success",
+  "resultCode": "SUCCESS",
+  "message": "주문 생성 성공",
   "data": {
-    "orderId": 5001,
-    "userId": 1234,
+    "orderId": 2001,
+    "userId": 1001,
     "status": "CREATED",
-    "totalPrice": 1400000,
-    "discountPrice": 140000,
-    "finalPrice": 1260000,
-    "items": [
+    "totalPrice": 16000,
+    "discountPrice": 1000,
+    "finalPrice": 15000,
+    "itemInfos": [
       {
-        "orderItemId": 7001,
-        "productId": 1001,
-        "productName": "스마트폰 A",
-        "productDescription": "최신 스마트폰 A 모델",
-        "productOptionId": 10012,
-        "productOptionName": "화이트/256GB",
-        "productOptionDescription": "화이트 색상, 256GB 저장공간",
-        "basePrice": 800000,
-        "additionalPrice": 200000,
-        "quantity": 1,
-        "itemTotalPrice": 1000000,
+        "orderItemId": 3001,
+        "productId": 1,
+        "productName": "아메리카노",
+        "productDescription": "깔끔하고 깊은 맛의 에스프레소에 물을 더한 커피",
+        "productOptionId": 1,
+        "productOptionName": "ICE",
+        "productOptionDescription": "차갑게 즐기는 아메리카노",
+        "basePrice": 4500,
+        "additionalPrice": 500,
+        "totalPrice": 10000,
+        "discountPrice": 1000,
+        "finalPrice": 9000,
+        "quantity": 2,
         "couponInfo": {
-          "couponId": 1230,
-          "name": "봄맞이 할인 쿠폰",
-          "discountRate": 10,
-          "discountAmount": null
+          "couponId": 501,
+          "couponName": "신규 가입 할인",
+          "discountRate": 10.0,
+          "discountAmount": 0,
+          "couponType": "PERCENTAGE"
         }
       },
       {
-        "orderItemId": 7002,
-        "productId": 1002,
-        "productName": "노트북 B",
-        "productDescription": "고성능 노트북 B 모델",
-        "productOptionId": 10021,
-        "productOptionName": "i5/8GB/256GB",
-        "productOptionDescription": "인텔 i5, 8GB RAM, 256GB SSD",
-        "basePrice": 1200000,
-        "additionalPrice": 0,
+        "orderItemId": 3002,
+        "productId": 2,
+        "productName": "카페라떼",
+        "productDescription": "에스프레소와 스팀 밀크가 어우러진 부드러운 커피",
+        "productOptionId": 3,
+        "productOptionName": "ICE",
+        "productOptionDescription": "차갑게 즐기는 카페라떼",
+        "basePrice": 5000,
+        "additionalPrice": 500,
+        "totalPrice": 5500,
+        "discountPrice": 0,
+        "finalPrice": 5500,
         "quantity": 1,
-        "itemTotalPrice": 400000,
         "couponInfo": null
       }
-    ],
-    "createdAt": "2025-04-04T15:30:45Z"
+    ]
   }
 }
 
@@ -314,18 +356,18 @@
 
 ```json
 {
-  "resultCode": "00",
-  "message": "success",
+  "resultCode": "SUCCESS",
+  "message": "주문 결제 성공",
   "data": {
-    "paymentId": 6001,
-    "orderId": 5001,
-    "userId": 1234,
-    "amount": 1260000,
-    "status": "COMPLETED",
-    "remainingPoint": 3970,
-    "createdAt": "2025-04-04T15:35:22Z"
+    "orderId": 2001,
+    "userId": 1001,
+    "amount": 15000,
+    "status": "PAID",
+    "remainingPoint": 20000,
+    "createdAt": "2025-04-04T15:30:45Z"
   }
 }
+
 
 ```
 
@@ -342,58 +384,41 @@
 
 ```json
 {
-  "resultCode": "00",
-  "message": "success",
+  "resultCode": "SUCCESS",
+  "message": "상위 판매 상품 조회 성공",
   "data": {
-    "dateRange": {
-      "from": "2025-04-01",
-      "to": "2025-04-03"
-    },
-    "topProducts": [
+    "from": "2025-03-01T00:00:00Z",
+    "to": "2025-03-31T23:59:59Z",
+    "topSellingProducts": [
       {
         "rank": 1,
-        "productId": 1001,
-        "name": "스마트폰 A",
-        "description": "최신 스마트폰 A 모델",
-        "basePrice": 800000,
-        "salesCount": 145,
-        "salesAmount": 152500000
+        "productId": 1,
+        "productOptionId": 1,
+        "name": "아메리카노 ICE",
+        "description": "차갑게 즐기는 아메리카노",
+        "basePrice": 4500,
+        "additionalPrice": 500,
+        "quantity": 350
       },
       {
         "rank": 2,
-        "productId": 1005,
-        "name": "스마트워치 C",
-        "description": "건강 모니터링 스마트워치",
-        "basePrice": 250000,
-        "salesCount": 120,
-        "salesAmount": 30000000
+        "productId": 2,
+        "productOptionId": 3,
+        "name": "카페라떼 ICE",
+        "description": "차갑게 즐기는 카페라떼",
+        "basePrice": 5000,
+        "additionalPrice": 500,
+        "quantity": 280
       },
       {
         "rank": 3,
-        "productId": 1002,
-        "name": "노트북 B",
-        "description": "고성능 노트북 B 모델",
-        "basePrice": 1200000,
-        "salesCount": 78,
-        "salesAmount": 109200000
-      },
-      {
-        "rank": 4,
-        "productId": 1010,
-        "name": "무선이어폰 D",
-        "description": "노이즈 캔슬링 무선이어폰",
-        "basePrice": 150000,
-        "salesCount": 65,
-        "salesAmount": 9750000
-      },
-      {
-        "rank": 5,
-        "productId": 1008,
-        "name": "태블릿 E",
-        "description": "10인치 태블릿",
-        "basePrice": 500000,
-        "salesCount": 52,
-        "salesAmount": 26000000
+        "productId": 3,
+        "productOptionId": 5,
+        "name": "바닐라 라떼 ICE",
+        "description": "차갑게 즐기는 바닐라 라떼",
+        "basePrice": 5500,
+        "additionalPrice": 500,
+        "quantity": 220
       }
     ]
   }
