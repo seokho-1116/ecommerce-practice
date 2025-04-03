@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import kr.hhplus.be.server.controller.CurrentPointResponse;
+import kr.hhplus.be.server.controller.response.CurrentPointResponse;
 import kr.hhplus.be.server.controller.response.ChargePointResponse;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.ErrorResponse;

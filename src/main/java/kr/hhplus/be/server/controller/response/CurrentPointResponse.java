@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.controller;
+package kr.hhplus.be.server.controller.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

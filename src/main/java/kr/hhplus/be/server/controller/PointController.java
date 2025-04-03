@@ -2,6 +2,7 @@ package kr.hhplus.be.server.controller;
 
 import kr.hhplus.be.server.controller.response.ChargePointResponse;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
+import kr.hhplus.be.server.controller.response.CurrentPointResponse;
 import kr.hhplus.be.server.controller.spec.PointControllerSpec;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
