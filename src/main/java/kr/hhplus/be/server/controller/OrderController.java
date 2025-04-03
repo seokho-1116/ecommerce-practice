@@ -9,6 +9,7 @@ import kr.hhplus.be.server.controller.response.OrderRequest;
 import kr.hhplus.be.server.controller.response.OrderResponse;
 import kr.hhplus.be.server.controller.response.OrderResponse.CouponInfoResponse;
 import kr.hhplus.be.server.controller.response.OrderResponse.ItemInfoResponse;
+import kr.hhplus.be.server.controller.spec.OrderControllerSpec;
 import kr.hhplus.be.server.service.CouponType;
 import kr.hhplus.be.server.service.OrderStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/orders")
-public class OrderController {
+public class OrderController implements OrderControllerSpec {
 
   @PostMapping
   public CommonResponseWrapper<OrderResponse> createOrder(OrderRequest request) {
