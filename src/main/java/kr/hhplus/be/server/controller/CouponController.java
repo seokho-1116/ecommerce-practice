@@ -5,6 +5,7 @@ import java.util.List;
 import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.CouponIssueResponse;
 import kr.hhplus.be.server.controller.response.CouponSummaryResponse;
+import kr.hhplus.be.server.controller.spec.CouponControllerSpec;
 import kr.hhplus.be.server.service.CouponType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/coupons")
-public class CouponController {
+public class CouponController implements CouponControllerSpec {
 
   @GetMapping
   public CommonResponseWrapper<List<CouponSummaryResponse>> findAllCoupons() {
