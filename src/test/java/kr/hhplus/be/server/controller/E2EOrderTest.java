@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class E2EOrderTest {
@@ -41,13 +42,14 @@ class E2EOrderTest {
     long point = 10000L;
 
     CommonResponseWrapper<ChargePointResponse> chargePointResponseWrapper = RestAssured.given()
+        .basePath("/api/v1/point/{userId}/charge")
+        .pathParam("userId", userId)
         .contentType(ContentType.JSON)
         .body(point)
         .when()
-        .pathParam("userId", userId)
-        .post("/api/v1/point/{userId}/charge")
+        .post()
         .then()
-        .statusCode(200)
+        .assertThat().statusCode(HttpStatus.OK.value())
         .extract()
         .response().as(new TypeRef<>() {
         });
@@ -63,33 +65,37 @@ class E2EOrderTest {
     ));
 
     CommonResponseWrapper<OrderResponse> orderResponseWrapper = RestAssured.given()
+        .basePath("/api/v1/orders")
         .contentType(ContentType.JSON)
         .body(orderRequest)
         .when()
-        .post("/api/v1/orders")
+        .post()
         .then()
-        .statusCode(200)
+        .assertThat().statusCode(HttpStatus.OK.value())
         .extract()
         .response().as(new TypeRef<>() {
         });
 
+    assertThat(orderResponseWrapper.data().orderId()).isNotNull();
     assertThat(orderResponseWrapper.data().status()).isEqualTo(OrderStatus.CREATED);
 
     // 3. 결제
     OrderPaymentRequest paymentRequest = new OrderPaymentRequest(userId);
 
     CommonResponseWrapper<OrderPaymentResponse> orderPaymentResponseWrapper = RestAssured.given()
+        .basePath("/api/v1/orders/{orderId}/payments")
+        .pathParam("orderId", orderResponseWrapper.data().orderId())
         .contentType(ContentType.JSON)
         .body(paymentRequest)
         .when()
-        .pathParam("orderId", orderResponseWrapper.data().orderId())
-        .post("/api/v1/orders/{orderId}/payments")
+        .post()
         .then()
-        .statusCode(200)
+        .assertThat().statusCode(HttpStatus.OK.value())
         .extract()
         .response().as(new TypeRef<>() {
         });
 
+    assertThat(orderPaymentResponseWrapper.data().amount()).isGreaterThanOrEqualTo(0L);
     assertThat(orderPaymentResponseWrapper.data().status()).isEqualTo(OrderStatus.PAID);
   }
 }
