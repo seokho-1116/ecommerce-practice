@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.controller.response;
 
 import java.util.List;
-import kr.hhplus.be.server.service.CouponType;
-import kr.hhplus.be.server.service.OrderStatus;
+import kr.hhplus.be.server.domain.coupon.CouponType;
+import kr.hhplus.be.server.domain.order.OrderStatus;
 
 public record OrderResponse(
     Long orderId,

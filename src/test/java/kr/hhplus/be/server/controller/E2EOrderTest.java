@@ -13,7 +13,7 @@ import kr.hhplus.be.server.controller.response.OrderPaymentResponse;
 import kr.hhplus.be.server.controller.response.OrderRequest;
 import kr.hhplus.be.server.controller.response.OrderRequest.AmountProductOptionRequest;
 import kr.hhplus.be.server.controller.response.OrderResponse;
-import kr.hhplus.be.server.service.OrderStatus;
+import kr.hhplus.be.server.domain.order.OrderStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
