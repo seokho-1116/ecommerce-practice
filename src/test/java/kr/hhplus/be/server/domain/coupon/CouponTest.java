@@ -1,8 +1,11 @@
 package kr.hhplus.be.server.domain.coupon;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
+import kr.hhplus.be.server.domain.coupon.Coupon.CouponBuilder;
+import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponIllegalStateException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -123,5 +126,104 @@ class CouponTest {
 
     // then
     assertThat(discountPrice).isZero();
+  }
+
+  @DisplayName("시작일이 null이면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithNullFromTsTest() {
+    // given
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(null)
+        .toTs(toTs);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilder::build)
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("종료일이 null이면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithNullToTsTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    CouponBuilder couponBuilderoupon = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(null);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilderoupon::build)
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("시작일이 종료일보다 늦으면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithFromTsAfterToTsTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().minusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilder::build)
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰 타입이 null이면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithNullCouponTypeTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .couponType(null);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilder::build)
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰 타입이 비율 할인일 때 할인율이 0보다 작으면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithNegativeDiscountRateTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .couponType(CouponType.PERCENTAGE)
+        .discountRate(-0.1);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilder::build)
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰 타입이 정액 할인일 때 할인 금액이 0보다 작으면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithNegativeDiscountAmountTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .couponType(CouponType.FIXED)
+        .discountAmount(-1000L);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilder::build)
+        .isInstanceOf(CouponIllegalStateException.class);
   }
 }

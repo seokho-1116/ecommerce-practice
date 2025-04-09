@@ -53,7 +53,8 @@ class UserCouponTest {
         .coupon(coupon)
         .build();
 
-    // when & then
+    // when
+    // then
     assertThatThrownBy(userCoupon::use)
         .isInstanceOf(CouponIllegalStateException.class);
   }
@@ -76,7 +77,8 @@ class UserCouponTest {
         .coupon(coupon)
         .build();
 
-    // when & then
+    // when
+    // then
     assertThatThrownBy(userCoupon::use)
         .isInstanceOf(CouponIllegalStateException.class);
   }
@@ -98,7 +100,8 @@ class UserCouponTest {
         .coupon(coupon)
         .build();
 
-    // when & then
+    // when
+    // then
     assertThatThrownBy(userCoupon::use)
         .isInstanceOf(CouponIllegalStateException.class);
   }
