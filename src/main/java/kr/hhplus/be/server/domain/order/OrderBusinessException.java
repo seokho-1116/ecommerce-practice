@@ -6,6 +6,12 @@ public class OrderBusinessException extends RuntimeException {
     super(message);
   }
 
+  public static class OrderCommandIllegalStateException extends OrderBusinessException {
+    public OrderCommandIllegalStateException(String message) {
+      super(message);
+    }
+  }
+
   public static class OrderIllegalStateException extends OrderBusinessException {
     public OrderIllegalStateException(String message) {
       super(message);

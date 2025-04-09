@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
-import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand.ProductIdItemPair;
+import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderCommandIllegalStateException;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductOption;
 import kr.hhplus.be.server.domain.user.User;
@@ -16,11 +16,35 @@ public record OrderCommand(
     UserCoupon userCoupon
 ) {
 
+  public OrderCommand {
+    if (user == null) {
+      throw new OrderCommandIllegalStateException("주문자 정보는 필수입니다.");
+    }
+
+    if (productAmountPairs == null || productAmountPairs.isEmpty()) {
+      throw new OrderCommandIllegalStateException("주문할 상품은 필수입니다.");
+    }
+  }
+
   public record ProductAmountPair(
       Product product,
       ProductOption productOption,
       Long amount
   ) {
+
+    public ProductAmountPair {
+      if (product == null) {
+        throw new OrderCommandIllegalStateException("상품은 필수입니다.");
+      }
+
+      if (productOption == null) {
+        throw new OrderCommandIllegalStateException("상품 옵션은 필수입니다.");
+      }
+
+      if (amount == null || amount <= 0) {
+        throw new OrderCommandIllegalStateException("상품 수량은 1 이상이어야 합니다.");
+      }
+    }
 
   }
 
@@ -29,6 +53,16 @@ public record OrderCommand(
       Long userCouponId,
       List<ProductIdItemPair> productIdItemPairs
   ) {
+
+    public OrderCreateCommand {
+      if (userId == null) {
+        throw new OrderCommandIllegalStateException("주문자 ID는 필수입니다.");
+      }
+
+      if (productIdItemPairs == null || productIdItemPairs.isEmpty()) {
+        throw new OrderCommandIllegalStateException("주문할 상품은 필수입니다.");
+      }
+    }
 
     public List<Long> productOptionIds() {
       return productIdItemPairs.stream()
@@ -64,6 +98,15 @@ public record OrderCommand(
         Item item
     ) {
 
+      public ProductIdItemPair {
+        if (productId == null) {
+          throw new OrderCommandIllegalStateException("상품 ID는 필수입니다.");
+        }
+
+        if (item == null) {
+          throw new OrderCommandIllegalStateException("상품 옵션은 필수입니다.");
+        }
+      }
     }
 
     public record Item(
@@ -71,6 +114,15 @@ public record OrderCommand(
         Long amount
     ) {
 
+      public Item {
+        if (productOptionId == null) {
+          throw new OrderCommandIllegalStateException("상품 옵션 ID는 필수입니다.");
+        }
+
+        if (amount == null || amount <= 0) {
+          throw new OrderCommandIllegalStateException("상품 수량은 1 이상이어야 합니다.");
+        }
+      }
     }
   }
 }
