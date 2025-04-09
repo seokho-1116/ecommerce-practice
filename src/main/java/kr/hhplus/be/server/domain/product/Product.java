@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.product.ProductBusinessException.ProductIllegalStateException;
 import lombok.Builder;
@@ -22,6 +24,9 @@ public class Product extends BaseEntity {
   private String name;
   private String description;
   private Long basePrice;
+
+  @OneToMany(mappedBy = "product")
+  private List<ProductOption> productOptions;
 
   @Builder
   public Product(Long id, String name, String description, Long basePrice) {

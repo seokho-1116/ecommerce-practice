@@ -12,6 +12,8 @@ import java.util.List;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderItemIllegalStateException;
+import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
+import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductOption;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,8 +35,6 @@ public class OrderItem extends BaseEntity {
   private Long basePrice;
   private Long additionalPrice;
   private Long totalPrice;
-  private Long discountPrice;
-  private Long finalPrice;
 
   @ManyToOne
   @JoinColumn(name = "order_id")
@@ -51,7 +51,7 @@ public class OrderItem extends BaseEntity {
   @Builder
   public OrderItem(Long id, String productName, String productDescription, String productOptionName,
       String productOptionDescription, Long basePrice, Long additionalPrice, Long totalPrice,
-      Long discountPrice, Long finalPrice, Order order, ProductOption productOption,
+      Order order, ProductOption productOption,
       UserCoupon userCoupon) {
     if (basePrice != null && basePrice < 0) {
       throw new OrderItemIllegalStateException("상품 기본 가격은 0 이상이어야 합니다.");
@@ -65,14 +65,6 @@ public class OrderItem extends BaseEntity {
       throw new OrderItemIllegalStateException("상품 총 가격은 0 이상이어야 합니다.");
     }
 
-    if (discountPrice != null && discountPrice < 0) {
-      throw new OrderItemIllegalStateException("상품 할인 가격은 0 이상이어야 합니다.");
-    }
-
-    if (finalPrice != null && finalPrice < 0) {
-      throw new OrderItemIllegalStateException("상품 최종 가격은 0 이상이어야 합니다.");
-    }
-
     this.id = id;
     this.productName = productName;
     this.productDescription = productDescription;
@@ -81,28 +73,27 @@ public class OrderItem extends BaseEntity {
     this.basePrice = basePrice;
     this.additionalPrice = additionalPrice;
     this.totalPrice = totalPrice;
-    this.discountPrice = discountPrice;
-    this.finalPrice = finalPrice;
     this.order = order;
     this.productOption = productOption;
     this.userCoupon = userCoupon;
   }
 
-  public static List<OrderItem> create(OrderProductPair orderProductPair) {
+  public static List<OrderItem> createAll(ProductAmountPair productAmountPair) {
     List<OrderItem> orderItems = new ArrayList<>();
-    for (int itemCount = 0; itemCount < orderProductPair.amount(); itemCount++) {
-      ProductOption productOption = orderProductPair.productOption();
-      UserCoupon userCoupon = orderProductPair.userCoupon();
+    Product product = productAmountPair.product();
+    ProductOption productOption = productAmountPair.productOption();
 
-      OrderItem orderItem = productOption.createOrderItem();
-
-      orderItem.discountPrice = 0L;
-      orderItem.finalPrice = orderItem.totalPrice;
-      if (userCoupon != null) {
-        orderItem.userCoupon = userCoupon;
-        orderItem.discountPrice = userCoupon.calculateDiscountPrice(orderItem.totalPrice);
-        orderItem.finalPrice = orderItem.totalPrice - orderItem.discountPrice;
-      }
+    for (int itemCount = 0; itemCount < productAmountPair.amount(); itemCount++) {
+      long totalPrice = product.getBasePrice() + productOption.getAdditionalPrice();
+      OrderItem orderItem = OrderItem.builder()
+          .productName(product.getName())
+          .productDescription(product.getDescription())
+          .productOptionName(productOption.getName())
+          .productOptionDescription(productOption.getDescription())
+          .basePrice(product.getBasePrice())
+          .additionalPrice(productOption.getAdditionalPrice())
+          .totalPrice(totalPrice)
+          .build();
 
       orderItems.add(orderItem);
     }

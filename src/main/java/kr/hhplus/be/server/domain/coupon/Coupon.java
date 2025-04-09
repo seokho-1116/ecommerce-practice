@@ -36,7 +36,7 @@ public class Coupon extends BaseEntity {
     }
 
     if (fromTs.isAfter(toTs)) {
-      throw new CouponIllegalStateException("쿠폰 사용 기간이 잘못 설정되었습니다.");
+      throw new CouponIllegalStateException("쿠폰 사용 기간이 잘못 설정되었습니다. 시작일이 종료일보다 늦을 수 없습니다.");
     }
 
     if (couponType == null) {
@@ -44,11 +44,11 @@ public class Coupon extends BaseEntity {
     }
 
     if (CouponType.PERCENTAGE.equals(couponType) && (discountRate == null || discountRate < 0)) {
-       throw new CouponIllegalStateException("할인율은 0 이상이어야 합니다.");
+       throw new CouponIllegalStateException("비율 쿠폰인 경우 할인율은 0 이상이어야 합니다.");
     }
 
     if (CouponType.FIXED.equals(couponType) && (discountAmount == null || discountAmount < 0)) {
-      throw new CouponIllegalStateException("할인 금액은 0 이상이어야 합니다.");
+      throw new CouponIllegalStateException("정액 쿠폰인 경우 할인 금액은 0 이상이어야 합니다.");
     }
 
     this.id = id;

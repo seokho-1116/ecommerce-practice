@@ -1,13 +1,18 @@
 package kr.hhplus.be.server.domain.order;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import kr.hhplus.be.server.domain.BaseEntity;
+import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderIllegalStateException;
 import kr.hhplus.be.server.domain.user.User;
 import lombok.Builder;
@@ -31,6 +36,9 @@ public class Order extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
+
+  @OneToMany(mappedBy = "order", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<OrderItem> orderItems = new ArrayList<>();
 
   @Builder
   public Order(Long id, Long totalPrice, Long discountPrice, Long finalPrice, OrderStatus status,
@@ -59,23 +67,30 @@ public class Order extends BaseEntity {
     this.user = user;
   }
 
-  public static Order newOrder(User user, List<OrderItem> orderItems) {
+  public static Order newOrder(User user, List<OrderItem> orderItems, UserCoupon userCoupon) {
     Order order = Order.builder()
         .user(user)
         .status(OrderStatus.CREATED)
         .totalPrice(0L)
         .discountPrice(0L)
-        .finalPrice(0L)
         .build();
 
     for (OrderItem orderItem : orderItems) {
       order.totalPrice += orderItem.getTotalPrice();
-      order.discountPrice += orderItem.getDiscountPrice();
-      order.finalPrice += orderItem.getFinalPrice();
-
-      orderItem.setupOrder(order);
+      order.setupOrderItem(orderItem);
     }
 
+    if (userCoupon != null) {
+      order.discountPrice = userCoupon.calculateDiscountPrice(order.totalPrice);
+    }
+
+    order.finalPrice = order.totalPrice - order.discountPrice;
+
     return order;
+  }
+
+  private void setupOrderItem(OrderItem orderItem) {
+    this.orderItems.add(orderItem);
+    orderItem.setupOrder(this);
   }
 }

@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import kr.hhplus.be.server.domain.BaseEntity;
-import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.product.ProductBusinessException.ProductOptionIllegalStateException;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,19 +41,5 @@ public class ProductOption extends BaseEntity {
     this.description = description;
     this.additionalPrice = additionalPrice;
     this.product = product;
-  }
-
-  public OrderItem createOrderItem() {
-    long totalPrice = product.getBasePrice() + additionalPrice;
-    return OrderItem.builder()
-        .productName(product.getName())
-        .productDescription(product.getDescription())
-        .productOptionName(name)
-        .productOptionDescription(description)
-        .basePrice(product.getBasePrice())
-        .additionalPrice(additionalPrice)
-        .discountPrice(0L)
-        .totalPrice(totalPrice)
-        .build();
   }
 }
