@@ -9,4 +9,8 @@ public interface ProductRepository {
   List<ProductInventory> findProductInventoriesByProductOptionIds(List<Long> productOptionIds);
 
   void saveAll(List<ProductInventory> productInventories);
+
+  List<Product> findTop5SellingProducts();
+
+  List<Product> findAll();
 }
