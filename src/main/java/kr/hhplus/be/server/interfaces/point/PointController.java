@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/point")
+@RequestMapping("/api/v1/points")
 public class PointController implements PointControllerSpec {
 
   private final PointService pointService;
