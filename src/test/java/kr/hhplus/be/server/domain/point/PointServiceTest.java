@@ -86,4 +86,15 @@ class PointServiceTest {
     assertThatThrownBy(() -> pointService.charge(userId, amount))
         .isInstanceOf(PointBusinessException.class);
   }
+
+  @DisplayName("포인트 조회 시 유저 아이디가 null인 경우 예외가 발생해야 한다")
+  @Test
+  void findUserPointByUserId_NullUserId_ThrowsException() {
+    // given
+    Long userId = null;
+
+    // when & then
+    assertThatThrownBy(() -> pointService.findUserPointByUserId(userId))
+        .isInstanceOf(PointBusinessException.class);
+  }
 }
