@@ -45,7 +45,11 @@ public class UserPoint extends BaseEntity {
     this.user = user;
   }
 
-  public long use(long amount) {
+  public long use(Long amount) {
+    if (amount == null) {
+      throw new UserPointIllegalStateException("사용할 포인트는 null일 수 없습니다.");
+    }
+
     if (amount < 0) {
       throw new UserPointIllegalStateException("사용할 포인트는 0 이상이어야 합니다.");
     }
