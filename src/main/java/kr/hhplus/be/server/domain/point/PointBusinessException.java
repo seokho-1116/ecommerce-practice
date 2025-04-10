@@ -12,4 +12,11 @@ public class PointBusinessException extends RuntimeException {
       super(message);
     }
   }
+
+  public static class UserPointNotFoundException extends PointBusinessException {
+
+    public UserPointNotFoundException(String message) {
+      super(message);
+    }
+  }
 }
