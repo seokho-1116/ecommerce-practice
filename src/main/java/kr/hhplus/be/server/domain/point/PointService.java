@@ -23,4 +23,20 @@ public class PointService {
 
     pointRepository.save(userPoint);
   }
+
+  public void charge(Long userId, Long amount) {
+    if (userId == null) {
+      throw new PointBusinessException("유저 ID는 null일 수 없습니다.");
+    }
+
+    UserPoint userPoint = pointRepository.findByUserId(userId)
+        .orElseThrow(() -> new UserPointNotFoundException("유저 포인트를 찾을 수 없습니다."));
+
+    userPoint.charge(amount);
+
+    PointHistory pointHistory = PointHistory.chargeHistory(userPoint.getUser(), amount);
+    pointRepository.savePointHistory(pointHistory);
+
+    pointRepository.save(userPoint);
+  }
 }
