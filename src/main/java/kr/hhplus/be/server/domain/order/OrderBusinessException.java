@@ -23,4 +23,10 @@ public class OrderBusinessException extends RuntimeException {
       super(message);
     }
   }
+
+  public static class OrderNotFoundException extends OrderBusinessException {
+    public OrderNotFoundException(String message) {
+      super(message);
+    }
+  }
 }

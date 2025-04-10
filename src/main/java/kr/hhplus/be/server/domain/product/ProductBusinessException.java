@@ -17,4 +17,10 @@ public class ProductBusinessException extends RuntimeException {
       super(message);
     }
   }
+
+  public static class ProductInventoryIllegalStateException extends ProductBusinessException {
+    public ProductInventoryIllegalStateException(String message) {
+      super(message);
+    }
+  }
 }
