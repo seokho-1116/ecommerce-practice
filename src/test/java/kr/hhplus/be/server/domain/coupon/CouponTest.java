@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDateTime;
 import kr.hhplus.be.server.domain.coupon.Coupon.CouponBuilder;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponIllegalStateException;
+import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -225,5 +226,92 @@ class CouponTest {
     // then
     assertThatThrownBy(couponBuilder::build)
         .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰을 발급하면 사용자 쿠폰이 발급된다")
+  @Test
+  void issueCouponTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .build();
+
+    User user = User.builder()
+        .id(1L)
+        .name("testUser")
+        .build();
+
+    // when
+    UserCoupon userCoupon = coupon.issue(user);
+
+    // then
+    assertThat(userCoupon).isNotNull();
+  }
+
+  @DisplayName("쿠폰 수량이 0보다 작으면 쿠폰 상태 예외가 발생한다")
+  @Test
+  void createCouponWithNegativeQuantityTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .quantity(-1L);
+
+    // when
+    // then
+    assertThatThrownBy(couponBuilder::build)
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰 수량이 0일 때 쿠폰 발급 시 쿠폰 상태 예외가 발생한다")
+  @Test
+  void issueCouponWithZeroQuantityTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .quantity(0L)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .build();
+
+    User user = User.builder()
+        .id(1L)
+        .name("testUser")
+        .build();
+
+    // when
+    // then
+    assertThatThrownBy(() -> coupon.issue(user))
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰 수량은 null일 수 있다")
+  @Test
+  void constructorWithNullQuantityTest() {
+    // given
+    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    CouponBuilder couponBuilder = Coupon.builder()
+        .fromTs(fromTs)
+        .toTs(toTs)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .quantity(null);
+
+    // when
+    Coupon coupon = couponBuilder.build();
+
+    // then
+    assertThat(coupon.getQuantity()).isNull();
   }
 }
