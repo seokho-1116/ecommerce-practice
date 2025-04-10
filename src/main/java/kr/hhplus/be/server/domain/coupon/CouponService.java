@@ -13,6 +13,6 @@ public class CouponService {
 
   public void use(UserCoupon userCoupon) {
     userCoupon.use();
-    couponRepository.save(userCoupon);
+    couponRepository.saveUserCoupon(userCoupon);
   }
 }
