@@ -11,4 +11,24 @@ public class ProductService {
   public List<Product> findAllByProductOptionIds(List<Long> productOptionIds) {
     return productRepository.findAllByProductOptionIds(productOptionIds);
   }
+
+  public void deductInventory(ProductDeductCommand productDeductCommand) {
+    if (productDeductCommand == null || productDeductCommand.isEmpty()) {
+      throw new ProductBusinessException("상품 재고 차감 명령어는 null이거나 차감할 상품 항목이 비어있을 수 없습니다.");
+    }
+
+    List<Long> productOptionIds = productDeductCommand.productOptionIds();
+    List<ProductInventory> productInventories = productRepository.findProductInventoriesByProductOptionIds(productOptionIds);
+
+    for (ProductInventory productInventory : productInventories) {
+      Long productOptionId = productInventory.getProductOption().getId();
+      Long amount = productDeductCommand.getAmount(productOptionId);
+
+      if (amount != null) {
+        productInventory.deduct(amount);
+      }
+    }
+
+    productRepository.saveAll(productInventories);
+  }
 }
