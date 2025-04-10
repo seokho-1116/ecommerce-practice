@@ -68,4 +68,13 @@ public class PointService {
 
     pointRepository.save(userPoint);
   }
+
+  public UserPoint findUserPointByUserId(Long userId) {
+    if (userId == null) {
+      throw new PointBusinessException("유저 ID는 null일 수 없습니다.");
+    }
+
+    return pointRepository.findByUserId(userId)
+        .orElseThrow(() -> new UserPointNotFoundException("유저 포인트를 찾을 수 없습니다."));
+  }
 }
