@@ -11,4 +11,10 @@ public class CouponBusinessException extends RuntimeException {
       super(message);
     }
   }
+
+  public static class CouponNotFoundException extends CouponBusinessException {
+    public CouponNotFoundException(String message) {
+      super(message);
+    }
+  }
 }
