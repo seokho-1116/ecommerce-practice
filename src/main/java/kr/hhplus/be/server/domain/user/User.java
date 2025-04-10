@@ -7,9 +7,11 @@ import jakarta.persistence.Id;
 import kr.hhplus.be.server.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
