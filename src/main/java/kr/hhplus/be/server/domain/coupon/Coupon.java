@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponIllegalStateException;
+import kr.hhplus.be.server.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,13 +25,15 @@ public class Coupon extends BaseEntity {
   private String description;
   private Double discountRate;
   private Long discountAmount;
+  private Long quantity;
   private CouponType couponType;
   private LocalDateTime fromTs;
   private LocalDateTime toTs;
 
   @Builder
   public Coupon(Long id, String name, String description, Double discountRate, Long discountAmount,
-      CouponType couponType, LocalDateTime fromTs, LocalDateTime toTs) {
+      Long quantity, CouponType couponType, LocalDateTime fromTs, LocalDateTime toTs
+  ) {
     if (fromTs == null || toTs == null) {
       throw new CouponIllegalStateException("쿠폰 사용 기간이 설정되어야 합니다.");
     }
@@ -44,11 +47,15 @@ public class Coupon extends BaseEntity {
     }
 
     if (CouponType.PERCENTAGE.equals(couponType) && (discountRate == null || discountRate < 0)) {
-       throw new CouponIllegalStateException("비율 쿠폰인 경우 할인율은 0 이상이어야 합니다.");
+      throw new CouponIllegalStateException("비율 쿠폰인 경우 할인율은 0 이상이어야 합니다.");
     }
 
     if (CouponType.FIXED.equals(couponType) && (discountAmount == null || discountAmount < 0)) {
       throw new CouponIllegalStateException("정액 쿠폰인 경우 할인 금액은 0 이상이어야 합니다.");
+    }
+
+    if (quantity != null && quantity < 0) {
+      throw new CouponIllegalStateException("쿠폰 수량은 0 이상이어야 합니다.");
     }
 
     this.id = id;
@@ -56,6 +63,7 @@ public class Coupon extends BaseEntity {
     this.description = description;
     this.discountRate = discountRate;
     this.discountAmount = discountAmount;
+    this.quantity = quantity;
     this.couponType = couponType;
     this.fromTs = fromTs;
     this.toTs = toTs;
@@ -63,5 +71,17 @@ public class Coupon extends BaseEntity {
 
   public long calculateDiscountPrice(long totalPrice) {
     return couponType.calculateDiscountPrice(totalPrice, discountRate, discountAmount);
+  }
+
+  public UserCoupon issue(User user) {
+    if (quantity != null && quantity <= 0) {
+      throw new CouponIllegalStateException("쿠폰 수량이 부족합니다.");
+    }
+
+    return UserCoupon.builder()
+        .user(user)
+        .isUsed(false)
+        .coupon(this)
+        .build();
   }
 }
