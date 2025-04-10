@@ -8,7 +8,7 @@ public class PointService {
 
   private PointRepository pointRepository;
 
-  public void use(Long userId, Long amount) {
+  public long use(Long userId, Long amount) {
     if (userId == null) {
       throw new PointBusinessException("유저 ID는 null일 수 없습니다.");
     }
@@ -22,9 +22,11 @@ public class PointService {
     pointRepository.savePointHistory(pointHistory);
 
     pointRepository.save(userPoint);
+
+    return userPoint.getAmount();
   }
 
-  public void charge(Long userId, Long amount) {
+  public long charge(Long userId, Long amount) {
     if (userId == null) {
       throw new PointBusinessException("유저 ID는 null일 수 없습니다.");
     }
@@ -38,6 +40,8 @@ public class PointService {
     pointRepository.savePointHistory(pointHistory);
 
     pointRepository.save(userPoint);
+
+    return userPoint.getAmount();
   }
 
   public UserPoint findUserPointByUserId(Long userId) {

@@ -18,17 +18,19 @@ public class PaymentFacade {
   private PointService pointService;
   private PaymentEventPublisher paymentEventPublisher;
 
-  public void payment(PaymentCommand paymentCommand) {
+  public PaymentResult payment(PaymentCommand paymentCommand) {
     Order order = orderService.findById(paymentCommand.orderId());
 
     ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.getOrderItems());
     productService.deductInventory(productDeductCommand);
 
-    pointService.use(paymentCommand.userId(), order.getFinalPrice());
+    long remainingPoint = pointService.use(paymentCommand.userId(), order.getFinalPrice());
 
     orderService.pay(order);
 
     PaymentSuccessEvent event = PaymentSuccessEvent.from(order);
     paymentEventPublisher.publish(event);
+
+    return PaymentResult.of(order, remainingPoint);
   }
 }
