@@ -1,12 +1,12 @@
 package kr.hhplus.be.server.interfaces.product;
 
 import java.util.List;
-import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
-import kr.hhplus.be.server.controller.response.ProductSummaryResponse;
-import kr.hhplus.be.server.controller.response.TopSellingProductsResponse;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import kr.hhplus.be.server.domain.product.ProductService;
+import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.product.ProductResponse.ProductSummaryResponse;
+import kr.hhplus.be.server.interfaces.product.ProductResponse.TopSellingProductsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -6,10 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
-import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
-import kr.hhplus.be.server.controller.response.ErrorResponse;
-import kr.hhplus.be.server.controller.response.ProductSummaryResponse;
-import kr.hhplus.be.server.controller.response.TopSellingProductsResponse;
+import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.ErrorResponse;
+import kr.hhplus.be.server.interfaces.product.ProductResponse.ProductSummaryResponse;
+import kr.hhplus.be.server.interfaces.product.ProductResponse.TopSellingProductsResponse;
 
 public interface ProductControllerSpec {
 
