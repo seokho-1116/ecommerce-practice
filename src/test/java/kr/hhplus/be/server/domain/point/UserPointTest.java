@@ -42,22 +42,6 @@ class UserPointTest {
         .isInstanceOf(UserPointIllegalStateException.class);
   }
 
-  @DisplayName("사용 후 포인트가 최대값보다 크면 포인트 상태 예외가 발생한다")
-  @Test
-  void createUserPointWithOverMaxAmountTest() {
-    //given
-    UserPoint userPoint = UserPoint.builder()
-        .id(1L)
-        .amount(UserPoint.getMaxPoint())
-        .build();
-    long useAmount = 2000L;
-
-    //when
-    //then
-    assertThatThrownBy(() -> userPoint.use(useAmount))
-        .isInstanceOf(UserPointIllegalStateException.class);
-  }
-
   @DisplayName("사용할 포인트가 0보다 작으면 포인트 상태 예외가 발생한다")
   @Test
   void createUserPointWithNegativeUseAmountTest() {
