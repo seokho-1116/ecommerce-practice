@@ -58,6 +58,55 @@ class UserPointTest {
         .isInstanceOf(UserPointIllegalStateException.class);
   }
 
+  @DisplayName("포인트가 0보다 크면 포인트가 충전된다")
+  @Test
+  void chargeUserPointTest() {
+    //given
+    UserPoint userPoint = UserPoint.builder()
+        .id(1L)
+        .amount(1000L)
+        .build();
+    long chargeAmount = 100L;
+
+    //when
+    long remain = userPoint.charge(chargeAmount);
+
+    //then
+    assertThat(remain).isEqualTo(1100L);
+  }
+
+  @DisplayName("충전 후 포인트가 최대값보다 크면 포인트 상태 예외가 발생한다")
+  @Test
+  void chargeUserPointWithOverMaxAmountTest() {
+    //given
+    UserPoint userPoint = UserPoint.builder()
+        .id(1L)
+        .amount(UserPoint.getMaxPoint())
+        .build();
+    long chargeAmount = 2000L;
+
+    //when
+    //then
+    assertThatThrownBy(() -> userPoint.charge(chargeAmount))
+        .isInstanceOf(UserPointIllegalStateException.class);
+  }
+
+  @DisplayName("충전할 포인트가 0보다 작으면 포인트 상태 예외가 발생한다")
+  @Test
+  void chargeUserPointWithNegativeChargeAmountTest() {
+    //given
+    UserPoint userPoint = UserPoint.builder()
+        .id(1L)
+        .amount(1000L)
+        .build();
+    long chargeAmount = -1000L;
+
+    //when
+    //then
+    assertThatThrownBy(() -> userPoint.charge(chargeAmount))
+        .isInstanceOf(UserPointIllegalStateException.class);
+  }
+
   @DisplayName("포인트는 0보다 작을 수 없다")
   @Test
   void constructorWithNegativeAmountTest() {
