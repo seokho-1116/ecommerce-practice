@@ -66,4 +66,22 @@ public class UserPoint extends BaseEntity {
   public static long getMaxPoint() {
     return MAX_POINT;
   }
+
+  public long charge(Long amount) {
+    if (amount == null) {
+      throw new UserPointIllegalStateException("충전할 포인트는 null일 수 없습니다.");
+    }
+
+    if (amount < 0) {
+      throw new UserPointIllegalStateException("충전할 포인트는 0 이상이어야 합니다.");
+    }
+
+    if (this.amount + amount > MAX_POINT) {
+      throw new UserPointIllegalStateException("포인트는 최대 " + MAX_POINT + "까지 충전 가능합니다.");
+    }
+
+    this.amount += amount;
+
+    return this.amount;
+  }
 }
