@@ -31,4 +31,12 @@ public class ProductService {
 
     productRepository.saveAll(productInventories);
   }
+
+  public List<Product> findTop5SellingProducts() {
+    return productRepository.findTop5SellingProducts();
+  }
+
+  public List<Product> findAllProducts() {
+    return productRepository.findAll();
+  }
 }
