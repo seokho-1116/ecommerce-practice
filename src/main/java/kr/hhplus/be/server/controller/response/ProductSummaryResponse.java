@@ -2,6 +2,7 @@ package kr.hhplus.be.server.controller.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 
 public record ProductSummaryResponse(
     @Schema(description = "상품 ID")
@@ -17,10 +18,31 @@ public record ProductSummaryResponse(
     Long basePrice,
 
     @Schema(description = "상품 옵션 목록")
-    List<SummaryOptionResponse> options
+    List<SummaryOption> options
 ) {
 
-  public record SummaryOptionResponse(
+  public static List<ProductSummaryResponse> from(List<ProductWithQuantity> productWithQuantities) {
+    return productWithQuantities.stream()
+        .map(productWithQuantity -> new ProductSummaryResponse(
+            productWithQuantity.id(),
+            productWithQuantity.name(),
+            productWithQuantity.description(),
+            productWithQuantity.basePrice(),
+            productWithQuantity.options()
+                .stream()
+                .map(option -> new SummaryOption(
+                    option.id(),
+                    option.name(),
+                    option.description(),
+                    option.additionalPrice(),
+                    option.quantity()
+                ))
+                .toList()
+        ))
+        .toList();
+  }
+
+  public record SummaryOption(
       @Schema(description = "상품 옵션 ID")
       Long id,
 
