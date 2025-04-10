@@ -58,10 +58,6 @@ public class UserPoint extends BaseEntity {
       throw new UserPointIllegalStateException("사용할 포인트가 부족합니다.");
     }
 
-    if (this.amount + amount > MAX_POINT) {
-      throw new UserPointIllegalStateException("포인트는 최대 " + MAX_POINT + "까지 사용 가능합니다.");
-    }
-
     this.amount -= amount;
 
     return this.amount;
