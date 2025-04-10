@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.controller.spec;
+package kr.hhplus.be.server.interfaces.point;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,10 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import kr.hhplus.be.server.controller.response.CurrentPointResponse;
-import kr.hhplus.be.server.controller.response.ChargePointResponse;
-import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
-import kr.hhplus.be.server.controller.response.ErrorResponse;
+import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.ErrorResponse;
+import kr.hhplus.be.server.interfaces.point.PointResponse.ChargePointResponse;
+import kr.hhplus.be.server.interfaces.point.PointResponse.CurrentPointResponse;
 
 public interface PointControllerSpec {
 
