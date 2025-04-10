@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.payment;
 
 
+import jakarta.validation.Valid;
 import kr.hhplus.be.server.application.payment.PaymentFacade;
 import kr.hhplus.be.server.application.payment.PaymentResult;
 import kr.hhplus.be.server.domain.payment.PaymentCommand;
@@ -22,7 +23,7 @@ public class PaymentController implements PaymentControllerSpec {
   @PostMapping("/{orderId}")
   public CommonResponseWrapper<OrderPaymentResponse> paymentOrder(
       @PathVariable long orderId,
-      @RequestBody OrderPaymentRequest request
+      @RequestBody @Valid OrderPaymentRequest request
   ) {
     PaymentCommand command = request.toCommand(orderId);
     PaymentResult paymentResult = paymentFacade.payment(command);
