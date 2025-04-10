@@ -93,4 +93,12 @@ public class Order extends BaseEntity {
     this.orderItems.add(orderItem);
     orderItem.setupOrder(this);
   }
+
+  public void pay() {
+    if (this.status != OrderStatus.CREATED) {
+      throw new OrderIllegalStateException("결제 상태로 변경할 수 없습니다.");
+    }
+
+    this.status = OrderStatus.PAID;
+  }
 }

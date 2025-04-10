@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.user.User;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,16 +22,25 @@ public class PointHistory extends BaseEntity {
   private Long id;
 
   private Long amount;
-  private String transactionType;
+  private TransactionType transactionType;
 
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
 
-  public PointHistory(Long id, Long amount, String transactionType, User user) {
+  @Builder
+  public PointHistory(Long id, Long amount, TransactionType transactionType, User user) {
     this.id = id;
     this.amount = amount;
     this.transactionType = transactionType;
     this.user = user;
+  }
+
+  public static PointHistory useHistory(User user, long amount) {
+    return PointHistory.builder()
+        .amount(amount)
+        .user(user)
+        .transactionType(TransactionType.USE)
+        .build();
   }
 }
