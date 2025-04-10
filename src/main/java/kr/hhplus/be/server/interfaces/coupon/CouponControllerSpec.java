@@ -1,12 +1,13 @@
-package kr.hhplus.be.server.controller.spec;
+package kr.hhplus.be.server.interfaces.coupon;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
-import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
-import kr.hhplus.be.server.controller.response.CouponIssueResponse;
-import kr.hhplus.be.server.controller.response.CouponSummaryResponse;
+import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponIssueResponse;
+import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponSummaryResponse;
 
 public interface CouponControllerSpec {
 
@@ -52,5 +53,5 @@ public interface CouponControllerSpec {
           )
       }
   )
-  CommonResponseWrapper<CouponIssueResponse> issue();
+  CommonResponseWrapper<CouponIssueResponse> issue(@RequestBody CouponIssueRequest request);
 }
