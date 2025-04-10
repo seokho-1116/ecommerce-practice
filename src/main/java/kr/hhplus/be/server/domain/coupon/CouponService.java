@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.coupon;
 
+import java.util.List;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponNotFoundException;
 import kr.hhplus.be.server.domain.user.User;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,9 @@ public class CouponService {
 
     UserCoupon userCoupon = coupon.issue(user);
     return couponRepository.saveUserCoupon(userCoupon);
+  }
+
+  public List<Coupon> findAllCoupons() {
+    return couponRepository.findAllCoupons();
   }
 }
