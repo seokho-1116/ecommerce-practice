@@ -45,6 +45,10 @@ public class PointHistory extends BaseEntity {
   }
 
   public static PointHistory chargeHistory(User user, Long amount) {
-    return null;
+    return PointHistory.builder()
+        .amount(amount)
+        .user(user)
+        .transactionType(TransactionType.CHARGE)
+        .build();
   }
 }
