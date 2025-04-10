@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.controller.response;
+package kr.hhplus.be.server.interfaces;
 
 public record CommonResponseWrapper<T>(
     String resultCode,

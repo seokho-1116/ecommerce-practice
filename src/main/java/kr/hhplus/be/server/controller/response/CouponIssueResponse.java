@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.controller.response;
 
 import java.time.LocalDateTime;
-import kr.hhplus.be.server.service.CouponType;
+import kr.hhplus.be.server.domain.coupon.CouponType;
 
 public record CouponIssueResponse(
     Long userId,

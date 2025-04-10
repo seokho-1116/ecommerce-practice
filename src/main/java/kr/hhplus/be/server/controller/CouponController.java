@@ -6,7 +6,7 @@ import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
 import kr.hhplus.be.server.controller.response.CouponIssueResponse;
 import kr.hhplus.be.server.controller.response.CouponSummaryResponse;
 import kr.hhplus.be.server.controller.spec.CouponControllerSpec;
-import kr.hhplus.be.server.service.CouponType;
+import kr.hhplus.be.server.domain.coupon.CouponType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
