@@ -1,6 +1,12 @@
 package kr.hhplus.be.server.domain.product;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
+import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,11 +38,19 @@ public class ProductService {
     productRepository.saveAll(productInventories);
   }
 
-  public List<Product> findTop5SellingProducts() {
-    return productRepository.findTop5SellingProducts();
+  public Top5SellingProducts findTop5SellingProducts() {
+    LocalDate now = LocalDate.now();
+    LocalDateTime from = now.minusDays(3).atStartOfDay();
+    LocalDateTime to = now.minusDays(1).atTime(LocalTime.MAX);
+    List<ProductWithRank> productWithRanks = productRepository.findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
+        from,
+        to
+    );
+
+    return new Top5SellingProducts(from, to, productWithRanks);
   }
 
-  public List<Product> findAllProducts() {
+  public List<ProductWithQuantity> findAllProducts() {
     return productRepository.findAll();
   }
 }
