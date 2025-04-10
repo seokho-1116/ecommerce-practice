@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.coupon;
 
-import java.time.LocalDateTime;
+import jakarta.validation.Valid;
 import java.util.List;
 import kr.hhplus.be.server.application.coupon.CouponFacade;
 import kr.hhplus.be.server.domain.coupon.Coupon;
@@ -34,7 +34,8 @@ public class CouponController implements CouponControllerSpec {
   }
 
   @PostMapping("/issue")
-  public CommonResponseWrapper<CouponIssueResponse> issue(@RequestBody CouponIssueRequest request) {
+  public CommonResponseWrapper<CouponIssueResponse> issue(
+      @RequestBody @Valid CouponIssueRequest request) {
     UserCoupon userCoupon = couponFacade.issue(request.userId(), request.couponId());
 
     CouponIssueResponse response = CouponIssueResponse.from(userCoupon);
