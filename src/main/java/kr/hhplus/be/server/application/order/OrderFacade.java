@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application;
+package kr.hhplus.be.server.application.order;
 
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.CouponService;
