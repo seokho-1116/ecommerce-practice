@@ -23,7 +23,7 @@ public class OrderFacade {
   private final CouponService couponService;
   private final UserService userService;
 
-  public Order createOrder(OrderCreateCommand orderCreateCommand) {
+  public OrderResult createOrder(OrderCreateCommand orderCreateCommand) {
     List<Product> products = productService.findAllByProductOptionIds(
         orderCreateCommand.productOptionIds());
 
@@ -36,6 +36,6 @@ public class OrderFacade {
 
     couponService.use(userCoupon);
 
-    return order;
+    return OrderResult.of(order, userCoupon);
   }
 }
