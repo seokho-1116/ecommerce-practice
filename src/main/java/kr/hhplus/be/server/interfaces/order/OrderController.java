@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.order;
 
+import jakarta.validation.Valid;
 import kr.hhplus.be.server.application.order.OrderFacade;
 import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
@@ -19,7 +20,7 @@ public class OrderController implements OrderControllerSpec {
   private final OrderFacade orderFacade;
 
   @PostMapping
-  public CommonResponseWrapper<OrderSuccessResponse> createOrder(@RequestBody OrderRequest request) {
+  public CommonResponseWrapper<OrderSuccessResponse> createOrder(@RequestBody @Valid OrderRequest request) {
     OrderCreateCommand command = request.toCreateCommand();
     OrderResult orderResult = orderFacade.createOrder(command);
 

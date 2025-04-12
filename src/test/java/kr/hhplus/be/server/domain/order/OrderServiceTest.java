@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -61,5 +62,45 @@ class OrderServiceTest {
 
     // then
     verify(orderRepository, atLeastOnce()).save(any(Order.class));
+  }
+
+  @DisplayName("주문 결제 시 주문이 결제 상태로 변경되어야 한다")
+  @Test
+  void payOrderTest() {
+    // given
+    Order order = Order.builder()
+        .status(OrderStatus.CREATED)
+        .build();
+
+    // when
+    orderService.pay(order);
+
+    // then
+    verify(orderRepository, atLeastOnce()).save(order);
+    assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+  }
+
+  @DisplayName("주문 결제 시 주문이 null이면 예외가 발생해야 한다")
+  @Test
+  void payOrderWhenOrderIsNullTest() {
+    // given
+    Order order = null;
+
+    // when
+    // then
+    assertThatThrownBy(() -> orderService.pay(order))
+        .isInstanceOf(OrderBusinessException.class);
+  }
+  
+  @DisplayName("주문 조회 시 주문 ID가 null이면 예외가 발생해야 한다")
+  @Test
+  void findByIdWhenOrderIdIsNullTest() {
+    // given
+    Long orderId = null;
+
+    // when
+    // then
+    assertThatThrownBy(() -> orderService.findById(orderId))
+        .isInstanceOf(OrderBusinessException.class);
   }
 }
