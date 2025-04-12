@@ -43,7 +43,7 @@ class CouponServiceTest {
     couponService.use(userCoupon);
 
     // then
-    verify(couponRepository, atLeastOnce()).save(userCoupon);
+    verify(couponRepository, atLeastOnce()).saveUserCoupon(userCoupon);
     assertThat(userCoupon.getIsUsed()).isTrue();
   }
 }
