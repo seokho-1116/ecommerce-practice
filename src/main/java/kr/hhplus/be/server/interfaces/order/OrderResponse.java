@@ -15,6 +15,7 @@ public record OrderResponse(
 ) {
 
   public record OrderSuccessResponse(
+
       @Schema(description = "주문 ID")
       Long orderId,
 
@@ -88,6 +89,7 @@ public record OrderResponse(
     }
 
     public record ItemInfoResponse(
+
         @Schema(description = "주문 상품 ID")
         Long orderItemId,
 
@@ -119,6 +121,7 @@ public record OrderResponse(
     }
 
     public record CouponInfoResponse(
+
         @Schema(description = "쿠폰 ID")
         Long couponId,
 
