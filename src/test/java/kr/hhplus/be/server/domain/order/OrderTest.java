@@ -194,4 +194,18 @@ class OrderTest {
     // then
     assertThat(order.getFinalPrice()).isZero();
   }
+
+  @DisplayName("주문이 이미 결제된 상태면 결제 상태로 변경할 수 없다")
+  @Test
+  void payWhenOrderIsPaid() {
+    // given
+    Order order = Order.builder()
+        .status(OrderStatus.PAID)
+        .build();
+
+    // when
+    // then
+    assertThatThrownBy(order::pay)
+        .isInstanceOf(OrderIllegalStateException.class);
+  }
 }
