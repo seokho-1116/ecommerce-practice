@@ -1,12 +1,14 @@
 package kr.hhplus.be.server.domain.point;
 
 import kr.hhplus.be.server.domain.point.PointBusinessException.UserPointNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PointService {
 
-  private PointRepository pointRepository;
+  private final PointRepository pointRepository;
 
   public long use(Long userId, Long amount) {
     if (userId == null) {
