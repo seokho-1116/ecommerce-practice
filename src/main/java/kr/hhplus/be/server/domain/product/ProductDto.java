@@ -32,6 +32,26 @@ public record ProductDto() {
       List<ProductWithQuantityOption> options
   ) {
 
+    public static ProductWithQuantity from(Product product) {
+      List<ProductWithQuantityOption> productWithQuantityOptions = product.getProductOptions().stream()
+          .map(productOption -> new ProductWithQuantityOption(
+              productOption.getId(),
+              productOption.getName(),
+              productOption.getDescription(),
+              productOption.getAdditionalPrice(),
+              productOption.getProductInventory().getQuantity()
+          ))
+          .toList();
+
+      return new ProductWithQuantity(
+          product.getId(),
+          product.getName(),
+          product.getDescription(),
+          product.getBasePrice(),
+          productWithQuantityOptions
+      );
+    }
+
     public record ProductWithQuantityOption(
         Long id,
         String name,
