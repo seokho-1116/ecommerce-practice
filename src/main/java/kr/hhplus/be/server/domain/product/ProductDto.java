@@ -24,6 +24,13 @@ public record ProductDto() {
 
   }
 
+  public record ProductIdWithRank(
+      Long rank,
+      Long productId
+  ) {
+
+  }
+
   public record ProductWithQuantity(
       Long id,
       String name,
