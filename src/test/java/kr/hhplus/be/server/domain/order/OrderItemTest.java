@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.order;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.List;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderItemIllegalStateException;
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
 import kr.hhplus.be.server.domain.order.OrderItem.OrderItemBuilder;
@@ -16,7 +15,7 @@ class OrderItemTest {
 
   @DisplayName("주문 상품은 수량만큼 생성된다")
   @Test
-  void createAllOrderItemTestWithAmount() {
+  void createOrderItemTestWithAmount() {
     // given
     Product product = Product.builder()
         .id(1L)
@@ -37,15 +36,15 @@ class OrderItemTest {
     ProductAmountPair productAmountPair = new ProductAmountPair(product, productOption, amount);
 
     // when
-    List<OrderItem> orderItems = OrderItem.createAll(productAmountPair);
+    OrderItem orderItem = OrderItem.create(productAmountPair);
 
     // then
-    assertThat(orderItems).hasSize((int) amount);
+    assertThat(orderItem.getAmount()).isEqualTo(amount);
   }
 
   @DisplayName("주문 상품의 전체 금액은 주문 상품의 기본 금액과 추가 금액의 합이다")
   @Test
-  void createAllOrderItemWithTotalPriceTest() {
+  void createOrderItemWithTotalPriceTest() {
     // given
     Product product = Product.builder()
         .id(1L)
@@ -65,12 +64,11 @@ class OrderItemTest {
     ProductAmountPair orderProductPair = new ProductAmountPair(product, productOption, 5L);
 
     // when
-    List<OrderItem> orderItems = OrderItem.createAll(orderProductPair);
+    OrderItem orderItem = OrderItem.create(orderProductPair);
 
     // then
-    assertThat(orderItems).isNotEmpty()
-        .allMatch(orderItem -> orderItem.getTotalPrice()
-            == product.getBasePrice() + productOption.getAdditionalPrice());
+    long price = product.getBasePrice() + productOption.getAdditionalPrice();
+    assertThat(orderItem.getTotalPrice()).isEqualTo(price * orderProductPair.amount());
   }
 
   @DisplayName("주문 상품의 기본 금액은 0 보다 작으면 주문 상태 예외가 발생한다")
@@ -104,7 +102,7 @@ class OrderItemTest {
 
   @DisplayName("주문 상품의 총 금액은 0 보다 작으면 주문 상태 예외가 발생한다")
   @Test
-  void createOrderItemWithTotalPriceTest() {
+  void createOrderItemWithMinusTotalPriceTest() {
     // given
     OrderItemBuilder orderItemBuilder = OrderItem.builder()
         .basePrice(100L)

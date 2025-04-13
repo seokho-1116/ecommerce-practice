@@ -7,8 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import java.util.ArrayList;
-import java.util.List;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderItemIllegalStateException;
@@ -35,6 +33,7 @@ public class OrderItem extends BaseEntity {
   private Long basePrice;
   private Long additionalPrice;
   private Long totalPrice;
+  private Long amount;
 
   @ManyToOne
   @JoinColumn(name = "order_id")
@@ -51,8 +50,7 @@ public class OrderItem extends BaseEntity {
   @Builder
   public OrderItem(Long id, String productName, String productDescription, String productOptionName,
       String productOptionDescription, Long basePrice, Long additionalPrice, Long totalPrice,
-      Order order, ProductOption productOption,
-      UserCoupon userCoupon) {
+      Long amount, Order order, ProductOption productOption, UserCoupon userCoupon) {
     if (basePrice != null && basePrice < 0) {
       throw new OrderItemIllegalStateException("상품 기본 가격은 0 이상이어야 합니다.");
     }
@@ -73,32 +71,27 @@ public class OrderItem extends BaseEntity {
     this.basePrice = basePrice;
     this.additionalPrice = additionalPrice;
     this.totalPrice = totalPrice;
+    this.amount = amount;
     this.order = order;
     this.productOption = productOption;
     this.userCoupon = userCoupon;
   }
 
-  public static List<OrderItem> createAll(ProductAmountPair productAmountPair) {
-    List<OrderItem> orderItems = new ArrayList<>();
+  public static OrderItem create(ProductAmountPair productAmountPair) {
     Product product = productAmountPair.product();
     ProductOption productOption = productAmountPair.productOption();
 
-    for (int itemCount = 0; itemCount < productAmountPair.amount(); itemCount++) {
-      long totalPrice = product.getBasePrice() + productOption.getAdditionalPrice();
-      OrderItem orderItem = OrderItem.builder()
-          .productName(product.getName())
-          .productDescription(product.getDescription())
-          .productOptionName(productOption.getName())
-          .productOptionDescription(productOption.getDescription())
-          .basePrice(product.getBasePrice())
-          .additionalPrice(productOption.getAdditionalPrice())
-          .totalPrice(totalPrice)
-          .build();
-
-      orderItems.add(orderItem);
-    }
-
-    return orderItems;
+    long totalPrice = product.getBasePrice() + productOption.getAdditionalPrice();
+    return OrderItem.builder()
+        .productName(product.getName())
+        .productDescription(product.getDescription())
+        .productOptionName(productOption.getName())
+        .productOptionDescription(productOption.getDescription())
+        .basePrice(product.getBasePrice())
+        .additionalPrice(productOption.getAdditionalPrice())
+        .totalPrice(totalPrice * productAmountPair.amount())
+        .amount(productAmountPair.amount())
+        .build();
   }
 
   public void setupOrder(Order order) {

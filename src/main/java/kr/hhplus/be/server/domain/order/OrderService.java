@@ -11,8 +11,7 @@ public class OrderService {
 
   public Order createOrder(OrderCommand orderCommand) {
     List<OrderItem> orderItems = orderCommand.productAmountPairs().stream()
-        .flatMap(productAmountPair -> OrderItem.createAll(productAmountPair)
-            .stream())
+        .map(OrderItem::create)
         .toList();
 
     Order order = Order.newOrder(orderCommand.user(), orderItems, orderCommand.userCoupon());
