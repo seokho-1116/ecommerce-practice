@@ -29,8 +29,8 @@ class CouponServiceTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.plusMonths(1))
+        .from(now.minusMonths(1))
+        .to(now.plusMonths(1))
         .build();
 
     UserCoupon userCoupon = UserCoupon.builder()

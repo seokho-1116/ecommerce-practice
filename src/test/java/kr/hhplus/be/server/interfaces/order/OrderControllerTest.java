@@ -65,8 +65,8 @@ class OrderControllerTest {
         .name("쿠폰")
         .discountAmount(1000L)
         .couponType(CouponType.FIXED)
-        .fromTs(now.minusDays(1))
-        .toTs(now.plusDays(1))
+        .from(now.minusDays(1))
+        .to(now.plusDays(1))
         .build();
 
     UserCoupon userCoupon = UserCoupon.builder()

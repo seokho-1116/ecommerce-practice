@@ -30,8 +30,8 @@ class CouponTest {
     return Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(discountAmount)
-        .fromTs(LocalDateTime.now().minusMonths(1))
-        .toTs(LocalDateTime.now().plusMonths(1))
+        .from(LocalDateTime.now().minusMonths(1))
+        .to(LocalDateTime.now().plusMonths(1))
         .build();
   }
 
@@ -96,8 +96,8 @@ class CouponTest {
     return Coupon.builder()
         .couponType(CouponType.PERCENTAGE)
         .discountRate(discountRate)
-        .fromTs(LocalDateTime.now().minusMonths(1))
-        .toTs(LocalDateTime.now().plusMonths(1))
+        .from(LocalDateTime.now().minusMonths(1))
+        .to(LocalDateTime.now().plusMonths(1))
         .build();
   }
 
@@ -131,12 +131,12 @@ class CouponTest {
 
   @DisplayName("시작일이 null이면 쿠폰 상태 예외가 발생한다")
   @Test
-  void createCouponWithNullFromTsTest() {
+  void createCouponWithNullfromTest() {
     // given
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(null)
-        .toTs(toTs);
+        .from(null)
+        .to(to);
 
     // when
     // then
@@ -146,12 +146,12 @@ class CouponTest {
 
   @DisplayName("종료일이 null이면 쿠폰 상태 예외가 발생한다")
   @Test
-  void createCouponWithNullToTsTest() {
+  void createCouponWithNulltoTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
     CouponBuilder couponBuilderoupon = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(null);
+        .from(from)
+        .to(null);
 
     // when
     // then
@@ -161,13 +161,13 @@ class CouponTest {
 
   @DisplayName("시작일이 종료일보다 늦으면 쿠폰 상태 예외가 발생한다")
   @Test
-  void createCouponWithFromTsAfterToTsTest() {
+  void createCouponWithfromAftertoTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().plusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().minusMonths(1);
+    LocalDateTime from = LocalDateTime.now().plusMonths(1);
+    LocalDateTime to = LocalDateTime.now().minusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs);
+        .from(from)
+        .to(to);
 
     // when
     // then
@@ -179,11 +179,11 @@ class CouponTest {
   @Test
   void createCouponWithNullCouponTypeTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .couponType(null);
 
     // when
@@ -196,11 +196,11 @@ class CouponTest {
   @Test
   void createCouponWithNegativeDiscountRateTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .couponType(CouponType.PERCENTAGE)
         .discountRate(-0.1);
 
@@ -214,11 +214,11 @@ class CouponTest {
   @Test
   void createCouponWithNegativeDiscountAmountTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .couponType(CouponType.FIXED)
         .discountAmount(-1000L);
 
@@ -232,11 +232,11 @@ class CouponTest {
   @Test
   void issueCouponTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     Coupon coupon = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
         .build();
@@ -257,11 +257,11 @@ class CouponTest {
   @Test
   void createCouponWithNegativeQuantityTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .quantity(-1L);
 
     // when
@@ -274,11 +274,11 @@ class CouponTest {
   @Test
   void issueCouponWithZeroQuantityTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     Coupon coupon = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .quantity(0L)
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
@@ -299,11 +299,11 @@ class CouponTest {
   @Test
   void constructorWithNullQuantityTest() {
     // given
-    LocalDateTime fromTs = LocalDateTime.now().minusMonths(1);
-    LocalDateTime toTs = LocalDateTime.now().plusMonths(1);
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
     CouponBuilder couponBuilder = Coupon.builder()
-        .fromTs(fromTs)
-        .toTs(toTs)
+        .from(from)
+        .to(to)
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
         .quantity(null);

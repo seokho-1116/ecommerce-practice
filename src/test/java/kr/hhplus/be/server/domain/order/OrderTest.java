@@ -53,8 +53,8 @@ class OrderTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.plusMonths(1))
+        .from(now.minusMonths(1))
+        .to(now.plusMonths(1))
         .build();
     UserCoupon userCoupon = UserCoupon.builder()
         .coupon(coupon)
@@ -80,8 +80,8 @@ class OrderTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.PERCENTAGE)
         .discountRate(0.1)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.plusMonths(1))
+        .from(now.minusMonths(1))
+        .to(now.plusMonths(1))
         .build();
     UserCoupon userCoupon = UserCoupon.builder()
         .coupon(coupon)

@@ -6,14 +6,15 @@ import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import java.util.List;
-import kr.hhplus.be.server.controller.response.ChargePointResponse;
-import kr.hhplus.be.server.controller.response.CommonResponseWrapper;
-import kr.hhplus.be.server.controller.response.OrderPaymentRequest;
-import kr.hhplus.be.server.controller.response.OrderPaymentResponse;
-import kr.hhplus.be.server.controller.response.OrderRequest;
-import kr.hhplus.be.server.controller.response.OrderRequest.AmountProductOptionRequest;
-import kr.hhplus.be.server.controller.response.OrderResponse;
 import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.order.OrderRequest;
+import kr.hhplus.be.server.interfaces.order.OrderRequest.AmountProductOptionRequest;
+import kr.hhplus.be.server.interfaces.order.OrderResponse;
+import kr.hhplus.be.server.interfaces.order.OrderResponse.OrderSuccessResponse;
+import kr.hhplus.be.server.interfaces.payment.OrderPaymentRequest;
+import kr.hhplus.be.server.interfaces.payment.OrderPaymentResponse;
+import kr.hhplus.be.server.interfaces.point.PointResponse.ChargePointResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,11 +61,12 @@ class E2EOrderTest {
     long productOptionId = 1L;
     long couponId = 1L;
     long amount = 100L;
-    OrderRequest orderRequest = new OrderRequest(userId, List.of(
+    long userCouponId = 1L;
+    OrderRequest orderRequest = new OrderRequest(userId, userCouponId, List.of(
         new AmountProductOptionRequest(productOptionId, amount, couponId)
     ));
 
-    CommonResponseWrapper<OrderResponse> orderResponseWrapper = RestAssured.given()
+    CommonResponseWrapper<OrderSuccessResponse> orderResponseWrapper = RestAssured.given()
         .basePath("/api/v1/orders")
         .contentType(ContentType.JSON)
         .body(orderRequest)

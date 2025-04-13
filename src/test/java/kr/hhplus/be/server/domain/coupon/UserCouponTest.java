@@ -20,8 +20,8 @@ class UserCouponTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.plusMonths(1))
+        .from(now.minusMonths(1))
+        .to(now.plusMonths(1))
         .build();
 
     UserCoupon userCoupon = UserCoupon.builder()
@@ -44,8 +44,8 @@ class UserCouponTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.plusMonths(1))
+        .from(now.minusMonths(1))
+        .to(now.plusMonths(1))
         .build();
 
     UserCoupon userCoupon = UserCoupon.builder()
@@ -67,8 +67,8 @@ class UserCouponTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.plusMonths(1))
+        .from(now.minusMonths(1))
+        .to(now.plusMonths(1))
         .build();
     coupon.deactivate();
 
@@ -91,8 +91,8 @@ class UserCouponTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(now.minusDays(1))
+        .from(now.minusMonths(1))
+        .to(now.minusDays(1))
         .build();
 
     UserCoupon userCoupon = UserCoupon.builder()
@@ -114,8 +114,8 @@ class UserCouponTest {
     Coupon coupon = Coupon.builder()
         .couponType(CouponType.FIXED)
         .discountAmount(1000L)
-        .fromTs(now.minusMonths(1))
-        .toTs(LocalDate.now().atTime(LocalTime.MAX))
+        .from(now.minusMonths(1))
+        .to(LocalDate.now().atTime(LocalTime.MAX))
         .build();
 
     UserCoupon userCoupon = UserCoupon.builder()

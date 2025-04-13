@@ -46,7 +46,7 @@ public class UserCoupon extends BaseEntity {
     }
 
     LocalDateTime now = LocalDateTime.now();
-    if (now.isBefore(coupon.getFromTs()) || now.isAfter(coupon.getToTs())) {
+    if (now.isBefore(coupon.getFrom()) || now.isAfter(coupon.getTo())) {
       throw new CouponIllegalStateException("쿠폰 사용 기간이 아닙니다.");
     }
 
