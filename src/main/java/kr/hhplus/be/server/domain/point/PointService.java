@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.point;
 
 import kr.hhplus.be.server.domain.point.PointBusinessException.UserPointNotFoundException;
+import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class PointService {
 
   private final PointRepository pointRepository;
+  private final UserRepository userRepository;
 
   public long use(Long userId, Long amount) {
     if (userId == null) {
@@ -16,7 +19,18 @@ public class PointService {
     }
 
     UserPoint userPoint = pointRepository.findByUserId(userId)
-        .orElseThrow(() -> new UserPointNotFoundException("유저 포인트를 찾을 수 없습니다."));
+        .orElseGet(() -> {
+          User user = userRepository.findById(userId)
+              .orElseThrow(() -> new UserPointNotFoundException("유저를 찾을 수 없습니다."));
+
+          UserPoint newUserPoint = UserPoint.builder()
+              .user(user)
+              .amount(0L)
+              .build();
+
+          pointRepository.save(newUserPoint);
+          return newUserPoint;
+        });
 
     userPoint.use(amount);
 
@@ -34,7 +48,18 @@ public class PointService {
     }
 
     UserPoint userPoint = pointRepository.findByUserId(userId)
-        .orElseThrow(() -> new UserPointNotFoundException("유저 포인트를 찾을 수 없습니다."));
+        .orElseGet(() -> {
+          User user = userRepository.findById(userId)
+              .orElseThrow(() -> new UserPointNotFoundException("유저를 찾을 수 없습니다."));
+
+          UserPoint newUserPoint = UserPoint.builder()
+              .user(user)
+              .amount(0L)
+              .build();
+
+          pointRepository.save(newUserPoint);
+          return newUserPoint;
+        });
 
     userPoint.charge(amount);
 
