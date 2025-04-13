@@ -52,8 +52,8 @@ public class CouponResponse {
           coupon.getDiscountRate(),
           coupon.getDiscountAmount(),
           coupon.getCouponType(),
-          coupon.getFromTs(),
-          coupon.getToTs(),
+          coupon.getFrom(),
+          coupon.getTo(),
           userCoupon.getCreatedAt()
       );
     }
@@ -93,8 +93,8 @@ public class CouponResponse {
               coupon.getDiscountRate(),
               coupon.getDiscountAmount(),
               coupon.getCouponType(),
-              coupon.getFromTs(),
-              coupon.getToTs(),
+              coupon.getFrom(),
+              coupon.getTo(),
               coupon.getCreatedAt()
           ))
           .toList();

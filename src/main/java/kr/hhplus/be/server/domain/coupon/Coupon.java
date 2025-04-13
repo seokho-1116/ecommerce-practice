@@ -27,18 +27,18 @@ public class Coupon extends BaseEntity {
   private Long discountAmount;
   private Long quantity;
   private CouponType couponType;
-  private LocalDateTime fromTs;
-  private LocalDateTime toTs;
+  private LocalDateTime from;
+  private LocalDateTime to;
 
   @Builder
   public Coupon(Long id, String name, String description, Double discountRate, Long discountAmount,
-      Long quantity, CouponType couponType, LocalDateTime fromTs, LocalDateTime toTs
+      Long quantity, CouponType couponType, LocalDateTime from, LocalDateTime to
   ) {
-    if (fromTs == null || toTs == null) {
+    if (from == null || to == null) {
       throw new CouponIllegalStateException("쿠폰 사용 기간이 설정되어야 합니다.");
     }
 
-    if (fromTs.isAfter(toTs)) {
+    if (from.isAfter(to)) {
       throw new CouponIllegalStateException("쿠폰 사용 기간이 잘못 설정되었습니다. 시작일이 종료일보다 늦을 수 없습니다.");
     }
 
@@ -65,8 +65,8 @@ public class Coupon extends BaseEntity {
     this.discountAmount = discountAmount;
     this.quantity = quantity;
     this.couponType = couponType;
-    this.fromTs = fromTs;
-    this.toTs = toTs;
+    this.from = from;
+    this.to = to;
   }
 
   public long calculateDiscountPrice(long totalPrice) {
