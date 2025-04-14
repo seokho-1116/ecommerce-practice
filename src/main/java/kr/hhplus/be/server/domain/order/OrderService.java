@@ -2,12 +2,14 @@ package kr.hhplus.be.server.domain.order;
 
 import java.util.List;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
-  private OrderRepository orderRepository;
+  private final OrderRepository orderRepository;
 
   public Order createOrder(OrderCommand orderCommand) {
     List<OrderItem> orderItems = orderCommand.productAmountPairs().stream()
