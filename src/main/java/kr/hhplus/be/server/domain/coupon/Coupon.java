@@ -82,6 +82,10 @@ public class Coupon extends BaseEntity {
       throw new CouponIllegalStateException("쿠폰 수량이 부족합니다.");
     }
 
+    if (quantity != null) {
+      this.quantity--;
+    }
+
     return UserCoupon.builder()
         .user(user)
         .isUsed(false)
