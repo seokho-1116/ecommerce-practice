@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.coupon;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,6 +28,8 @@ public class Coupon extends BaseEntity {
   private Double discountRate;
   private Long discountAmount;
   private Long quantity;
+
+  @Enumerated(EnumType.STRING)
   private CouponType couponType;
   private LocalDateTime from;
   private LocalDateTime to;
