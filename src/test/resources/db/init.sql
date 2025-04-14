@@ -10,7 +10,7 @@ create table coupon
     discount_rate   double       null,
     discount_amount bigint       null,
     quantity        bigint       null,
-    coupon_type     smallint     null,
+    coupon_type     varchar(30)     null,
     `from`          datetime     null,
     `to`            datetime     null
 );
