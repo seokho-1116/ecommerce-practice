@@ -20,7 +20,7 @@ public class PaymentFacade {
   private final PointService pointService;
   private final PaymentEventPublisher paymentEventPublisher;
 
-  public PaymentResult payment(PaymentCommand paymentCommand) {
+  public PaymentResult payOrder(PaymentCommand paymentCommand) {
     Order order = orderService.findById(paymentCommand.orderId());
 
     ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.getOrderItems());
