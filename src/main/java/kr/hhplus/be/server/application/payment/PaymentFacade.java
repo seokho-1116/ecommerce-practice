@@ -8,15 +8,17 @@ import kr.hhplus.be.server.domain.payment.PaymentSuccessEvent;
 import kr.hhplus.be.server.domain.point.PointService;
 import kr.hhplus.be.server.domain.product.ProductDeductCommand;
 import kr.hhplus.be.server.domain.product.ProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PaymentFacade {
 
-  private OrderService orderService;
-  private ProductService productService;
-  private PointService pointService;
-  private PaymentEventPublisher paymentEventPublisher;
+  private final OrderService orderService;
+  private final ProductService productService;
+  private final PointService pointService;
+  private final PaymentEventPublisher paymentEventPublisher;
 
   public PaymentResult payment(PaymentCommand paymentCommand) {
     Order order = orderService.findById(paymentCommand.orderId());
