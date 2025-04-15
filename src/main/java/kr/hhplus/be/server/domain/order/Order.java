@@ -2,6 +2,8 @@ package kr.hhplus.be.server.domain.order;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +33,8 @@ public class Order extends BaseEntity {
   private Long totalPrice;
   private Long discountPrice;
   private Long finalPrice;
+
+  @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
   @ManyToOne
