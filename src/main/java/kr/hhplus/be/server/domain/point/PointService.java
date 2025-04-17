@@ -24,7 +24,7 @@ public class PointService {
               .orElseThrow(() -> new UserPointNotFoundException("유저를 찾을 수 없습니다."));
 
           UserPoint newUserPoint = UserPoint.builder()
-              .user(user)
+              .userId(user.getId())
               .amount(0L)
               .build();
 
@@ -34,7 +34,7 @@ public class PointService {
 
     userPoint.use(amount);
 
-    PointHistory pointHistory = PointHistory.useHistory(userPoint.getUser(), amount);
+    PointHistory pointHistory = PointHistory.useHistory(userPoint.getUserId(), amount);
     pointRepository.savePointHistory(pointHistory);
 
     pointRepository.save(userPoint);
@@ -53,7 +53,7 @@ public class PointService {
               .orElseThrow(() -> new UserPointNotFoundException("유저를 찾을 수 없습니다."));
 
           UserPoint newUserPoint = UserPoint.builder()
-              .user(user)
+              .userId(user.getId())
               .amount(0L)
               .build();
 
@@ -63,7 +63,7 @@ public class PointService {
 
     userPoint.charge(amount);
 
-    PointHistory pointHistory = PointHistory.chargeHistory(userPoint.getUser(), amount);
+    PointHistory pointHistory = PointHistory.chargeHistory(userPoint.getUserId(), amount);
     pointRepository.savePointHistory(pointHistory);
 
     pointRepository.save(userPoint);
