@@ -10,6 +10,7 @@ import kr.hhplus.be.server.domain.product.ProductDeductCommand;
 import kr.hhplus.be.server.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @RequiredArgsConstructor
@@ -19,20 +20,24 @@ public class PaymentFacade {
   private final ProductService productService;
   private final PointService pointService;
   private final PaymentEventPublisher paymentEventPublisher;
+  private final TransactionTemplate transactionTemplate;
 
   public PaymentResult payOrder(PaymentCommand paymentCommand) {
-    Order order = orderService.findNotPaidOrderById(paymentCommand.orderId());
+    PaymentResult result = transactionTemplate.execute(status -> {
+      Order order = orderService.findNotPaidOrderById(paymentCommand.orderId());
 
-    ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.getOrderItems());
-    productService.deductInventory(productDeductCommand);
+      ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.getOrderItems());
+      productService.deductInventory(productDeductCommand);
 
-    long remainingPoint = pointService.use(paymentCommand.userId(), order.getFinalPrice());
+      long remainingPoint = pointService.use(paymentCommand.userId(), order.getFinalPrice());
 
-    orderService.pay(order);
+      orderService.pay(order);
+      return PaymentResult.of(order, remainingPoint);
+    });
 
-    PaymentSuccessEvent event = PaymentSuccessEvent.from(order);
+    PaymentSuccessEvent event = PaymentSuccessEvent.from(result.order());
     paymentEventPublisher.publish(event);
 
-    return PaymentResult.of(order, remainingPoint);
+    return result;
   }
 }
