@@ -66,7 +66,7 @@ public record OrderCommand(
 
     public List<Long> productOptionIds() {
       return productIdItemPairs.stream()
-          .map(ProductIdItemPair::productId)
+          .map(productIdItemPair -> productIdItemPair.item.productOptionId)
           .toList();
     }
 
