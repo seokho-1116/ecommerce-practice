@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.payment;
 
+import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.payment.PaymentCommand;
@@ -20,6 +21,7 @@ public class PaymentFacade {
   private final PointService pointService;
   private final PaymentEventPublisher paymentEventPublisher;
 
+  @Transactional
   public PaymentResult payOrder(PaymentCommand paymentCommand) {
     Order order = orderService.findNotPaidOrderById(paymentCommand.orderId());
 
