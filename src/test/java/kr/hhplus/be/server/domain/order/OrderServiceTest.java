@@ -94,13 +94,13 @@ class OrderServiceTest {
   
   @DisplayName("주문 조회 시 주문 ID가 null이면 예외가 발생해야 한다")
   @Test
-  void findByIdWhenOrderIdIsNullTest() {
+  void findNotPaidOrderByIdWhenOrderIdIsNullTest() {
     // given
     Long orderId = null;
 
     // when
     // then
-    assertThatThrownBy(() -> orderService.findById(orderId))
+    assertThatThrownBy(() -> orderService.findNotPaidOrderById(orderId))
         .isInstanceOf(OrderBusinessException.class);
   }
 }

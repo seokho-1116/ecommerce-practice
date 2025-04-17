@@ -21,7 +21,7 @@ public class PaymentFacade {
   private final PaymentEventPublisher paymentEventPublisher;
 
   public PaymentResult payOrder(PaymentCommand paymentCommand) {
-    Order order = orderService.findById(paymentCommand.orderId());
+    Order order = orderService.findNotPaidOrderById(paymentCommand.orderId());
 
     ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.getOrderItems());
     productService.deductInventory(productDeductCommand);
