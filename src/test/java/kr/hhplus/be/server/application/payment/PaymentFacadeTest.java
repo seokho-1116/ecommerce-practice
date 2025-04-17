@@ -2,6 +2,8 @@ package kr.hhplus.be.server.application.payment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.payment.PaymentCommand;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +22,7 @@ class PaymentFacadeTest {
 
   @DisplayName("성공한 주문을 결제하면 결제 상태가 성공으로 변경되어야 한다")
   @Test
-  void test() {
+  void payOrderTest() {
     // given
     Long orderId = 1L;
     Long userId = 1L;
@@ -32,5 +34,37 @@ class PaymentFacadeTest {
     // then
     assertThat(paymentResult.order().getStatus()).isNotNull().isEqualTo(OrderStatus.PAID);
     assertThat(paymentResult.remainingPoint()).isGreaterThanOrEqualTo(0L);
+  }
+
+  @DisplayName("동시에 주문 결제를 요청하면 한 건만 결제되고 나머지는 실패해야 한다")
+  @Test
+  void payOrderWithSameOrderTest() throws InterruptedException {
+    // given
+    Long orderId = 1L;
+    Long userId = 1L;
+    int requestCount = 3;
+    PaymentCommand paymentCommand = new PaymentCommand(orderId, userId);
+    CountDownLatch latch = new CountDownLatch(requestCount);
+
+    // when
+    AtomicLong successCount = new AtomicLong(0);
+    AtomicLong failedCount = new AtomicLong(0);
+    for (int i = 0; i < requestCount; i++) {
+      new Thread(() -> {
+        try {
+          paymentFacade.payOrder(paymentCommand);
+          successCount.incrementAndGet();
+        } catch (Exception e) {
+          failedCount.incrementAndGet();
+        } finally {
+          latch.countDown();
+        }
+      }).start();
+    }
+    latch.await();
+
+    // then
+    assertThat(successCount.get()).isEqualTo(1L);
+    assertThat(failedCount.get()).isEqualTo(requestCount - 1);
   }
 }
