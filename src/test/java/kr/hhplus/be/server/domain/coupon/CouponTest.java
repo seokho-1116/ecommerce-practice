@@ -314,4 +314,30 @@ class CouponTest {
     // then
     assertThat(coupon.getQuantity()).isNull();
   }
+
+  @DisplayName("수량이 존재하는 쿠폰을 발급하면 쿠폰 수량이 감소한다")
+  @Test
+  void issueCouponWithQuantityTest() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(10L)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .build();
+
+    User user = User.builder()
+        .id(1L)
+        .name("testUser")
+        .build();
+
+    // when
+    coupon.issue(user);
+
+    // then
+    assertThat(coupon.getQuantity()).isEqualTo(9L);
+  }
 }

@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.coupon;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,6 +28,8 @@ public class Coupon extends BaseEntity {
   private Double discountRate;
   private Long discountAmount;
   private Long quantity;
+
+  @Enumerated(EnumType.STRING)
   private CouponType couponType;
   private LocalDateTime from;
   private LocalDateTime to;
@@ -76,6 +80,10 @@ public class Coupon extends BaseEntity {
   public UserCoupon issue(User user) {
     if (quantity != null && quantity <= 0) {
       throw new CouponIllegalStateException("쿠폰 수량이 부족합니다.");
+    }
+
+    if (quantity != null) {
+      this.quantity--;
     }
 
     return UserCoupon.builder()
