@@ -7,12 +7,14 @@ import java.util.List;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-  private ProductRepository productRepository;
+  private final ProductRepository productRepository;
 
   public List<Product> findAllByProductOptionIds(List<Long> productOptionIds) {
     return productRepository.findAllByProductOptionIds(productOptionIds);
