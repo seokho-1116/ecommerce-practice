@@ -11,7 +11,7 @@ import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order.OrderBuilder;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderIllegalStateException;
-import org.assertj.core.api.Assertions;
+import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +25,12 @@ class OrderTest {
 
     OrderItem orderItem2 = getOrderItemWithRandomPrice();
 
+    User user = User.builder()
+        .id(1L)
+        .build();
+
     // when
-    Order order = Order.newOrder(null, List.of(orderItem1, orderItem2), null);
+    Order order = Order.newOrder(user, List.of(orderItem1, orderItem2), null);
 
     // then
     long totalPrice = orderItem1.getTotalPrice() + orderItem2.getTotalPrice();
@@ -60,9 +64,12 @@ class OrderTest {
         .coupon(coupon)
         .isUsed(false)
         .build();
+    User user = User.builder()
+        .id(1L)
+        .build();
 
     // when
-    Order order = Order.newOrder(null, List.of(orderItem1, orderItem2), userCoupon);
+    Order order = Order.newOrder(user, List.of(orderItem1, orderItem2), userCoupon);
 
     // then
     assertThat(order.getDiscountPrice()).isEqualTo(coupon.getDiscountAmount());
@@ -87,9 +94,12 @@ class OrderTest {
         .coupon(coupon)
         .isUsed(false)
         .build();
+    User user = User.builder()
+        .id(1L)
+        .build();
 
     // when
-    Order order = Order.newOrder(null, List.of(orderItem1, orderItem2), userCoupon);
+    Order order = Order.newOrder(user, List.of(orderItem1, orderItem2), userCoupon);
 
     // then
     long totalPrice = orderItem1.getTotalPrice() + orderItem2.getTotalPrice();

@@ -43,8 +43,8 @@ VALUES (1, 20000, 0, 20000, 'CREATED', 1);
 -- 6. OrderItem
 INSERT INTO order_item (id, product_name, product_description, product_option_name,
                         product_option_description, base_price, additional_price, total_price,
-                        amount, order_id, product_option_id, coupon_id, created_at)
-VALUES (1, 'test', 'test', 'test', 'test', 1000, 1000, 2000, 1, 1, 1, 1, NOW() - INTERVAL 1 DAY),
-         (2, 'test2', 'test2', 'test2', 'test2', 2000, 2000, 4000, 1, 1, 2, 1, NOW() - INTERVAL 1 DAY),
-         (3, 'test3', 'test3', 'test3', 'test3', 3000, 3000, 6000, 1, 1, 3, null, NOW() - INTERVAL 1 DAY),
-         (4, 'test4', 'test4', 'test4', 'test4', 4000, 4000, 8000, 1, 1, 4, null, NOW() - INTERVAL 1 DAY);
+                        amount, order_id, product_option_id, created_at)
+VALUES (1, 'test', 'test', 'test', 'test', 1000, 1000, 2000, 1, 1, 1,  NOW() - INTERVAL 1 DAY),
+         (2, 'test2', 'test2', 'test2', 'test2', 2000, 2000, 4000, 1, 1, 2, NOW() - INTERVAL 1 DAY),
+         (3, 'test3', 'test3', 'test3', 'test3', 3000, 3000, 6000, 1, 1, 3, NOW() - INTERVAL 1 DAY),
+         (4, 'test4', 'test4', 'test4', 'test4', 4000, 4000, 8000, 1, 1, 4, NOW() - INTERVAL 1 DAY);

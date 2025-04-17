@@ -28,7 +28,7 @@ public record OrderPaymentResponse(
   public static OrderPaymentResponse from(PaymentResult paymentResult) {
     return new OrderPaymentResponse(
         paymentResult.order().getId(),
-        paymentResult.order().getUser().getId(),
+        paymentResult.order().getUserId(),
         paymentResult.order().getTotalPrice(),
         paymentResult.order().getStatus(),
         paymentResult.remainingPoint(),
