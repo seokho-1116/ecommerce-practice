@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point;
 
+import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.point.PointBusinessException.UserPointNotFoundException;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
@@ -13,6 +14,7 @@ public class PointService {
   private final PointRepository pointRepository;
   private final UserRepository userRepository;
 
+  @Transactional
   public long use(Long userId, Long amount) {
     if (userId == null) {
       throw new PointBusinessException("유저 ID는 null일 수 없습니다.");
@@ -42,6 +44,7 @@ public class PointService {
     return userPoint.getAmount();
   }
 
+  @Transactional
   public long charge(Long userId, Long amount) {
     if (userId == null) {
       throw new PointBusinessException("유저 ID는 null일 수 없습니다.");

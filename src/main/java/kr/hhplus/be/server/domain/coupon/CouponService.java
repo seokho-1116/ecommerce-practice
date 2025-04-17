@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.coupon;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponNotFoundException;
 import kr.hhplus.be.server.domain.user.User;
@@ -17,11 +18,13 @@ public class CouponService {
         .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
   }
 
+  @Transactional
   public void use(UserCoupon userCoupon) {
     userCoupon.use();
     couponRepository.saveUserCoupon(userCoupon);
   }
 
+  @Transactional
   public UserCoupon issue(User user, Long couponId) {
     Coupon coupon = couponRepository.findById(couponId)
         .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ public class OrderService {
 
   private final OrderRepository orderRepository;
 
+  @Transactional
   public Order createOrder(OrderCommand orderCommand) {
     List<OrderItem> orderItems = orderCommand.productAmountPairs().stream()
         .map(OrderItem::create)
@@ -30,6 +32,7 @@ public class OrderService {
         .orElseThrow(() -> new OrderNotFoundException("주문을 찾을 수 없습니다."));
   }
 
+  @Transactional
   public void pay(Order order) {
     if (order == null) {
       throw new OrderBusinessException("결제 상태로 변경할 주문이 없습니다.");
