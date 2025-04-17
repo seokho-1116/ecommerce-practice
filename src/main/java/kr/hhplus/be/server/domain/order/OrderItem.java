@@ -87,6 +87,7 @@ public class OrderItem extends BaseEntity {
         .productDescription(product.getDescription())
         .productOptionName(productOption.getName())
         .productOptionDescription(productOption.getDescription())
+        .productOption(productOption)
         .basePrice(product.getBasePrice())
         .additionalPrice(productOption.getAdditionalPrice())
         .totalPrice(totalPrice * productAmountPair.amount())
