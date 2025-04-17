@@ -25,7 +25,7 @@ create table `order`
     total_price    bigint   null,
     discount_price bigint   null,
     final_price    bigint   null,
-    status         smallint null,
+    status         varchar(30) null,
     user_id        bigint   null
 );
 

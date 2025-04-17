@@ -3,6 +3,7 @@ package kr.hhplus.be.server.infrastructure.order;
 import java.util.Optional;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.order.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +19,7 @@ public class OrderRepositoryImpl implements OrderRepository {
   }
 
   @Override
-  public Optional<Order> findById(Long orderId) {
-    return orderJpaRepository.findFetchedById(orderId);
+  public Optional<Order> findByIdAndStatus(Long orderId, OrderStatus orderStatus) {
+    return orderJpaRepository.findFetchedById(orderId, orderStatus);
   }
 }

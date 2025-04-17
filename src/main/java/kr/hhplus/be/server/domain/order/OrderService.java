@@ -21,12 +21,12 @@ public class OrderService {
     return orderRepository.save(order);
   }
 
-  public Order findById(Long orderId) {
+  public Order findNotPaidOrderById(Long orderId) {
     if (orderId == null) {
       throw new OrderBusinessException("주문 ID는 null일 수 없습니다.");
     }
 
-    return orderRepository.findById(orderId)
+    return orderRepository.findByIdAndStatus(orderId, OrderStatus.CREATED)
         .orElseThrow(() -> new OrderNotFoundException("주문을 찾을 수 없습니다."));
   }
 
