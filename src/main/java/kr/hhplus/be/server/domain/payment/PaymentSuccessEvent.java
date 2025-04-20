@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.*;
 import java.util.List;
 import java.util.Map;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.payment.PaymentBusinessException.PaymentEventIllegalStateException;
 
 public record PaymentSuccessEvent(
@@ -21,12 +22,12 @@ public record PaymentSuccessEvent(
 
     Map<Long, Long> orderItemAmountMap = order.getOrderItems()
         .stream()
-        .collect(groupingBy(orderItem -> orderItem.getProductOption().getId(), counting()));
+        .collect(groupingBy(OrderItem::getProductOptionId, counting()));
 
     List<OrderItemSummary> orderItemSummaries = order.getOrderItems()
         .stream()
         .map(orderItem -> {
-          Long amount = orderItemAmountMap.get(orderItem.getProductOption().getId());
+          Long amount = orderItemAmountMap.get(orderItem.getProductOptionId());
 
           return new OrderItemSummary(
               orderItem.getId(),
@@ -41,7 +42,7 @@ public record PaymentSuccessEvent(
 
     return new PaymentSuccessEvent(
         order.getId(),
-        order.getUser().getId(),
+        order.getUserId(),
         order.getFinalPrice(),
         orderItemSummaries
     );

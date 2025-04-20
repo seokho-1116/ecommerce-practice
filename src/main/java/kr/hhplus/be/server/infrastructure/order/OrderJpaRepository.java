@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OrderJpaRepository extends JpaRepository<Order, Long> {
 
-  @Query("SELECT o FROM Order o JOIN FETCH o.user u JOIN FETCH o.orderItems oi WHERE o.id = :id AND o.status = :orderStatus")
+  @Query("SELECT o FROM Order o JOIN FETCH o.orderItems oi WHERE o.id = :id AND o.status = :orderStatus")
   Optional<Order> findFetchedById(Long id, OrderStatus orderStatus);
 }
