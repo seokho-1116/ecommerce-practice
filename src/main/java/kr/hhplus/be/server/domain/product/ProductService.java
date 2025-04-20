@@ -5,7 +5,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +34,8 @@ public class ProductService {
     }
 
     List<Long> productOptionIds = productDeductCommand.productOptionIds();
-    List<ProductInventory> productInventories = productRepository.findProductInventoriesByProductOptionIds(productOptionIds);
+    List<ProductInventory> productInventories = productRepository.findProductInventoriesByProductOptionIds(
+        productOptionIds);
 
     for (ProductInventory productInventory : productInventories) {
       Long productOptionId = productInventory.getProductOption().getId();
@@ -46,10 +53,44 @@ public class ProductService {
     LocalDate now = LocalDate.now();
     LocalDateTime from = now.minusDays(3).atStartOfDay();
     LocalDateTime to = now.minusDays(1).atTime(LocalTime.MAX);
-    List<ProductWithRank> productWithRanks = productRepository.findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
         from,
         to
     );
+
+    List<Long> productIds = productIdWithRanks.stream()
+        .map(ProductIdWithRank::productId)
+        .toList();
+    List<Product> products = productRepository.findAllByIdIn(productIds);
+
+    Map<Long, ProductWithQuantity> productWithQuantities = products.stream()
+        .map(ProductWithQuantity::from)
+        .collect(Collectors.toMap(ProductWithQuantity::id, Function.identity()));
+
+    List<ProductWithRank> productWithRanks = productIdWithRanks.stream()
+        .map(productIdWithRank -> {
+          Long productId = productIdWithRank.productId();
+          ProductWithQuantity productWithQuantity = productWithQuantities.get(productId);
+
+          if (productWithQuantity == null) {
+            return null;
+          }
+
+          Long quantity = productWithQuantity.options().stream()
+              .mapToLong(ProductWithQuantityOption::quantity)
+              .sum();
+
+          return new ProductWithRank(
+              productIdWithRank.rank(),
+              quantity,
+              productId,
+              productWithQuantity.name(),
+              productWithQuantity.description(),
+              productWithQuantity.basePrice()
+          );
+        })
+        .filter(Objects::nonNull)
+        .toList();
 
     return new Top5SellingProducts(from, to, productWithRanks);
   }
