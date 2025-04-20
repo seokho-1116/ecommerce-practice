@@ -1,0 +1,10 @@
+TRUNCATE TABLE user_coupon;
+TRUNCATE TABLE user_point;
+TRUNCATE TABLE point_history;
+TRUNCATE TABLE user;
+TRUNCATE TABLE product_option;
+TRUNCATE TABLE product_inventory;
+TRUNCATE TABLE product;
+TRUNCATE TABLE coupon;
+TRUNCATE TABLE `order`;
+TRUNCATE TABLE order_item;

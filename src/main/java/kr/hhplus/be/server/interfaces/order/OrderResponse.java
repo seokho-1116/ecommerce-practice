@@ -8,6 +8,7 @@ import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 
 public record OrderResponse(
@@ -57,12 +58,11 @@ public record OrderResponse(
       }
 
       Map<Long, Long> productOptionIdToAmountMap = orderResult.order().getOrderItems().stream()
-          .collect(Collectors.groupingBy(orderItem -> orderItem.getProductOption().getId(),
-              Collectors.counting()));
+          .collect(Collectors.groupingBy(OrderItem::getProductOptionId, Collectors.counting()));
 
       return new OrderSuccessResponse(
           order.getId(),
-          order.getUser().getId(),
+          order.getUserId(),
           order.getStatus(),
           order.getTotalPrice(),
           order.getDiscountPrice(),
@@ -70,7 +70,7 @@ public record OrderResponse(
           couponInfo,
           order.getOrderItems().stream()
               .map(item -> {
-                Long amount = productOptionIdToAmountMap.get(item.getProductOption().getId());
+                Long amount = productOptionIdToAmountMap.get(item.getProductOptionId());
 
                 return new ItemInfoResponse(
                     item.getId(),
