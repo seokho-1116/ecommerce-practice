@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.order;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
@@ -23,6 +24,7 @@ public class OrderFacade {
   private final CouponService couponService;
   private final UserService userService;
 
+  @Transactional
   public OrderResult createOrder(OrderCreateCommand orderCreateCommand) {
     List<Product> products = productService.findAllByProductOptionIds(
         orderCreateCommand.productOptionIds());

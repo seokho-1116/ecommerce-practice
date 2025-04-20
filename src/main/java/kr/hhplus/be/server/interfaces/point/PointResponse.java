@@ -29,7 +29,7 @@ public record PointResponse(
 
     public static CurrentPointResponse from(UserPoint userPoint) {
       return new CurrentPointResponse(
-          userPoint.getUser().getId(),
+          userPoint.getUserId(),
           userPoint.getAmount()
       );
     }

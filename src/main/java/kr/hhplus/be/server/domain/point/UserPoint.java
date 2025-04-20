@@ -4,11 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.point.PointBusinessException.UserPointIllegalStateException;
-import kr.hhplus.be.server.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,13 +22,10 @@ public class UserPoint extends BaseEntity {
   private Long id;
 
   private Long amount;
-
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+  private Long userId;
 
   @Builder
-  public UserPoint(Long id, Long amount, User user) {
+  public UserPoint(Long id, Long amount, Long userId) {
     if (amount != null && amount < 0) {
       throw new UserPointIllegalStateException("포인트는 0 이상이어야 합니다.");
     }
@@ -42,7 +36,7 @@ public class UserPoint extends BaseEntity {
 
     this.id = id;
     this.amount = amount;
-    this.user = user;
+    this.userId = userId;
   }
 
   public long use(Long amount) {
