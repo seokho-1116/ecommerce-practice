@@ -45,8 +45,7 @@ create table order_item
     total_price                bigint       null,
     amount                     bigint       null,
     order_id                   bigint       null,
-    product_option_id          bigint       null,
-    coupon_id                  bigint       null
+    product_option_id          bigint       null
 );
 
 create table point_history

@@ -56,7 +56,7 @@ class OrderControllerTest {
     Order order = Order.builder()
         .id(1L)
         .status(OrderStatus.CREATED)
-        .user(user)
+        .userId(user.getId())
         .build();
 
     LocalDateTime now = LocalDateTime.now();

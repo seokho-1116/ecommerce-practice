@@ -17,7 +17,7 @@ public record ProductDeductCommand(
     }
 
     Map<Long, Long> productOptionIdToAmountMap = orderItems.stream()
-        .collect(groupingBy(orderItem -> orderItem.getProductOption().getId(), counting()));
+        .collect(groupingBy(OrderItem::getProductOptionId, counting()));
 
     return new ProductDeductCommand(productOptionIdToAmountMap);
   }

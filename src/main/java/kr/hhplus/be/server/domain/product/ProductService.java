@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.product;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -20,6 +21,7 @@ public class ProductService {
     return productRepository.findAllByProductOptionIds(productOptionIds);
   }
 
+  @Transactional
   public void deductInventory(ProductDeductCommand productDeductCommand) {
     if (productDeductCommand == null || productDeductCommand.isEmpty()) {
       throw new ProductBusinessException("상품 재고 차감 커맨드는 null이거나 차감할 상품 항목이 비어있을 수 없습니다.");

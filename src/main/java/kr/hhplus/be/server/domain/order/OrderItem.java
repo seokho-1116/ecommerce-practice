@@ -6,9 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import kr.hhplus.be.server.domain.BaseEntity;
-import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderItemIllegalStateException;
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
 import kr.hhplus.be.server.domain.product.Product;
@@ -34,23 +32,16 @@ public class OrderItem extends BaseEntity {
   private Long additionalPrice;
   private Long totalPrice;
   private Long amount;
+  private Long productOptionId;
 
   @ManyToOne
   @JoinColumn(name = "order_id")
   private Order order;
 
-  @ManyToOne
-  @JoinColumn(name = "product_option_id")
-  private ProductOption productOption;
-
-  @OneToOne
-  @JoinColumn(name = "coupon_id")
-  private UserCoupon userCoupon;
-
   @Builder
   public OrderItem(Long id, String productName, String productDescription, String productOptionName,
       String productOptionDescription, Long basePrice, Long additionalPrice, Long totalPrice,
-      Long amount, Order order, ProductOption productOption, UserCoupon userCoupon) {
+      Long amount, Order order, Long productOptionId) {
     if (basePrice != null && basePrice < 0) {
       throw new OrderItemIllegalStateException("상품 기본 가격은 0 이상이어야 합니다.");
     }
@@ -73,8 +64,7 @@ public class OrderItem extends BaseEntity {
     this.totalPrice = totalPrice;
     this.amount = amount;
     this.order = order;
-    this.productOption = productOption;
-    this.userCoupon = userCoupon;
+    this.productOptionId = productOptionId;
   }
 
   public static OrderItem create(ProductAmountPair productAmountPair) {
@@ -87,7 +77,7 @@ public class OrderItem extends BaseEntity {
         .productDescription(product.getDescription())
         .productOptionName(productOption.getName())
         .productOptionDescription(productOption.getDescription())
-        .productOption(productOption)
+        .productOptionId(productOption.getId())
         .basePrice(product.getBasePrice())
         .additionalPrice(productOption.getAdditionalPrice())
         .totalPrice(totalPrice * productAmountPair.amount())
