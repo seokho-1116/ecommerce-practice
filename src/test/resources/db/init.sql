@@ -10,7 +10,7 @@ create table coupon
     discount_rate   double       null,
     discount_amount bigint       null,
     quantity        bigint       null,
-    coupon_type     smallint     null,
+    coupon_type     varchar(30)     null,
     `from`          datetime     null,
     `to`            datetime     null
 );
@@ -25,7 +25,7 @@ create table `order`
     total_price    bigint   null,
     discount_price bigint   null,
     final_price    bigint   null,
-    status         smallint null,
+    status         varchar(30) null,
     user_id        bigint   null
 );
 
@@ -45,8 +45,7 @@ create table order_item
     total_price                bigint       null,
     amount                     bigint       null,
     order_id                   bigint       null,
-    product_option_id          bigint       null,
-    coupon_id                  bigint       null
+    product_option_id          bigint       null
 );
 
 create table point_history

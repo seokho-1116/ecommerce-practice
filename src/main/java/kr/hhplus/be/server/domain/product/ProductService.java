@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.product;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,17 +8,20 @@ import java.util.List;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-  private ProductRepository productRepository;
+  private final ProductRepository productRepository;
 
   public List<Product> findAllByProductOptionIds(List<Long> productOptionIds) {
     return productRepository.findAllByProductOptionIds(productOptionIds);
   }
 
+  @Transactional
   public void deductInventory(ProductDeductCommand productDeductCommand) {
     if (productDeductCommand == null || productDeductCommand.isEmpty()) {
       throw new ProductBusinessException("상품 재고 차감 커맨드는 null이거나 차감할 상품 항목이 비어있을 수 없습니다.");

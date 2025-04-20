@@ -2,12 +2,12 @@ package kr.hhplus.be.server.domain.order;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,18 +31,17 @@ public class Order extends BaseEntity {
   private Long totalPrice;
   private Long discountPrice;
   private Long finalPrice;
-  private OrderStatus status;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+  @Enumerated(EnumType.STRING)
+  private OrderStatus status;
+  private Long userId;
 
   @OneToMany(mappedBy = "order", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<OrderItem> orderItems = new ArrayList<>();
 
   @Builder
   public Order(Long id, Long totalPrice, Long discountPrice, Long finalPrice, OrderStatus status,
-      User user) {
+      Long userId) {
     if (totalPrice != null && totalPrice < 0) {
       throw new OrderIllegalStateException("주문 총 금액은 0 이상이어야 합니다.");
     }
@@ -64,12 +63,12 @@ public class Order extends BaseEntity {
     this.discountPrice = discountPrice;
     this.finalPrice = finalPrice;
     this.status = status;
-    this.user = user;
+    this.userId = userId;
   }
 
   public static Order newOrder(User user, List<OrderItem> orderItems, UserCoupon userCoupon) {
     Order order = Order.builder()
-        .user(user)
+        .userId(user.getId())
         .status(OrderStatus.CREATED)
         .totalPrice(0L)
         .discountPrice(0L)
