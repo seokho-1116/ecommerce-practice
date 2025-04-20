@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.controller;
+package kr.hhplus.be.server.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,7 +10,6 @@ import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
 import kr.hhplus.be.server.interfaces.order.OrderRequest;
 import kr.hhplus.be.server.interfaces.order.OrderRequest.AmountProductOptionRequest;
-import kr.hhplus.be.server.interfaces.order.OrderResponse;
 import kr.hhplus.be.server.interfaces.order.OrderResponse.OrderSuccessResponse;
 import kr.hhplus.be.server.interfaces.payment.OrderPaymentRequest;
 import kr.hhplus.be.server.interfaces.payment.OrderPaymentResponse;
@@ -22,8 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@Sql(scripts = "classpath:db/e2e_test_case.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:db/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class E2EOrderTest {
 
   @LocalServerPort
@@ -40,7 +42,7 @@ class E2EOrderTest {
   void order() {
     // 1. 잔액 충전
     long userId = 1L;
-    long point = 10000L;
+    long point = 10000000L;
 
     CommonResponseWrapper<ChargePointResponse> chargePointResponseWrapper = RestAssured.given()
         .basePath("/api/v1/point/{userId}/charge")
@@ -58,12 +60,12 @@ class E2EOrderTest {
     assertThat(chargePointResponseWrapper.data().amount()).isEqualTo(point);
 
     // 2. 주문
+    long productId = 1L;
     long productOptionId = 1L;
-    long couponId = 1L;
     long amount = 100L;
     long userCouponId = 1L;
     OrderRequest orderRequest = new OrderRequest(userId, userCouponId, List.of(
-        new AmountProductOptionRequest(productOptionId, amount, couponId)
+        new AmountProductOptionRequest(productId, productOptionId, amount)
     ));
 
     CommonResponseWrapper<OrderSuccessResponse> orderResponseWrapper = RestAssured.given()
@@ -85,7 +87,7 @@ class E2EOrderTest {
     OrderPaymentRequest paymentRequest = new OrderPaymentRequest(userId);
 
     CommonResponseWrapper<OrderPaymentResponse> orderPaymentResponseWrapper = RestAssured.given()
-        .basePath("/api/v1/orders/{orderId}/payments")
+        .basePath("/api/v1/payments/{orderId}")
         .pathParam("orderId", orderResponseWrapper.data().orderId())
         .contentType(ContentType.JSON)
         .body(paymentRequest)

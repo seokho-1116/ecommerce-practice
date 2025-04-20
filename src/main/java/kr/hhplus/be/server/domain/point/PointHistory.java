@@ -23,31 +23,28 @@ public class PointHistory extends BaseEntity {
 
   private Long amount;
   private TransactionType transactionType;
-
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+  private Long userId;
 
   @Builder
-  public PointHistory(Long id, Long amount, TransactionType transactionType, User user) {
+  public PointHistory(Long id, Long amount, TransactionType transactionType, Long userId) {
     this.id = id;
     this.amount = amount;
     this.transactionType = transactionType;
-    this.user = user;
+    this.userId = userId;
   }
 
-  public static PointHistory useHistory(User user, long amount) {
+  public static PointHistory useHistory(Long userId, long amount) {
     return PointHistory.builder()
         .amount(amount)
-        .user(user)
+        .userId(userId)
         .transactionType(TransactionType.USE)
         .build();
   }
 
-  public static PointHistory chargeHistory(User user, Long amount) {
+  public static PointHistory chargeHistory(Long userId, Long amount) {
     return PointHistory.builder()
         .amount(amount)
-        .user(user)
+        .userId(userId)
         .transactionType(TransactionType.CHARGE)
         .build();
   }
