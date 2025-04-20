@@ -26,7 +26,7 @@ public class PaymentController implements PaymentControllerSpec {
       @RequestBody @Valid OrderPaymentRequest request
   ) {
     PaymentCommand command = request.toCommand(orderId);
-    PaymentResult paymentResult = paymentFacade.payment(command);
+    PaymentResult paymentResult = paymentFacade.payOrder(command);
 
     OrderPaymentResponse response = OrderPaymentResponse.from(paymentResult);
     return CommonResponseWrapper.ok(response);

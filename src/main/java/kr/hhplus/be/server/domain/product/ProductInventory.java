@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.product;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +24,7 @@ public class ProductInventory extends BaseEntity {
 
   private Long quantity;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_option_id")
   private ProductOption productOption;
 
