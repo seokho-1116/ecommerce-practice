@@ -46,4 +46,9 @@ public class ProductInventory extends BaseEntity {
 
     this.quantity -= quantity;
   }
+
+  public void setupProductOption(ProductOption productOption) {
+    this.productOption = productOption;
+    productOption.setupProductInventory(this);
+  }
 }

@@ -47,4 +47,13 @@ public class ProductOption extends BaseEntity {
     this.additionalPrice = additionalPrice;
     this.product = product;
   }
+
+  public void setupProduct(Product product) {
+    this.product = product;
+    product.getProductOptions().add(this);
+  }
+
+  public void setupProductInventory(ProductInventory productInventory) {
+    this.productInventory = productInventory;
+  }
 }
