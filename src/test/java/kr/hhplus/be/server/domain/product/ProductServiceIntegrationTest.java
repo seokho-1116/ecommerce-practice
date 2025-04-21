@@ -21,7 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ProductServiceIntegrationTest {
 
-  private final ProductTestDataGenerator productTestDataGenerator = new ProductTestDataGenerator();
+  @Autowired
+  private ProductTestDataGenerator productTestDataGenerator;
 
   @Autowired
   private ProductService productService;
