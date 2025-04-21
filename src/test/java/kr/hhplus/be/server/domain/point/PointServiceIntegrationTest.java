@@ -3,30 +3,56 @@ package kr.hhplus.be.server.domain.point;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import kr.hhplus.be.server.common.TestHelpRepository;
+import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 @SpringBootTest
-@Sql(scripts = "classpath:db/point_test_case.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "classpath:db/cleanup.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class PointServiceIntegrationTest {
 
   @Autowired
   private PointService pointService;
 
+  @Autowired
+  private TestHelpRepository testHelpRepository;
+
+  @Autowired
+  private UserTestDataGenerator userTestDataGenerator;
+
+  @Autowired
+  private PointTestDataGenerator pointTestDataGenerator;
+
+  private User user;
+  private UserPoint userPoint;
+
+  private User noPointUser;
+
+  @BeforeEach
+  void setup() {
+    user = userTestDataGenerator.user();
+    testHelpRepository.save(user);
+
+    userPoint = pointTestDataGenerator.userPoint(user.getId());
+    testHelpRepository.save(userPoint);
+
+    noPointUser = userTestDataGenerator.user();
+    testHelpRepository.save(noPointUser);
+  }
+
   @DisplayName("기존 포인트가 없을 때 포인트를 충전하면 현재 포인트에서 충전한 포인트를 더한 값이 반환된다")
   @Test
   void chargeTest() {
     // given
-    long userId = 2L;
+    long noPointUserId = noPointUser.getId();
     long amount = 1000L;
 
     // when
-    long remainingPoint = pointService.charge(userId, amount);
+    long remainingPoint = pointService.charge(noPointUserId, amount);
 
     // then
     assertThat(remainingPoint).isEqualTo(amount);
@@ -36,8 +62,8 @@ class PointServiceIntegrationTest {
   @Test
   void chargeWithExistingPointTest() {
     // given
-    long userId = 1L;
-    long initialAmount = 1000L;
+    long userId = user.getId();
+    long initialAmount = userPoint.getAmount();
     long chargeAmount = 500L;
 
     // when
@@ -51,8 +77,8 @@ class PointServiceIntegrationTest {
   @Test
   void useTest() {
     // given
-    long userId = 1L;
-    long initialAmount = 1000L;
+    long userId = user.getId();
+    long initialAmount = userPoint.getAmount();
     long useAmount = 500L;
 
     // when
@@ -66,11 +92,11 @@ class PointServiceIntegrationTest {
   @Test
   void useWithNoExistingPointTest() {
     // given
-    long userId = 2L;
+    long noPointUserId = noPointUser.getId();
     long useAmount = 500L;
 
     // when & then
-    assertThatThrownBy(() -> pointService.use(userId, useAmount))
+    assertThatThrownBy(() -> pointService.use(noPointUserId, useAmount))
         .isInstanceOf(PointBusinessException.class);
   }
 }
