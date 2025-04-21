@@ -37,7 +37,7 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
   @Autowired
   private CouponTestDataGenerator couponTestDataGenerator;
 
-  private Order order;
+  private Order notPaidOrder;
 
   @BeforeEach
   void setup() {
@@ -61,8 +61,8 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
     List<ProductOption> productOptions = productTestDataGenerator.productOptions(5);
 
     // order
-    order = orderTestDataGenerator.order(user.getId(), OrderStatus.CREATED);
-    testHelpRepository.save(order);
+    notPaidOrder = orderTestDataGenerator.order(user.getId(), OrderStatus.CREATED);
+    testHelpRepository.save(notPaidOrder);
 
     // product inventory
     productOptions.forEach(productOption -> {
@@ -73,8 +73,8 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
       productInventory.setupProductOption(productOption);
       testHelpRepository.save(productInventory);
 
-      OrderItem orderItem = orderTestDataGenerator.orderItem(order, productOption.getId());
-      orderItem.setupOrder(order);
+      OrderItem orderItem = orderTestDataGenerator.orderItem(notPaidOrder, productOption.getId());
+      orderItem.setupOrder(notPaidOrder);
       testHelpRepository.save(orderItem);
     });
   }
@@ -83,8 +83,6 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
   @Test
   void createOrderTest() {
     // given
-    Order notPaidOrder = orderService.findNotPaidOrderById(order.getId());
-
     // when
     orderService.pay(notPaidOrder);
 
@@ -96,7 +94,6 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
   @Test
   void concurrentPayOrderTest() throws InterruptedException {
     // given
-    Order notPaidOrder = orderService.findNotPaidOrderById(order.getId());
     int threadCount = 15;
     CountDownLatch latch = new CountDownLatch(threadCount);
 
