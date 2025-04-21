@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.point;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestHelpRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
@@ -13,13 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class PointServiceIntegrationTest {
+class PointServiceIntegrationTest extends IntegrationTestSupport {
 
   @Autowired
   private PointService pointService;
-
-  @Autowired
-  private TestHelpRepository testHelpRepository;
 
   @Autowired
   private UserTestDataGenerator userTestDataGenerator;
