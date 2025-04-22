@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.product.ProductBusinessException.ProductIllegalStateException;
@@ -27,7 +28,7 @@ public class Product extends BaseEntity {
   private Long basePrice;
 
   @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-  private List<ProductOption> productOptions;
+  private List<ProductOption> productOptions = new ArrayList<>();
 
   @Builder
   public Product(Long id, String name, String description, Long basePrice) {

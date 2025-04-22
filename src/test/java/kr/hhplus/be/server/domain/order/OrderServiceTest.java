@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.order;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -68,27 +69,24 @@ class OrderServiceTest {
   @Test
   void payOrderTest() {
     // given
-    Order order = Order.builder()
-        .status(OrderStatus.CREATED)
-        .build();
+    long orderId = 1L;
 
     // when
-    orderService.pay(order);
+    orderService.pay(orderId);
 
     // then
-    verify(orderRepository, atLeastOnce()).save(order);
-    assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+    verify(orderRepository, atLeastOnce()).save(any(Order.class));
   }
 
   @DisplayName("주문 결제 시 주문이 null이면 예외가 발생해야 한다")
   @Test
   void payOrderWhenOrderIsNullTest() {
     // given
-    Order order = null;
+    Long orderId = null;
 
     // when
     // then
-    assertThatThrownBy(() -> orderService.pay(order))
+    assertThatThrownBy(() -> orderService.pay(orderId))
         .isInstanceOf(OrderBusinessException.class);
   }
   

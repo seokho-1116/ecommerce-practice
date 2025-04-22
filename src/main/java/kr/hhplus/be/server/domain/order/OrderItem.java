@@ -87,5 +87,6 @@ public class OrderItem extends BaseEntity {
 
   public void setupOrder(Order order) {
     this.order = order;
+    order.getOrderItems().add(this);
   }
 }

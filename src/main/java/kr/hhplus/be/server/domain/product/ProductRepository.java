@@ -2,8 +2,8 @@ package kr.hhplus.be.server.domain.product;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 
 public interface ProductRepository {
 
@@ -13,10 +13,12 @@ public interface ProductRepository {
 
   void saveAll(List<ProductInventory> productInventories);
 
-  List<ProductWithRank> findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
+  List<ProductIdWithRank> findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
       LocalDateTime from,
       LocalDateTime to
   );
 
   List<ProductWithQuantity> findAll();
+
+  List<Product> findAllByIdIn(List<Long> productIds);
 }
