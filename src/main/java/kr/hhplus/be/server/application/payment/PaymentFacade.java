@@ -31,7 +31,7 @@ public class PaymentFacade {
 
       long remainingPoint = pointService.use(paymentCommand.userId(), order.getFinalPrice());
 
-      orderService.pay(order);
+      orderService.pay(order.getId());
       return PaymentResult.of(order, remainingPoint);
     });
 

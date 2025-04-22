@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -9,6 +10,7 @@ import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponTestDataGenerator;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
+import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
@@ -83,17 +85,21 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
   @Test
   void createOrderTest() {
     // given
+    long notPaidOrderId = notPaidOrder.getId();
+
     // when
-    orderService.pay(notPaidOrder);
+    orderService.pay(notPaidOrderId);
 
     // then
-    assertThat(notPaidOrder.getStatus()).isEqualTo(OrderStatus.PAID);
+    assertThatThrownBy(() -> orderService.findNotPaidOrderById(notPaidOrderId))
+        .isInstanceOf(OrderNotFoundException.class);
   }
 
   @DisplayName("동시에 주문 결제를 요청하면 하나만 결제된다")
   @Test
   void concurrentPayOrderTest() throws InterruptedException {
     // given
+    Long notPaidOrderId = notPaidOrder.getId();
     int threadCount = 15;
     CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -103,7 +109,7 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
     for (int i = 0; i < threadCount; i++) {
       new Thread(() -> {
         try {
-          orderService.pay(notPaidOrder);
+          orderService.pay(notPaidOrderId);
           successCount.incrementAndGet();
         } catch (Exception e) {
           failedCount.incrementAndGet();
