@@ -36,4 +36,13 @@ public class ProductTestDataGenerator {
         .ignore(field(ProductInventory::getUpdatedAt))
         .create();
   }
+
+  public ProductOption productOption() {
+    return Instancio.of(ProductOption.class)
+        .ignore(field(ProductOption::getId))
+        .set(field(Product::getIsActive), true)
+        .ignore(field(ProductOption::getCreatedAt))
+        .ignore(field(ProductOption::getUpdatedAt))
+        .create();
+  }
 }

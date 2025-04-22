@@ -3,8 +3,13 @@ package kr.hhplus.be.server.domain.product;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
@@ -24,6 +29,9 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
   @Autowired
   private ProductService productService;
 
+  private final List<ProductOption> productOptions = new ArrayList<>();
+  private ProductOption limitedQuantityProductOption;
+
   @BeforeEach
   void setup() {
     Product product = productTestDataGenerator.product();
@@ -34,8 +42,10 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     for (ProductOption option : productOption) {
       option.setupProduct(product);
       testHelpRepository.save(option);
+      productOptions.add(option);
 
       ProductInventory productInventory = productTestDataGenerator.productInventory();
+      TestReflectionUtil.setField(productInventory, "quantity", 100L);
       productInventory.setupProductOption(option);
       testHelpRepository.save(productInventory);
 
@@ -43,6 +53,18 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
       TestReflectionUtil.setField(orderItem, "createdAt", LocalDateTime.now().minusDays(2));
       testHelpRepository.save(orderItem);
     }
+
+    saveProductOptionAndInventory(product);
+  }
+
+  private void saveProductOptionAndInventory(Product product) {
+    limitedQuantityProductOption = productTestDataGenerator.productOption();
+    limitedQuantityProductOption.setupProduct(product);
+    testHelpRepository.save(limitedQuantityProductOption);
+
+    ProductInventory productInventory = productTestDataGenerator.productInventory();
+    TestReflectionUtil.setField(productInventory, "quantity", 10L);
+    productInventory.setupProductOption(limitedQuantityProductOption);
   }
 
   @DisplayName("상위 상품 조회 시 이전 3일동안 가장 많이 팔린 상품이 순위로 정렬되어 조회된다")
@@ -56,5 +78,76 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     assertThat(top5SellingProducts.topSellingProducts())
         .isNotEmpty()
         .isSortedAccordingTo(Comparator.comparing(ProductWithRank::rank));
+  }
+
+  @DisplayName("동시에 재고를 차감하면 차감 요청 수만큼 차감된다")
+  @Test
+  void reduceStockTest() throws InterruptedException {
+    // given
+    int concurrentRequest = 10;
+    long quantity = 5L;
+    Map<Long, Long> productOptionIdToAmount = productOptions.stream()
+        .collect(Collectors.toMap(ProductOption::getId, productOption -> quantity));
+    CountDownLatch latch = new CountDownLatch(concurrentRequest);
+
+    // when
+    AtomicInteger successCount = new AtomicInteger(0);
+    AtomicInteger failureCount = new AtomicInteger(0);
+    for (int i = 0; i < concurrentRequest; i++) {
+      new Thread(() -> {
+        try {
+          ProductDeductCommand productDeductCommand = new ProductDeductCommand(
+              productOptionIdToAmount);
+          productService.deductInventory(productDeductCommand);
+
+          successCount.incrementAndGet();
+        } catch (Exception e) {
+          failureCount.incrementAndGet();
+        } finally {
+          latch.countDown();
+        }
+      }).start();
+    }
+
+    latch.await();
+
+    // then
+    assertThat(successCount.get()).isEqualTo(concurrentRequest);
+    assertThat(failureCount.get()).isZero();
+  }
+
+  @DisplayName("한정된 재고를 대상으로 동시에 재고를 차감하면 재고만큼만 재고 차감에 성공하고 나머지는 실패한다")
+  @Test
+  void limitedQuantityReduceStockTest() throws InterruptedException {
+    // given
+    Map<Long, Long> productOptionIdToAmount = Map.of(limitedQuantityProductOption.getId(),
+        limitedQuantityProductOption.getProductInventory().getQuantity());
+    int concurrentRequest = 10;
+    CountDownLatch latch = new CountDownLatch(concurrentRequest);
+
+    // when
+    AtomicInteger successCount = new AtomicInteger(0);
+    AtomicInteger failureCount = new AtomicInteger(0);
+    for (int i = 0; i < concurrentRequest; i++) {
+      new Thread(() -> {
+        try {
+          ProductDeductCommand productDeductCommand = new ProductDeductCommand(
+              productOptionIdToAmount);
+          productService.deductInventory(productDeductCommand);
+
+          successCount.incrementAndGet();
+        } catch (Exception e) {
+          failureCount.incrementAndGet();
+        } finally {
+          latch.countDown();
+        }
+      }).start();
+    }
+
+    latch.await();
+
+    // then
+    assertThat(successCount.get()).isEqualTo(1);
+    assertThat(failureCount.get()).isEqualTo(concurrentRequest - 1);
   }
 }
