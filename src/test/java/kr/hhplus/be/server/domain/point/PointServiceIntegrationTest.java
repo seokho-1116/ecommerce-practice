@@ -98,11 +98,11 @@ class PointServiceIntegrationTest extends IntegrationTestSupport {
         .isInstanceOf(PointBusinessException.class);
   }
 
-  @DisplayName("동시에 포인트를 충전하면 포인트가 수량만큼만 충전된다")
+  @DisplayName("동시에 포인트를 충전하면 포인트가 첫 요청만 충전된다")
   @Test
   void concurrentChargeTest() throws InterruptedException {
     // given
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
     long amount = 1000L;
     long userId = user.getId();
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
@@ -112,6 +112,8 @@ class PointServiceIntegrationTest extends IntegrationTestSupport {
       new Thread(() -> {
         try {
           pointService.charge(userId, amount);
+        } catch (Exception ignore){
+          // ignore
         } finally {
           latch.countDown();
         }
@@ -121,14 +123,14 @@ class PointServiceIntegrationTest extends IntegrationTestSupport {
 
     // then
     UserPoint result = pointService.findUserPointByUserId(userId);
-    assertThat(result.getAmount()).isEqualTo(userPoint.getAmount() + (amount * concurrentRequest));
+    assertThat(result.getAmount()).isEqualTo(userPoint.getAmount() + amount);
   }
 
-  @DisplayName("동시에 포인트를 사용하면 포인트가 수량만큼만 사용된다")
+  @DisplayName("동시에 포인트를 사용하면 첫 요청만 사용된다")
   @Test
   void concurrentUseTest() throws InterruptedException {
     // given
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
     long amount = 1000L;
     long userId = user.getId();
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
@@ -138,6 +140,8 @@ class PointServiceIntegrationTest extends IntegrationTestSupport {
       new Thread(() -> {
         try {
           pointService.use(userId, amount);
+        } catch (Exception ignore) {
+          // ignore
         } finally {
           latch.countDown();
         }
@@ -147,6 +151,6 @@ class PointServiceIntegrationTest extends IntegrationTestSupport {
 
     // then
     UserPoint result = pointService.findUserPointByUserId(userId);
-    assertThat(result.getAmount()).isEqualTo(userPoint.getAmount() - (amount * concurrentRequest));
+    assertThat(result.getAmount()).isEqualTo(userPoint.getAmount() - amount);
   }
 }

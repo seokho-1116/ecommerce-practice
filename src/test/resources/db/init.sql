@@ -127,6 +127,7 @@ create table user_point
     created_at datetime null,
     updated_at datetime null,
     amount     bigint   null,
-    user_id    bigint   null
+    user_id    bigint   null,
+    version    bigint   null
 );
 

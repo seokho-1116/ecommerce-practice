@@ -13,6 +13,7 @@ public class PointTestDataGenerator {
         .ignore(field(UserPoint::getId))
         .set(field(UserPoint::getIsActive), true)
         .set(field(UserPoint::getUserId), userId)
+        .set(field(UserPoint::getVersion), 1L)
         .ignore(field(UserPoint::getCreatedAt))
         .ignore(field(UserPoint::getUpdatedAt))
         .create();
