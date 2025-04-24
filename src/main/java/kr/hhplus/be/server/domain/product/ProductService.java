@@ -34,7 +34,7 @@ public class ProductService {
     }
 
     List<Long> productOptionIds = productDeductCommand.productOptionIds();
-    List<ProductInventory> productInventories = productRepository.findProductInventoriesByProductOptionIds(
+    List<ProductInventory> productInventories = productRepository.findProductInventoriesForUpdateByProductOptionIds(
         productOptionIds);
 
     for (ProductInventory productInventory : productInventories) {

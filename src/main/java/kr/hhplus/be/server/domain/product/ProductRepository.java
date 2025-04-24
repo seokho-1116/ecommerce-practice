@@ -9,7 +9,7 @@ public interface ProductRepository {
 
   List<Product> findAllByProductOptionIds(List<Long> productIds);
 
-  List<ProductInventory> findProductInventoriesByProductOptionIds(List<Long> productOptionIds);
+  List<ProductInventory> findProductInventoriesForUpdateByProductOptionIds(List<Long> productOptionIds);
 
   void saveAll(List<ProductInventory> productInventories);
 

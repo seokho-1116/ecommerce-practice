@@ -24,9 +24,10 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public List<ProductInventory> findProductInventoriesByProductOptionIds(
+  public List<ProductInventory> findProductInventoriesForUpdateByProductOptionIds(
       List<Long> productOptionIds) {
-    return productInventoryJpaRepository.findProductInventoriesByProductOptionIdIn(productOptionIds);
+    return productInventoryJpaRepository.findProductInventoriesForUpdateByProductOptionIdIn(
+        productOptionIds);
   }
 
   @Override
