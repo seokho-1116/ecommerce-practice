@@ -26,7 +26,8 @@ public record ProductDto() {
 
   public record ProductIdWithRank(
       Long rank,
-      Long productId
+      Long productId,
+      Long sumOfSellingAmount
   ) {
 
   }
