@@ -26,7 +26,8 @@ create table `order`
     discount_price bigint   null,
     final_price    bigint   null,
     status         varchar(30) null,
-    user_id        bigint   null
+    user_id        bigint   null,
+    version       bigint   null
 );
 
 create table order_item

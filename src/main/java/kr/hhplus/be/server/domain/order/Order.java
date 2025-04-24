@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import java.util.ArrayList;
 import java.util.List;
 import kr.hhplus.be.server.domain.BaseEntity;
@@ -35,6 +36,9 @@ public class Order extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
   private Long userId;
+
+  @Version
+  private Long version;
 
   @OneToMany(mappedBy = "order", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<OrderItem> orderItems = new ArrayList<>();

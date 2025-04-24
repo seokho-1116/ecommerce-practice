@@ -13,6 +13,7 @@ public class OrderTestDataGenerator {
         .ignore(field(Order::getId))
         .set(field(Order::getUserId), userId)
         .set(field(Order::getIsActive), true)
+        .set(field(Order::getVersion), 1L)
         .ignore(field(Order::getCreatedAt))
         .ignore(field(Order::getUpdatedAt))
         .set(field(Order::getStatus), orderStatus)
