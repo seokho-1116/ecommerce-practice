@@ -98,4 +98,21 @@ public class ProductService {
   public List<ProductWithQuantity> findAllProducts() {
     return productRepository.findAll();
   }
+
+  public void saveTop5SellingProductsBefore(LocalDateTime from, LocalDateTime to) {
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+        from, to);
+
+    List<ProductSellingRankView> productSellingRankViews = productIdWithRanks.stream()
+        .map(productIdWithRank -> ProductSellingRankView.builder()
+            .productId(productIdWithRank.productId())
+            .sumOfSellingAmount(productIdWithRank.sumOfSellingAmount())
+            .rank(productIdWithRank.rank())
+            .from(from)
+            .to(to)
+            .build())
+        .toList();
+
+    productRepository.saveAllRankingViews(productSellingRankViews);
+  }
 }
