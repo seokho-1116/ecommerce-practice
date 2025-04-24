@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces;
+package kr.hhplus.be.server.interfaces.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
