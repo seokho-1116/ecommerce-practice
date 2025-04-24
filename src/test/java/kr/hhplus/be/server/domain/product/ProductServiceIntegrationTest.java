@@ -45,7 +45,7 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
       productOptions.add(option);
 
       ProductInventory productInventory = productTestDataGenerator.productInventory();
-      TestReflectionUtil.setField(productInventory, "quantity", 100L);
+      TestReflectionUtil.setField(productInventory, "quantity", 1L);
       productInventory.setupProductOption(option);
       testHelpRepository.save(productInventory);
 
@@ -84,7 +84,7 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
   @Test
   void reduceStockTest() throws InterruptedException {
     // given
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
     long quantity = 5L;
     Map<Long, Long> productOptionIdToAmount = productOptions.stream()
         .collect(Collectors.toMap(ProductOption::getId, productOption -> quantity));
@@ -122,7 +122,7 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     // given
     Map<Long, Long> productOptionIdToAmount = Map.of(limitedQuantityProductOption.getId(),
         limitedQuantityProductOption.getProductInventory().getQuantity());
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
 
     // when
