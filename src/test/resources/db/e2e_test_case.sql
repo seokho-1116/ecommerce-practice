@@ -17,4 +17,4 @@ INSERT INTO coupon (id, name, description, discount_rate, discount_amount, quant
                                                                                                                     (1, '할인 쿠폰', '정액 쿠폰', null, 1000, null, 'FIXED', NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 1 DAY);
 
 -- 5. UserCoupon
-INSERT INTO user_coupon (id, user_id, coupon_id) VALUES (1, 1, 1);
+INSERT INTO user_coupon (id, user_id, coupon_id, version) VALUES (1, 1, 1, 1);
