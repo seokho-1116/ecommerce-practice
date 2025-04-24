@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.coupon;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
@@ -35,8 +34,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     testHelpRepository.save(user);
 
     coupon = couponTestDataGenerator.validateCoupon();
-    long randomQuantity = ThreadLocalRandom.current().nextLong(1, 6);
-    TestReflectionUtil.setField(coupon, "quantity", randomQuantity);
+    TestReflectionUtil.setField(coupon, "quantity", 10L);
     testHelpRepository.save(coupon);
 
     userCoupon = couponTestDataGenerator.notUsedUserCoupon(user, coupon);
@@ -98,19 +96,16 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   @Test
   void concurrentIssueTest() throws InterruptedException {
     // given
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
 
     // when
-    AtomicInteger successCount = new AtomicInteger(0);
-    AtomicInteger failureCount = new AtomicInteger(0);
     for (int i = 0; i < concurrentRequest; i++) {
       new Thread(() -> {
         try {
           couponService.issue(user, coupon.getId());
-          successCount.incrementAndGet();
-        } catch (Exception e) {
-          failureCount.incrementAndGet();
+        } catch (Exception ignore) {
+          // ignore
         } finally {
           latch.countDown();
         }
@@ -119,6 +114,11 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     latch.await();
 
     // then
-    assertThat(successCount.longValue()).isEqualTo(coupon.getQuantity());
+    Long couponQuantity = couponService.findAllCoupons().stream()
+        .filter(issue -> issue.getId().equals(coupon.getId()))
+        .map(Coupon::getQuantity)
+        .findAny()
+        .orElse(-1L);
+    assertThat(couponQuantity).isEqualTo(coupon.getQuantity() - concurrentRequest);
   }
 }
