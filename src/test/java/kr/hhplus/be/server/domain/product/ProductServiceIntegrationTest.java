@@ -34,6 +34,16 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
   @BeforeEach
   void setup() {
+    for (int i = 0; i < 5; i++) {
+      saveProductAndRelated();
+    }
+
+    Product product = saveProductAndRelated();
+
+    saveProductOptionAndInventory(product);
+  }
+
+  private Product saveProductAndRelated() {
     Product product = productTestDataGenerator.product();
     testHelpRepository.save(product);
 
@@ -50,11 +60,11 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
       testHelpRepository.save(productInventory);
 
       OrderItem orderItem = OrderItem.create(new ProductAmountPair(product, option, 1L));
-      TestReflectionUtil.setField(orderItem, "createdAt", LocalDateTime.now().minusDays(2));
+      TestReflectionUtil.setField(orderItem, "createdAt",
+          LocalDateTime.now().minusDays(1).minusMinutes(30));
       testHelpRepository.save(orderItem);
     }
-
-    saveProductOptionAndInventory(product);
+    return product;
   }
 
   private void saveProductOptionAndInventory(Product product) {
@@ -72,6 +82,10 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
   @Test
   void getTopSellingProducts() {
     // given
+    LocalDateTime from = LocalDateTime.now().minusDays(1).minusHours(1);
+    LocalDateTime to = LocalDateTime.now().minusDays(1);
+    productService.saveTop5SellingProductsBefore(from, to);
+
     // when
     Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
 
@@ -193,5 +207,20 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     // then
     assertThat(successCount.get()).isEqualTo(1);
     assertThat(failureCount.get()).isEqualTo(1);
+  }
+
+  @DisplayName("이전 1시간 동안 판매된 상품을 기준으로 상위 5개 상품을 저장한다")
+  @Test
+  void saveTop5SellingProductsBefore() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusDays(1).minusHours(1);
+    LocalDateTime to = LocalDateTime.now().minusDays(1);
+
+    // when
+    productService.saveTop5SellingProductsBefore(from, to);
+
+    // then
+    Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
+    assertThat(top5SellingProducts.topSellingProducts()).isNotEmpty();
   }
 }
