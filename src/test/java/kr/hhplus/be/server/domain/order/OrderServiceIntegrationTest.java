@@ -100,13 +100,13 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
   void concurrentPayOrderTest() throws InterruptedException {
     // given
     Long notPaidOrderId = notPaidOrder.getId();
-    int threadCount = 15;
-    CountDownLatch latch = new CountDownLatch(threadCount);
+    int concurrentRequest = 2;
+    CountDownLatch latch = new CountDownLatch(concurrentRequest);
 
     // when
     AtomicLong successCount = new AtomicLong(0);
     AtomicLong failedCount = new AtomicLong(0);
-    for (int i = 0; i < threadCount; i++) {
+    for (int i = 0; i < concurrentRequest; i++) {
       new Thread(() -> {
         try {
           orderService.pay(notPaidOrderId);

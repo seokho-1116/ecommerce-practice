@@ -12,6 +12,11 @@ public interface ProductRepository {
   List<ProductInventory> findProductInventoriesForUpdateByProductOptionIds(List<Long> productOptionIds);
 
   void saveAll(List<ProductInventory> productInventories);
+  
+  List<ProductIdWithRank> findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+      LocalDateTime from,
+      LocalDateTime to
+  );
 
   List<ProductIdWithRank> findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
       LocalDateTime from,
@@ -21,4 +26,6 @@ public interface ProductRepository {
   List<ProductWithQuantity> findAll();
 
   List<Product> findAllByIdIn(List<Long> productIds);
+
+  void saveAllRankingViews(List<ProductSellingRankView> productSellingRankViews);
 }
