@@ -141,7 +141,7 @@ create table product_selling_rank_view(
     updated_at  datetime     null,
     product_id  bigint       null,
     `rank`        bigint       null,
-    sum_of_selling_amount bigint       null,
+    total_sales bigint       null,
     `from`       datetime     null,
     `to`         datetime     null
 );

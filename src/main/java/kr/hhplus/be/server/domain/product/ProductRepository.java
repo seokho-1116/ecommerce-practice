@@ -13,12 +13,12 @@ public interface ProductRepository {
 
   void saveAll(List<ProductInventory> productInventories);
   
-  List<ProductIdWithRank> findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+  List<ProductIdWithRank> findTop5SellingProducts(
       LocalDateTime from,
       LocalDateTime to
   );
 
-  List<ProductIdWithRank> findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
+  List<ProductIdWithRank> findTop5SellingProductsFromRankView(
       LocalDateTime from,
       LocalDateTime to
   );

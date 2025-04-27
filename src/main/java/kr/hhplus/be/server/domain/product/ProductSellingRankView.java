@@ -20,17 +20,17 @@ public class ProductSellingRankView extends BaseEntity {
   private Long id;
 
   private Long productId;
-  private Long sumOfSellingAmount;
+  private Long totalSales;
   private Long rank;
   private LocalDateTime from;
   private LocalDateTime to;
 
   @Builder
-  public ProductSellingRankView(Long id, Long productId, Long sumOfSellingAmount, Long rank,
+  public ProductSellingRankView(Long id, Long productId, Long totalSales, Long rank,
       LocalDateTime from, LocalDateTime to) {
     this.id = id;
     this.productId = productId;
-    this.sumOfSellingAmount = sumOfSellingAmount;
+    this.totalSales = totalSales;
     this.rank = rank;
     this.from = from;
     this.to = to;

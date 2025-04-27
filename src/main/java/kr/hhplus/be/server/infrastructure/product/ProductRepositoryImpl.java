@@ -38,16 +38,16 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public List<ProductIdWithRank> findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+  public List<ProductIdWithRank> findTop5SellingProducts(
       LocalDateTime from, LocalDateTime to) {
-    return productCustomRepository.findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+    return productCustomRepository.findTop5SellingProducts(
         from, to);
   }
 
   @Override
-  public List<ProductIdWithRank> findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
+  public List<ProductIdWithRank> findTop5SellingProductsFromRankView(
       LocalDateTime from, LocalDateTime to) {
-    return productCustomRepository.findTop5SellingProductsFromRankViewByBetweenFromToOrderBySellingAmount(
+    return productCustomRepository.findTop5SellingProductsFromRankView(
         from, to);
   }
 
