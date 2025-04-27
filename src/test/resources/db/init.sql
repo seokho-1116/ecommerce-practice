@@ -116,7 +116,8 @@ create table user_coupon
     updated_at datetime null,
     is_used    bit      null,
     coupon_id  bigint   null,
-    user_id    bigint   null
+    user_id    bigint   null,
+    version    bigint   null
 );
 
 create table user_point

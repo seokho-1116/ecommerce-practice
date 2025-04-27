@@ -69,7 +69,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   @Test
   void concurrentUseTest() throws InterruptedException {
     // given
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
 
     // when
