@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductRepository;
+import kr.hhplus.be.server.domain.product.ProductSellingRankView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +18,7 @@ public class ProductRepositoryImpl implements ProductRepository {
   private final ProductJpaRepository productJpaRepository;
   private final ProductCustomRepository productCustomRepository;
   private final ProductInventoryJpaRepository productInventoryJpaRepository;
+  private final ProductSellingRankingViewJpaRepository productSellingRankingViewJpaRepository;
 
   @Override
   public List<Product> findAllByProductOptionIds(List<Long> productIds) {
@@ -24,9 +26,10 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public List<ProductInventory> findProductInventoriesByProductOptionIds(
+  public List<ProductInventory> findProductInventoriesForUpdateByProductOptionIds(
       List<Long> productOptionIds) {
-    return productInventoryJpaRepository.findProductInventoriesByProductOptionIdIn(productOptionIds);
+    return productInventoryJpaRepository.findProductInventoriesForUpdateByProductOptionIdIn(
+        productOptionIds);
   }
 
   @Override
@@ -35,9 +38,16 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
+  public List<ProductIdWithRank> findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+      LocalDateTime from, LocalDateTime to) {
+    return productCustomRepository.findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+        from, to);
+  }
+
+  @Override
   public List<ProductIdWithRank> findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
       LocalDateTime from, LocalDateTime to) {
-    return productCustomRepository.findTop5SellingProductIdsByBetweenCreatedTsOrderByAmount(
+    return productCustomRepository.findTop5SellingProductsFromRankViewByBetweenFromToOrderBySellingAmount(
         from, to);
   }
 
@@ -53,5 +63,10 @@ public class ProductRepositoryImpl implements ProductRepository {
   @Override
   public List<Product> findAllByIdIn(List<Long> productIds) {
     return productJpaRepository.findAllFetchedByIdIn(productIds);
+  }
+
+  @Override
+  public void saveAllRankingViews(List<ProductSellingRankView> productSellingRankViews) {
+    productSellingRankingViewJpaRepository.saveAll(productSellingRankViews);
   }
 }

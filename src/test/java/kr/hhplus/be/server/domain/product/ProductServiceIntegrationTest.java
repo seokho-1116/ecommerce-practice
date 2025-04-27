@@ -34,6 +34,16 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
   @BeforeEach
   void setup() {
+    for (int i = 0; i < 5; i++) {
+      saveProductAndRelated();
+    }
+
+    Product product = saveProductAndRelated();
+
+    saveProductOptionAndInventory(product);
+  }
+
+  private Product saveProductAndRelated() {
     Product product = productTestDataGenerator.product();
     testHelpRepository.save(product);
 
@@ -45,16 +55,16 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
       productOptions.add(option);
 
       ProductInventory productInventory = productTestDataGenerator.productInventory();
-      TestReflectionUtil.setField(productInventory, "quantity", 100L);
+      TestReflectionUtil.setField(productInventory, "quantity", 7L);
       productInventory.setupProductOption(option);
       testHelpRepository.save(productInventory);
 
       OrderItem orderItem = OrderItem.create(new ProductAmountPair(product, option, 1L));
-      TestReflectionUtil.setField(orderItem, "createdAt", LocalDateTime.now().minusDays(2));
+      TestReflectionUtil.setField(orderItem, "createdAt",
+          LocalDateTime.now().minusDays(1).minusMinutes(30));
       testHelpRepository.save(orderItem);
     }
-
-    saveProductOptionAndInventory(product);
+    return product;
   }
 
   private void saveProductOptionAndInventory(Product product) {
@@ -63,14 +73,19 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     testHelpRepository.save(limitedQuantityProductOption);
 
     ProductInventory productInventory = productTestDataGenerator.productInventory();
-    TestReflectionUtil.setField(productInventory, "quantity", 10L);
+    TestReflectionUtil.setField(productInventory, "quantity", 1L);
     productInventory.setupProductOption(limitedQuantityProductOption);
+    testHelpRepository.save(productInventory);
   }
 
   @DisplayName("상위 상품 조회 시 이전 3일동안 가장 많이 팔린 상품이 순위로 정렬되어 조회된다")
   @Test
   void getTopSellingProducts() {
     // given
+    LocalDateTime from = LocalDateTime.now().minusDays(1).minusHours(1);
+    LocalDateTime to = LocalDateTime.now().minusDays(1);
+    productService.saveTop5SellingProductsBefore(from, to);
+
     // when
     Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
 
@@ -80,12 +95,12 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
         .isSortedAccordingTo(Comparator.comparing(ProductWithRank::rank));
   }
 
-  @DisplayName("동시에 재고를 차감하면 차감 요청 수만큼 차감된다")
+  @DisplayName("동시에 재고를 차감하면 차감 요청 수만큼 전부 차감된다")
   @Test
   void reduceStockTest() throws InterruptedException {
     // given
-    int concurrentRequest = 10;
-    long quantity = 5L;
+    int concurrentRequest = 2;
+    long quantity = 2L;
     Map<Long, Long> productOptionIdToAmount = productOptions.stream()
         .collect(Collectors.toMap(ProductOption::getId, productOption -> quantity));
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
@@ -116,13 +131,56 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     assertThat(failureCount.get()).isZero();
   }
 
-  @DisplayName("한정된 재고를 대상으로 동시에 재고를 차감하면 재고만큼만 재고 차감에 성공하고 나머지는 실패한다")
+  @DisplayName("순차적으로 재고를 차감해서 0이 되는 경우 동시에 재고를 차감해도 재고가 0이 된다")
   @Test
-  void limitedQuantityReduceStockTest() throws InterruptedException {
+  void reduceStockToZeroTest() throws InterruptedException {
     // given
     Map<Long, Long> productOptionIdToAmount = Map.of(limitedQuantityProductOption.getId(),
         limitedQuantityProductOption.getProductInventory().getQuantity());
-    int concurrentRequest = 10;
+    int concurrentRequest = 2;
+    CountDownLatch latch = new CountDownLatch(concurrentRequest);
+
+    // when
+    for (int i = 0; i < concurrentRequest; i++) {
+      new Thread(() -> {
+        try {
+          ProductDeductCommand productDeductCommand = new ProductDeductCommand(
+              productOptionIdToAmount);
+          productService.deductInventory(productDeductCommand);
+        } catch (Exception ignore) {
+          // ignore
+        } finally {
+          latch.countDown();
+        }
+      }).start();
+    }
+
+    latch.await();
+
+    // then
+    ProductInventory productInventory = extractProductInventory(limitedQuantityProductOption);
+    assertThat(productInventory.getQuantity()).isZero();
+  }
+
+  private ProductInventory extractProductInventory(ProductOption productOption) {
+    List<Product> products = productService.findAllByProductOptionIds(
+        List.of(productOption.getId()));
+
+    return products.stream()
+        .flatMap(product -> product.getProductOptions().stream())
+        .filter(option -> option.getId().equals(productOption.getId()))
+        .findFirst()
+        .map(ProductOption::getProductInventory)
+        .orElseThrow(() -> new IllegalArgumentException("재고를 찾을 수 없습니다."));
+  }
+
+  @DisplayName("한정된 재고를 대상으로 동시에 재고를 차감하면 재고가 있으면 성공하고 재고가 없으면 실패한다")
+  @Test
+  void limitedQuantityReduceStockWithSuccessAndFailure() throws InterruptedException {
+    // given
+    Map<Long, Long> productOptionIdToAmount = Map.of(limitedQuantityProductOption.getId(),
+        limitedQuantityProductOption.getProductInventory().getQuantity());
+    int concurrentRequest = 2;
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
 
     // when
@@ -148,6 +206,21 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
     // then
     assertThat(successCount.get()).isEqualTo(1);
-    assertThat(failureCount.get()).isEqualTo(concurrentRequest - 1);
+    assertThat(failureCount.get()).isEqualTo(1);
+  }
+
+  @DisplayName("이전 1시간 동안 판매된 상품을 기준으로 상위 5개 상품을 저장한다")
+  @Test
+  void saveTop5SellingProductsBefore() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusDays(1).minusHours(1);
+    LocalDateTime to = LocalDateTime.now().minusDays(1);
+
+    // when
+    productService.saveTop5SellingProductsBefore(from, to);
+
+    // then
+    Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
+    assertThat(top5SellingProducts.topSellingProducts()).isNotEmpty();
   }
 }

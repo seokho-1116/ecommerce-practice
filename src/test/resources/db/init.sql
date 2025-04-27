@@ -26,7 +26,8 @@ create table `order`
     discount_price bigint   null,
     final_price    bigint   null,
     status         varchar(30) null,
-    user_id        bigint   null
+    user_id        bigint   null,
+    version       bigint   null
 );
 
 create table order_item
@@ -132,3 +133,15 @@ create table user_point
     version    bigint   null
 );
 
+create table product_selling_rank_view(
+    id          bigint auto_increment
+        primary key,
+    is_active   bit          null,
+    created_at  datetime     null,
+    updated_at  datetime     null,
+    product_id  bigint       null,
+    `rank`        bigint       null,
+    sum_of_selling_amount bigint       null,
+    `from`       datetime     null,
+    `to`         datetime     null
+);

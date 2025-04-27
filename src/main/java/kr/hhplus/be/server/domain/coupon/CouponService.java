@@ -26,10 +26,12 @@ public class CouponService {
 
   @Transactional
   public UserCoupon issue(User user, Long couponId) {
-    Coupon coupon = couponRepository.findById(couponId)
+    Coupon coupon = couponRepository.findForUpdateById(couponId)
         .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
 
     UserCoupon userCoupon = coupon.issue(user);
+    couponRepository.save(coupon);
+
     return couponRepository.saveUserCoupon(userCoupon);
   }
 
