@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponIllegalStateException;
@@ -27,6 +28,9 @@ public class UserCoupon extends BaseEntity {
   private Long id;
 
   private Boolean isUsed;
+
+  @Version
+  private Long version;
 
   @ManyToOne
   @JoinColumn(name = "coupon_id")
