@@ -53,7 +53,7 @@ public class ProductService {
     LocalDate now = LocalDate.now();
     LocalDateTime from = now.minusDays(3).atStartOfDay();
     LocalDateTime to = now.minusDays(1).atTime(LocalTime.MAX);
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsByBetweenCreatedTsOrderBySellingRanking(
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(
         from,
         to
     );
@@ -100,13 +100,13 @@ public class ProductService {
   }
 
   public void saveTop5SellingProductsBefore(LocalDateTime from, LocalDateTime to) {
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsForBatchByBetweenCreatedTsOrderByAmount(
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProducts(
         from, to);
 
     List<ProductSellingRankView> productSellingRankViews = productIdWithRanks.stream()
         .map(productIdWithRank -> ProductSellingRankView.builder()
             .productId(productIdWithRank.productId())
-            .sumOfSellingAmount(productIdWithRank.sumOfSellingAmount())
+            .totalSales(productIdWithRank.totalSales())
             .rank(productIdWithRank.rank())
             .from(from)
             .to(to)
