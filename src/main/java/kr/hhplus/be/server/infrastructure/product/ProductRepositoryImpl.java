@@ -28,8 +28,11 @@ public class ProductRepositoryImpl implements ProductRepository {
   @Override
   public List<ProductInventory> findProductInventoriesForUpdateByProductOptionIds(
       List<Long> productOptionIds) {
-    return productInventoryJpaRepository.findProductInventoriesForUpdateByProductOptionIdIn(
-        productOptionIds);
+    List<Long> sorted = productOptionIds.stream()
+        .sorted()
+        .toList();
+
+    return productInventoryJpaRepository.findProductInventoriesForUpdateByProductOptionIdIn(sorted);
   }
 
   @Override
