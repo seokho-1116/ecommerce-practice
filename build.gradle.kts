@@ -37,9 +37,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // Redis
-    implementation("org.springframework.boot:spring-boot-starter-redis")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("io.lettuce:lettuce-core:6.5.5.RELEASE")
-    implementation("org.redisson:redisson:3.46.0")
+    implementation("org.redisson:redisson-spring-boot-starter:3.46.0")
 
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
