@@ -14,16 +14,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DistributeLockImpl implements LockTemplate {
 
-  private static final String LOCK_KEY_PREFIX = "lock:";
-
   private final RedissonClient redissonClient;
 
   @Override
   public <T> T execute(Supplier<T> supplier, LockCommand lockCommand) {
-    List<String> keys = lockCommand.keys();
+    List<String> keys = lockCommand.keys().stream()
+        .sorted()
+        .toList();
+
     RLock[] locks = new RLock[keys.size()];
     for (int i = 0; i < keys.size(); i++) {
-      String lockKey = LOCK_KEY_PREFIX + lockCommand.keys() + ":" + keys.get(i);
+      String lockKey = lockCommand.prefix() + ":" + keys.get(i);
       locks[i] = redissonClient.getLock(lockKey);
     }
 
