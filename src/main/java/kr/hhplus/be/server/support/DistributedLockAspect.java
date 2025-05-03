@@ -27,7 +27,7 @@ public class DistributedLockAspect {
   private final LockTemplate lockTemplate;
 
   @Around("@annotation(kr.hhplus.be.server.support.DistributedLock)")
-  public Object aroundDistributedLock(ProceedingJoinPoint joinPoint) throws Throwable {
+  public Object aroundDistributedLock(ProceedingJoinPoint joinPoint) {
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     String[] parameterNames = signature.getParameterNames();
     Object[] args = joinPoint.getArgs();
@@ -39,8 +39,16 @@ public class DistributedLockAspect {
     }
 
     DistributedLock annotation = signature.getMethod().getAnnotation(DistributedLock.class);
-    Expression expression = parser.parseExpression(annotation.key());
-    List<String> keys = (List<String>) expression.getValue(context, List.class);
+    Expression expression = parser.parseExpression(annotation.expression());
+    List<Object> keys = (List<Object>) expression.getValue(context, List.class);
+
+    if (keys == null || keys.isEmpty()) {
+      throw new IllegalArgumentException("락 키가 비어있습니다.");
+    }
+
+    List<String> stringKeys = keys.stream()
+        .map(String::valueOf)
+        .toList();
 
     return lockTemplate.execute(() -> {
       try {
@@ -48,6 +56,6 @@ public class DistributedLockAspect {
       } catch (Throwable e) {
         throw new InternalServerException();
       }
-    }, LockCommand.of(annotation.topic(), annotation.timeout(), annotation.timeUnit(), keys));
+    }, LockCommand.of(annotation.key(), annotation.timeout(), annotation.timeUnit(), stringKeys));
   }
 }
