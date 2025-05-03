@@ -18,6 +18,8 @@ import kr.hhplus.be.server.domain.product.ProductTestDataGenerator;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
 import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.coupon.CouponIssueRequest;
+import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponIssueResponse;
 import kr.hhplus.be.server.interfaces.order.OrderRequest;
 import kr.hhplus.be.server.interfaces.order.OrderRequest.AmountProductOptionRequest;
 import kr.hhplus.be.server.interfaces.order.OrderResponse.OrderSuccessResponse;
@@ -149,5 +151,30 @@ class E2EOrderTest {
 
     assertThat(orderPaymentResponseWrapper.data().amount()).isGreaterThanOrEqualTo(0L);
     assertThat(orderPaymentResponseWrapper.data().status()).isEqualTo(OrderStatus.PAID);
+  }
+
+  @DisplayName("선착순 쿠폰 발급 E2E 테스트")
+  @Test
+  void issueFirstComeFirstServeCoupon() {
+    // given
+    long userId = 1L;
+    long couponId = 1L;
+    CouponIssueRequest request = new CouponIssueRequest(userId, couponId);
+
+    // when
+    CommonResponseWrapper<CouponIssueResponse> responseWrapper = RestAssured.given()
+        .basePath("/api/v1/coupons/issue")
+        .contentType(ContentType.JSON)
+        .body(request)
+        .when()
+        .post()
+        .then()
+        .assertThat().statusCode(HttpStatus.OK.value())
+        .extract()
+        .response().as(new TypeRef<>() {
+        });
+
+    // then
+    assertThat(responseWrapper.data().userCouponId()).isNotNull();
   }
 }
