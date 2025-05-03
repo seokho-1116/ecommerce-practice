@@ -33,7 +33,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     user = userTestDataGenerator.user();
     testHelpRepository.save(user);
 
-    coupon = couponTestDataGenerator.validateCoupon();
+    coupon = couponTestDataGenerator.validCoupon();
     TestReflectionUtil.setField(coupon, "quantity", 10L);
     testHelpRepository.save(coupon);
 

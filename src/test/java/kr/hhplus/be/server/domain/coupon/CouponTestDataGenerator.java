@@ -19,7 +19,7 @@ public class CouponTestDataGenerator {
         .create();
   }
 
-  public Coupon validateCoupon() {
+  public Coupon validCoupon() {
     LocalDateTime now = LocalDateTime.now();
     return Instancio.of(Coupon.class)
         .ignore(field(Coupon::getId))

@@ -75,7 +75,7 @@ class E2EOrderTest {
       testHelpRepository.save(productInventory);
     }
 
-    Coupon coupon = couponTestDataGenerator.validateCoupon();
+    Coupon coupon = couponTestDataGenerator.validCoupon();
     testHelpRepository.save(coupon);
 
     UserCoupon userCoupon = couponTestDataGenerator.notUsedUserCoupon(user, coupon);
