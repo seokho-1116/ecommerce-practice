@@ -53,7 +53,9 @@ public class DistributedLockAspect {
     return lockTemplate.execute(() -> {
       try {
         return joinPoint.proceed();
-      } catch (Throwable e) {
+      } catch (RuntimeException e) {
+        throw e;
+      } catch(Throwable e) {
         throw new InternalServerException();
       }
     }, LockCommand.of(annotation.key(), annotation.timeout(), annotation.timeUnit(), stringKeys));

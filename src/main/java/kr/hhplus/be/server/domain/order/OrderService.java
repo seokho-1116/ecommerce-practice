@@ -33,7 +33,7 @@ public class OrderService {
   }
 
   @Transactional
-  public void pay(Long orderId) {
+  public Order pay(Long orderId) {
     if (orderId == null) {
       throw new OrderBusinessException("결제 상태로 변경할 주문이 없습니다.");
     }
@@ -43,5 +43,7 @@ public class OrderService {
 
     order.pay();
     orderRepository.save(order);
+
+    return order;
   }
 }

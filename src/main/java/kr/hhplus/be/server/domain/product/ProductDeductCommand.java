@@ -39,4 +39,10 @@ public record ProductDeductCommand(
   public boolean isEmpty() {
     return productOptionIdToAmountMap == null || productOptionIdToAmountMap.isEmpty();
   }
+
+  public List<String> toKeys() {
+    return productOptionIdToAmountMap.keySet().stream()
+        .map(String::valueOf)
+        .toList();
+  }
 }
