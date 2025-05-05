@@ -27,10 +27,10 @@ public record OrderPaymentResponse(
 
   public static OrderPaymentResponse from(PaymentResult paymentResult) {
     return new OrderPaymentResponse(
-        paymentResult.order().getId(),
-        paymentResult.order().getUserId(),
-        paymentResult.order().getTotalPrice(),
-        paymentResult.order().getStatus(),
+        paymentResult.order().id(),
+        paymentResult.order().userId(),
+        paymentResult.order().totalPrice(),
+        paymentResult.order().status(),
         paymentResult.remainingPoint(),
         LocalDateTime.now()
     );

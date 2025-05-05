@@ -35,6 +35,12 @@ class OrderServiceTest {
             .status(OrderStatus.CREATED)
             .build()
     ));
+    given(orderRepository.save(any(Order.class))).willReturn(
+        Order.builder()
+            .id(orderId)
+            .status(OrderStatus.PAID)
+            .build()
+    );
 
     // when
     orderService.pay(orderId);

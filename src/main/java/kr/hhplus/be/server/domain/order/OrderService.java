@@ -26,17 +26,18 @@ public class OrderService {
     return OrderInfo.from(savedOrder);
   }
 
-  public Order findNotPaidOrderById(Long orderId) {
+  public OrderInfo findNotPaidOrderById(Long orderId) {
     if (orderId == null) {
       throw new OrderBusinessException("주문 ID는 null일 수 없습니다.");
     }
 
     return orderRepository.findByIdAndStatus(orderId, OrderStatus.CREATED)
+        .map(OrderInfo::from)
         .orElseThrow(() -> new OrderNotFoundException("주문을 찾을 수 없습니다."));
   }
 
   @Transactional
-  public void pay(Long orderId) {
+  public OrderInfo pay(Long orderId) {
     if (orderId == null) {
       throw new OrderBusinessException("결제 상태로 변경할 주문이 없습니다.");
     }
@@ -45,6 +46,8 @@ public class OrderService {
         .orElseThrow(() -> new OrderNotFoundException("주문을 찾을 수 없습니다."));
 
     order.pay();
-    orderRepository.save(order);
+    Order savedOrder = orderRepository.save(order);
+
+    return OrderInfo.from(savedOrder);
   }
 }

@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.application.payment;
 
-import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.payment.PaymentCommand;
 import kr.hhplus.be.server.domain.payment.PaymentEventPublisher;
@@ -24,15 +24,15 @@ public class PaymentFacade {
 
   public PaymentResult payOrder(PaymentCommand paymentCommand) {
     PaymentResult result = transactionTemplate.execute(status -> {
-      Order order = orderService.findNotPaidOrderById(paymentCommand.orderId());
+      OrderInfo order = orderService.findNotPaidOrderById(paymentCommand.orderId());
 
-      ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.getOrderItems());
+      ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.orderItems());
       productService.deductInventory(productDeductCommand);
 
-      long remainingPoint = pointService.use(paymentCommand.userId(), order.getFinalPrice());
+      long remainingPoint = pointService.use(paymentCommand.userId(), order.finalPrice());
 
-      orderService.pay(order.getId());
-      return PaymentResult.of(order, remainingPoint);
+      OrderInfo orderResult = orderService.pay(order.id());
+      return PaymentResult.of(orderResult, remainingPoint);
     });
 
     PaymentSuccessEvent event = PaymentSuccessEvent.from(result.order());
