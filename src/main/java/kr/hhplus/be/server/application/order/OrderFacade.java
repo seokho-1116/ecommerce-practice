@@ -2,15 +2,19 @@ package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderCommand;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.product.Product;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserDto.UserInfo;
 import kr.hhplus.be.server.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,17 +30,17 @@ public class OrderFacade {
 
   @Transactional
   public OrderResult createOrder(OrderCreateCommand orderCreateCommand) {
-    List<Product> products = productService.findAllByProductOptionIds(
+    List<ProductInfo> products = productService.findAllByProductOptionIds(
         orderCreateCommand.productOptionIds());
 
-    User user = userService.findUserById(orderCreateCommand.userId());
-    UserCoupon userCoupon = couponService.findUserCouponByUserCouponId(
+    UserInfo user = userService.findUserInfoById(orderCreateCommand.userId());
+    UserCouponInfo userCoupon = couponService.findUserCouponByUserCouponId(
         orderCreateCommand.userCouponId());
 
     OrderCommand orderCommand = orderCreateCommand.toOrderCommand(products, user, userCoupon);
-    Order order = orderService.createOrder(orderCommand);
+    OrderInfo order = orderService.createOrder(orderCommand);
 
-    couponService.use(userCoupon);
+    couponService.use(userCoupon.id());
 
     return OrderResult.of(order, userCoupon);
   }

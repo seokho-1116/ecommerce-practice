@@ -71,4 +71,59 @@ public record ProductDto() {
     }
 
   }
+
+  public record ProductInfo(
+      Long id,
+      String name,
+      String description,
+      Long basePrice,
+      List<ProductOptionInfo> options
+  ) {
+
+    public static ProductInfo from(Product product) {
+      List<ProductOptionInfo> productOptionInfos = product.getProductOptions().stream()
+          .map(ProductOptionInfo::from)
+          .toList();
+
+      return new ProductInfo(
+          product.getId(),
+          product.getName(),
+          product.getDescription(),
+          product.getBasePrice(),
+          productOptionInfos
+      );
+    }
+  }
+
+  public record ProductOptionInfo(
+      Long id,
+      String name,
+      String description,
+      Long additionalPrice,
+      ProductInventoryInfo productInventoryInfo
+  ) {
+
+    public static ProductOptionInfo from(ProductOption productOption) {
+      return new ProductOptionInfo(
+          productOption.getId(),
+          productOption.getName(),
+          productOption.getDescription(),
+          productOption.getAdditionalPrice(),
+          ProductInventoryInfo.from(productOption.getProductInventory())
+      );
+    }
+  }
+
+  public record ProductInventoryInfo(
+      Long id,
+      Long quantity
+  ) {
+
+    public static ProductInventoryInfo from(ProductInventory productInventory) {
+      return new ProductInventoryInfo(
+          productInventory.getId(),
+          productInventory.getQuantity()
+      );
+    }
+  }
 }

@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.order;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +14,16 @@ public class OrderService {
   private final OrderRepository orderRepository;
 
   @Transactional
-  public Order createOrder(OrderCommand orderCommand) {
+  public OrderInfo createOrder(OrderCommand orderCommand) {
     List<OrderItem> orderItems = orderCommand.productAmountPairs().stream()
         .map(OrderItem::create)
         .toList();
 
     Order order = Order.newOrder(orderCommand.user(), orderItems, orderCommand.userCoupon());
 
-    return orderRepository.save(order);
+    Order savedOrder = orderRepository.save(order);
+
+    return OrderInfo.from(savedOrder);
   }
 
   public Order findNotPaidOrderById(Long orderId) {

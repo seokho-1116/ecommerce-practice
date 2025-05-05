@@ -14,6 +14,9 @@ import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
 import kr.hhplus.be.server.domain.order.OrderItem;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInventoryInfo;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +62,9 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
       productInventory.setupProductOption(option);
       testHelpRepository.save(productInventory);
 
-      OrderItem orderItem = OrderItem.create(new ProductAmountPair(product, option, 1L));
+      ProductInfo productInfo = ProductInfo.from(product);
+      ProductOptionInfo productOptionInfo = ProductOptionInfo.from(option);
+      OrderItem orderItem = OrderItem.create(new ProductAmountPair(productInfo, productOptionInfo, 1L));
       TestReflectionUtil.setField(orderItem, "createdAt",
           LocalDateTime.now().minusDays(1).minusMinutes(30));
       testHelpRepository.save(orderItem);
@@ -158,19 +163,19 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     latch.await();
 
     // then
-    ProductInventory productInventory = extractProductInventory(limitedQuantityProductOption);
-    assertThat(productInventory.getQuantity()).isZero();
+    ProductInventoryInfo productInventory = extractProductInventory(limitedQuantityProductOption);
+    assertThat(productInventory.quantity()).isZero();
   }
 
-  private ProductInventory extractProductInventory(ProductOption productOption) {
-    List<Product> products = productService.findAllByProductOptionIds(
+  private ProductInventoryInfo extractProductInventory(ProductOption productOption) {
+    List<ProductInfo> products = productService.findAllByProductOptionIds(
         List.of(productOption.getId()));
 
     return products.stream()
-        .flatMap(product -> product.getProductOptions().stream())
-        .filter(option -> option.getId().equals(productOption.getId()))
+        .flatMap(product -> product.options().stream())
+        .filter(option -> option.id().equals(productOption.getId()))
         .findFirst()
-        .map(ProductOption::getProductInventory)
+        .map(ProductOptionInfo::productInventoryInfo)
         .orElseThrow(() -> new IllegalArgumentException("재고를 찾을 수 없습니다."));
   }
 

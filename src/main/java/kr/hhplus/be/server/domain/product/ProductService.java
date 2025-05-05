@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
@@ -23,8 +24,10 @@ public class ProductService {
 
   private final ProductRepository productRepository;
 
-  public List<Product> findAllByProductOptionIds(List<Long> productOptionIds) {
-    return productRepository.findAllByProductOptionIds(productOptionIds);
+  public List<ProductInfo> findAllByProductOptionIds(List<Long> productOptionIds) {
+    return productRepository.findAllByProductOptionIds(productOptionIds).stream()
+        .map(ProductInfo::from)
+        .toList();
   }
 
   @Transactional

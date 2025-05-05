@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,11 +46,14 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   @Test
   void useTest() {
     // given
+    Long userCouponId = userCoupon.getId();
+
     // when
-    couponService.use(userCoupon);
+    couponService.use(userCouponId);
 
     // then
-    assertThat(userCoupon.getIsUsed()).isTrue();
+    UserCouponInfo result = couponService.findUserCouponByUserCouponId(userCouponId);
+    assertThat(result.isUsed()).isTrue();
   }
 
   @DisplayName("쿠폰을 발급하면 쿠폰이 발급된다")
@@ -76,7 +80,9 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     for (int i = 0; i < concurrentRequest; i++) {
       new Thread(() -> {
         try {
-          couponService.use(userCoupon);
+          Long userCouponId = userCoupon.getId();
+
+          couponService.use(userCouponId);
 
           successCount.incrementAndGet();
         } catch (Exception e) {

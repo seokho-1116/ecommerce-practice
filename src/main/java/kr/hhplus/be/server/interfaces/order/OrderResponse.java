@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.application.order.OrderResult;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderItemInfo;
 import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 
@@ -43,44 +46,44 @@ public record OrderResponse(
   ) {
 
     public static OrderSuccessResponse from(OrderResult orderResult) {
-      Order order = orderResult.order();
-      UserCoupon userCoupon = orderResult.userCoupon();
+      OrderInfo order = orderResult.order();
+      UserCouponInfo userCoupon = orderResult.userCoupon();
 
       CouponInfoResponse couponInfo = null;
       if (userCoupon != null) {
         couponInfo = new CouponInfoResponse(
-            userCoupon.getId(),
-            userCoupon.getCoupon().getName(),
-            userCoupon.getCoupon().getDiscountRate(),
-            userCoupon.getCoupon().getDiscountAmount(),
-            userCoupon.getCoupon().getCouponType()
+            userCoupon.id(),
+            userCoupon.couponName(),
+            userCoupon.discountRate(),
+            userCoupon.discountAmount(),
+            userCoupon.couponType()
         );
       }
 
-      Map<Long, Long> productOptionIdToAmountMap = orderResult.order().getOrderItems().stream()
-          .collect(Collectors.groupingBy(OrderItem::getProductOptionId, Collectors.counting()));
+      Map<Long, Long> productOptionIdToAmountMap = orderResult.order().orderItems().stream()
+          .collect(Collectors.groupingBy(OrderItemInfo::productOptionId, Collectors.counting()));
 
       return new OrderSuccessResponse(
-          order.getId(),
-          order.getUserId(),
-          order.getStatus(),
-          order.getTotalPrice(),
-          order.getDiscountPrice(),
-          order.getFinalPrice(),
+          order.id(),
+          order.userId(),
+          order.status(),
+          order.totalPrice(),
+          order.discountPrice(),
+          order.finalPrice(),
           couponInfo,
-          order.getOrderItems().stream()
+          order.orderItems().stream()
               .map(item -> {
-                Long amount = productOptionIdToAmountMap.get(item.getProductOptionId());
+                Long amount = productOptionIdToAmountMap.get(item.productOptionId());
 
                 return new ItemInfoResponse(
-                    item.getId(),
-                    item.getProductName(),
-                    item.getProductDescription(),
-                    item.getProductOptionName(),
-                    item.getProductOptionDescription(),
-                    item.getBasePrice(),
-                    item.getAdditionalPrice(),
-                    item.getTotalPrice(),
+                    item.id(),
+                    item.productName(),
+                    item.productDescription(),
+                    item.productOptionName(),
+                    item.productOptionDescription(),
+                    item.basePrice(),
+                    item.additionalPrice(),
+                    item.totalPrice(),
                     amount
                 );
               })
