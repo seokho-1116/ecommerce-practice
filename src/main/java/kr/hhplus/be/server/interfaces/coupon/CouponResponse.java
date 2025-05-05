@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.Coupon;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 
@@ -41,20 +42,18 @@ public class CouponResponse {
       LocalDateTime createdAt
   ) {
 
-    public static CouponIssueResponse from(UserCoupon userCoupon) {
-      Coupon coupon = userCoupon.getCoupon();
-
+    public static CouponIssueResponse from(UserCouponInfo userCoupon) {
       return new CouponIssueResponse(
-          userCoupon.getUser().getId(),
-          coupon.getId(),
-          userCoupon.getId(),
-          coupon.getName(),
-          coupon.getDiscountRate(),
-          coupon.getDiscountAmount(),
-          coupon.getCouponType(),
-          coupon.getFrom(),
-          coupon.getTo(),
-          userCoupon.getCreatedAt()
+          userCoupon.userId(),
+          userCoupon.couponId(),
+          userCoupon.id(),
+          userCoupon.couponName(),
+          userCoupon.discountRate(),
+          userCoupon.discountAmount(),
+          userCoupon.couponType(),
+          userCoupon.from(),
+          userCoupon.to(),
+          userCoupon.createdAt()
       );
     }
   }

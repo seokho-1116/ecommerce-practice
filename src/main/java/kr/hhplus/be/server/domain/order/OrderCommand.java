@@ -4,16 +4,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderCommandIllegalStateException;
 import kr.hhplus.be.server.domain.product.Product;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
 import kr.hhplus.be.server.domain.product.ProductOption;
 import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserDto.UserInfo;
 
 public record OrderCommand(
-    User user,
+    UserInfo user,
     List<ProductAmountPair> productAmountPairs,
-    UserCoupon userCoupon
+    UserCouponInfo userCoupon
 ) {
 
   public OrderCommand {
@@ -27,8 +31,8 @@ public record OrderCommand(
   }
 
   public record ProductAmountPair(
-      Product product,
-      ProductOption productOption,
+      ProductInfo product,
+      ProductOptionInfo productOption,
       Long amount
   ) {
 
@@ -70,19 +74,20 @@ public record OrderCommand(
           .toList();
     }
 
-    public OrderCommand toOrderCommand(List<Product> products, User user, UserCoupon userCoupon) {
-      Map<Long, Product> productIdMap = products.stream()
-          .collect(Collectors.toMap(Product::getId, Function.identity()));
+    public OrderCommand toOrderCommand(List<ProductInfo> products, UserInfo user,
+        UserCouponInfo userCoupon) {
+      Map<Long, ProductInfo> productIdMap = products.stream()
+          .collect(Collectors.toMap(ProductInfo::id, Function.identity()));
 
-      Map<Long, ProductOption> productOptionIdMap = products.stream()
-          .flatMap(product -> product.getProductOptions().stream())
-          .collect(Collectors.toMap(ProductOption::getId, Function.identity()));
+      Map<Long, ProductOptionInfo> productOptionIdMap = products.stream()
+          .flatMap(product -> product.options().stream())
+          .collect(Collectors.toMap(ProductOptionInfo::id, Function.identity()));
 
       List<ProductAmountPair> productAmountPairs = productIdItemPairs.stream()
           .map(productIdItemPair -> {
-            Product product = productIdMap.get(productIdItemPair.productId());
+            ProductInfo product = productIdMap.get(productIdItemPair.productId());
 
-            ProductOption productOption = productOptionIdMap.get(
+            ProductOptionInfo productOption = productOptionIdMap.get(
                 productIdItemPair.item().productOptionId());
 
             return new ProductAmountPair(product, productOption,

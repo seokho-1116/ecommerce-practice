@@ -4,8 +4,8 @@ import static java.util.stream.Collectors.*;
 
 import java.util.List;
 import java.util.Map;
-import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.domain.order.OrderItem;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderItemInfo;
 import kr.hhplus.be.server.domain.payment.PaymentBusinessException.PaymentEventIllegalStateException;
 
 public record PaymentSuccessEvent(
@@ -15,35 +15,35 @@ public record PaymentSuccessEvent(
     List<OrderItemSummary> orderItemSummaries
 ) {
 
-  public static PaymentSuccessEvent from(Order order) {
+  public static PaymentSuccessEvent from(OrderInfo order) {
     if (order == null) {
       throw new PaymentEventIllegalStateException("결제 성공 이벤트를 생성할 주문이 없습니다.");
     }
 
-    Map<Long, Long> orderItemAmountMap = order.getOrderItems()
+    Map<Long, Long> orderItemAmountMap = order.orderItems()
         .stream()
-        .collect(groupingBy(OrderItem::getProductOptionId, counting()));
+        .collect(groupingBy(OrderItemInfo::productOptionId, counting()));
 
-    List<OrderItemSummary> orderItemSummaries = order.getOrderItems()
+    List<OrderItemSummary> orderItemSummaries = order.orderItems()
         .stream()
         .map(orderItem -> {
-          Long amount = orderItemAmountMap.get(orderItem.getProductOptionId());
+          Long amount = orderItemAmountMap.get(orderItem.productOptionId());
 
           return new OrderItemSummary(
-              orderItem.getId(),
-              orderItem.getProductName(),
-              orderItem.getProductOptionName(),
-              orderItem.getProductDescription(),
-              orderItem.getProductOptionDescription(),
+              orderItem.id(),
+              orderItem.productName(),
+              orderItem.productOptionName(),
+              orderItem.productDescription(),
+              orderItem.productOptionDescription(),
               amount
           );
         })
         .toList();
 
     return new PaymentSuccessEvent(
-        order.getId(),
-        order.getUserId(),
-        order.getFinalPrice(),
+        order.id(),
+        order.userId(),
+        order.finalPrice(),
         orderItemSummaries
     );
   }

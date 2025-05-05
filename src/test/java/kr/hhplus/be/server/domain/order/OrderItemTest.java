@@ -7,6 +7,9 @@ import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderItemIllegalS
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
 import kr.hhplus.be.server.domain.order.OrderItem.OrderItemBuilder;
 import kr.hhplus.be.server.domain.product.Product;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
+import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,7 @@ class OrderItemTest {
         .basePrice(1000L)
         .description("test")
         .build();
+    ProductInfo productInfo = ProductInfo.from(product);
 
     ProductOption productOption = ProductOption.builder()
         .id(1L)
@@ -31,9 +35,14 @@ class OrderItemTest {
         .description("test")
         .product(product)
         .build();
+    ProductInventory productInventory = ProductInventory.builder()
+        .build();
+    productOption.setupProductInventory(productInventory);
+
+    ProductOptionInfo productOptionInfo = ProductOptionInfo.from(productOption);
 
     long amount = 5L;
-    ProductAmountPair productAmountPair = new ProductAmountPair(product, productOption, amount);
+    ProductAmountPair productAmountPair = new ProductAmountPair(productInfo, productOptionInfo, amount);
 
     // when
     OrderItem orderItem = OrderItem.create(productAmountPair);
@@ -52,6 +61,7 @@ class OrderItemTest {
         .basePrice(1000L)
         .description("test")
         .build();
+    ProductInfo productInfo = ProductInfo.from(product);
 
     ProductOption productOption = ProductOption.builder()
         .id(1L)
@@ -60,8 +70,13 @@ class OrderItemTest {
         .description("test")
         .product(product)
         .build();
+    ProductInventory productInventory = ProductInventory.builder()
+        .build();
+    productOption.setupProductInventory(productInventory);
 
-    ProductAmountPair orderProductPair = new ProductAmountPair(product, productOption, 5L);
+    ProductOptionInfo productOptionInfo = ProductOptionInfo.from(productOption);
+
+    ProductAmountPair orderProductPair = new ProductAmountPair(productInfo, productOptionInfo, 5L);
 
     // when
     OrderItem orderItem = OrderItem.create(orderProductPair);

@@ -1,13 +1,13 @@
 package kr.hhplus.be.server.application.payment;
 
-import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 
 public record PaymentResult(
-    Order order,
+    OrderInfo order,
     long remainingPoint
 ) {
 
-  public static PaymentResult of(Order order, long remainingPoint) {
+  public static PaymentResult of(OrderInfo order, long remainingPoint) {
     return new PaymentResult(
         order,
         remainingPoint

@@ -10,6 +10,8 @@ import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderItemIllegalStateException;
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
 import kr.hhplus.be.server.domain.product.Product;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
 import kr.hhplus.be.server.domain.product.ProductOption;
 import lombok.Builder;
 import lombok.Getter;
@@ -68,18 +70,18 @@ public class OrderItem extends BaseEntity {
   }
 
   public static OrderItem create(ProductAmountPair productAmountPair) {
-    Product product = productAmountPair.product();
-    ProductOption productOption = productAmountPair.productOption();
+    ProductInfo product = productAmountPair.product();
+    ProductOptionInfo productOption = productAmountPair.productOption();
 
-    long totalPrice = product.getBasePrice() + productOption.getAdditionalPrice();
+    long totalPrice = product.basePrice() + productOption.additionalPrice();
     return OrderItem.builder()
-        .productName(product.getName())
-        .productDescription(product.getDescription())
-        .productOptionName(productOption.getName())
-        .productOptionDescription(productOption.getDescription())
-        .productOptionId(productOption.getId())
-        .basePrice(product.getBasePrice())
-        .additionalPrice(productOption.getAdditionalPrice())
+        .productName(product.name())
+        .productDescription(product.description())
+        .productOptionName(productOption.name())
+        .productOptionDescription(productOption.description())
+        .productOptionId(productOption.id())
+        .basePrice(product.basePrice())
+        .additionalPrice(productOption.additionalPrice())
         .totalPrice(totalPrice * productAmountPair.amount())
         .amount(productAmountPair.amount())
         .build();

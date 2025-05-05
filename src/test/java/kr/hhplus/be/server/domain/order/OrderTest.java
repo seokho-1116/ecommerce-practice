@@ -7,11 +7,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import kr.hhplus.be.server.domain.coupon.Coupon;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order.OrderBuilder;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderIllegalStateException;
 import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.user.UserDto.UserInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +30,10 @@ class OrderTest {
     User user = User.builder()
         .id(1L)
         .build();
+    UserInfo userInfo = UserInfo.from(user);
 
     // when
-    Order order = Order.newOrder(user, List.of(orderItem1, orderItem2), null);
+    Order order = Order.newOrder(userInfo, List.of(orderItem1, orderItem2), null);
 
     // then
     long totalPrice = orderItem1.getTotalPrice() + orderItem2.getTotalPrice();
@@ -60,16 +63,20 @@ class OrderTest {
         .from(now.minusMonths(1))
         .to(now.plusMonths(1))
         .build();
-    UserCoupon userCoupon = UserCoupon.builder()
-        .coupon(coupon)
-        .isUsed(false)
-        .build();
     User user = User.builder()
         .id(1L)
         .build();
+    UserCoupon userCoupon = UserCoupon.builder()
+        .user(user)
+        .coupon(coupon)
+        .isUsed(false)
+        .build();
+    UserCouponInfo userCouponInfo = UserCouponInfo.from(userCoupon);
+
+    UserInfo userInfo = UserInfo.from(user);
 
     // when
-    Order order = Order.newOrder(user, List.of(orderItem1, orderItem2), userCoupon);
+    Order order = Order.newOrder(userInfo, List.of(orderItem1, orderItem2), userCouponInfo);
 
     // then
     assertThat(order.getDiscountPrice()).isEqualTo(coupon.getDiscountAmount());
@@ -90,16 +97,20 @@ class OrderTest {
         .from(now.minusMonths(1))
         .to(now.plusMonths(1))
         .build();
-    UserCoupon userCoupon = UserCoupon.builder()
-        .coupon(coupon)
-        .isUsed(false)
-        .build();
     User user = User.builder()
         .id(1L)
         .build();
+    UserCoupon userCoupon = UserCoupon.builder()
+        .coupon(coupon)
+        .user(user)
+        .isUsed(false)
+        .build();
+    UserCouponInfo userCouponInfo = UserCouponInfo.from(userCoupon);
+
+    UserInfo userInfo = UserInfo.from(user);
 
     // when
-    Order order = Order.newOrder(user, List.of(orderItem1, orderItem2), userCoupon);
+    Order order = Order.newOrder(userInfo, List.of(orderItem1, orderItem2), userCouponInfo);
 
     // then
     long totalPrice = orderItem1.getTotalPrice() + orderItem2.getTotalPrice();

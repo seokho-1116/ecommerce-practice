@@ -11,9 +11,11 @@ import java.util.List;
 import kr.hhplus.be.server.application.order.OrderFacade;
 import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.domain.coupon.Coupon;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.order.OrderRequest.AmountProductOptionRequest;
@@ -58,6 +60,7 @@ class OrderControllerTest {
         .status(OrderStatus.CREATED)
         .userId(user.getId())
         .build();
+    OrderInfo orderInfo = OrderInfo.from(order);
 
     LocalDateTime now = LocalDateTime.now();
     Coupon coupon = Coupon.builder()
@@ -74,8 +77,9 @@ class OrderControllerTest {
         .user(user)
         .coupon(coupon)
         .build();
+    UserCouponInfo userCouponInfo = UserCouponInfo.from(userCoupon);
 
-    when(orderFacade.createOrder(any())).thenReturn(OrderResult.of(order, userCoupon));
+    when(orderFacade.createOrder(any())).thenReturn(OrderResult.of(orderInfo, userCouponInfo));
 
     // when
     // then

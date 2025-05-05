@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.application.coupon;
 
 import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponService;
-import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class CouponFacade {
   private final CouponService couponService;
 
   @Transactional
-  public UserCoupon issue(Long userId, Long couponId) {
+  public UserCouponInfo issue(Long userId, Long couponId) {
     User user = userService.findUserById(userId);
 
     return couponService.issue(user, couponId);
