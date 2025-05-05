@@ -61,10 +61,10 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   void issueTest() {
     // given
     // when
-    UserCoupon issuedCoupon = couponService.issue(user, coupon.getId());
+    UserCouponInfo issuedCoupon = couponService.issue(user, coupon.getId());
 
     // then
-    assertThat(issuedCoupon.getIsUsed()).isFalse();
+    assertThat(issuedCoupon.isUsed()).isFalse();
   }
 
   @DisplayName("동시에 쿠폰을 사용하면 쿠폰이 한 장만 사용된다")

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.coupon;
 
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 public class CouponDto {
@@ -15,6 +16,9 @@ public class CouponDto {
       Long discountAmount,
       CouponType couponType,
       Boolean isUsed,
+      LocalDateTime from,
+      LocalDateTime to,
+      LocalDateTime createdAt,
       Function<Long, Long> discountCalculator
   ) {
 
@@ -28,6 +32,9 @@ public class CouponDto {
           userCoupon.getCoupon().getDiscountAmount(),
           userCoupon.getCoupon().getCouponType(),
           userCoupon.getIsUsed(),
+          userCoupon.getCoupon().getFrom(),
+          userCoupon.getCoupon().getTo(),
+          userCoupon.getCreatedAt(),
           userCoupon::calculateDiscountPrice
       );
     }
