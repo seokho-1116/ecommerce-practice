@@ -59,7 +59,7 @@ class DistributedLockAspectTest {
   }
 
   @DistributedLock(
-      key = "test",
+      key = CacheKey.COUPON_ISSUE,
       expression = "#param1",
       timeout = 1000,
       timeUnit = TimeUnit.MILLISECONDS
