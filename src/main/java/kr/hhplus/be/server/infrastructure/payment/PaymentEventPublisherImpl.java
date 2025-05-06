@@ -9,10 +9,6 @@ public class PaymentEventPublisherImpl implements PaymentEventPublisher {
 
   @Override
   public void publish(PaymentSuccessEvent event) {
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException ignore) {
-      // ignore
-    }
+    // async
   }
 }
