@@ -2,12 +2,17 @@ package kr.hhplus.be.server.infrastructure.product;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
+import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.product.ProductSellingRankView;
+import kr.hhplus.be.server.infrastructure.support.RedisRepository;
+import kr.hhplus.be.server.support.CacheKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +24,7 @@ public class ProductRepositoryImpl implements ProductRepository {
   private final ProductCustomRepository productCustomRepository;
   private final ProductInventoryJpaRepository productInventoryJpaRepository;
   private final ProductSellingRankingViewJpaRepository productSellingRankingViewJpaRepository;
+  private final RedisRepository redisRepository;
 
   @Override
   public List<Product> findAllByProductOptionIds(List<Long> productIds) {
@@ -38,6 +44,16 @@ public class ProductRepositoryImpl implements ProductRepository {
   @Override
   public void saveAll(List<ProductInventory> productInventories) {
     productInventoryJpaRepository.saveAll(productInventories);
+  }
+
+  @Override
+  public Optional<Top5SellingProducts> findTop5SellingProductsFromCache() {
+    Top5SellingProducts top5SellingProducts = redisRepository.find(
+        CacheKey.TOP5_SELLING_PRODUCT.getKey(),
+        Top5SellingProducts.class
+    );
+
+    return Optional.ofNullable(top5SellingProducts);
   }
 
   @Override
@@ -71,5 +87,11 @@ public class ProductRepositoryImpl implements ProductRepository {
   @Override
   public void saveAllRankingViews(List<ProductSellingRankView> productSellingRankViews) {
     productSellingRankingViewJpaRepository.saveAll(productSellingRankViews);
+  }
+
+  @Override
+  public void saveTop5SellingProducts(CacheKey cacheKey, Top5SellingProducts top5SellingProducts,
+      long expireTime, TimeUnit timeUnit) {
+    redisRepository.save(cacheKey.getKey(), top5SellingProducts, expireTime, timeUnit);
   }
 }

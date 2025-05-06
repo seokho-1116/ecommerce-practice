@@ -11,6 +11,9 @@ public record ProductDto() {
       List<ProductWithRank> topSellingProducts
   ) {
 
+    public boolean isEmpty() {
+      return topSellingProducts == null || topSellingProducts.isEmpty();
+    }
   }
 
   public record ProductWithRank(

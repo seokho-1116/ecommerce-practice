@@ -66,7 +66,7 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
       ProductOptionInfo productOptionInfo = ProductOptionInfo.from(option);
       OrderItem orderItem = OrderItem.create(new ProductAmountPair(productInfo, productOptionInfo, 1L));
       TestReflectionUtil.setField(orderItem, "createdAt",
-          LocalDateTime.now().minusDays(1).minusMinutes(30));
+          LocalDateTime.now().minusMinutes(59));
       testHelpRepository.save(orderItem);
     }
     return product;
@@ -87,9 +87,7 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
   @Test
   void getTopSellingProducts() {
     // given
-    LocalDateTime from = LocalDateTime.now().minusDays(1).minusHours(1);
-    LocalDateTime to = LocalDateTime.now().minusDays(1);
-    productService.saveTop5SellingProductsBefore(from, to);
+    productService.saveTop5SellingProducts();
 
     // when
     Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
@@ -216,13 +214,10 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
   @DisplayName("이전 1시간 동안 판매된 상품을 기준으로 상위 5개 상품을 저장한다")
   @Test
-  void saveTop5SellingProductsBefore() {
+  void saveTop5SellingProducts() {
     // given
-    LocalDateTime from = LocalDateTime.now().minusDays(1).minusHours(1);
-    LocalDateTime to = LocalDateTime.now().minusDays(1);
-
     // when
-    productService.saveTop5SellingProductsBefore(from, to);
+    productService.saveTop5SellingProducts();
 
     // then
     Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
