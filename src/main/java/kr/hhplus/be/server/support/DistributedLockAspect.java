@@ -48,7 +48,8 @@ public class DistributedLockAspect {
 
     RLock[] locks = new RLock[keys.size()];
     for (int i = 0; i < keys.size(); i++) {
-      String lockKey = annotation.key() + ":" + keys.get(i);
+      CacheKey cacheKey = annotation.key();
+      String lockKey = cacheKey.appendAfterColon(String.valueOf(keys.get(i)));
       locks[i] = redissonClient.getLock(lockKey);
     }
 
@@ -57,7 +58,7 @@ public class DistributedLockAspect {
     try {
       boolean isAcquired = multiLock.tryLock(annotation.timeout(), annotation.timeUnit());
       if (!isAcquired) {
-        return false;
+        throw new ServerException();
       }
 
       return joinPoint.proceed();
@@ -66,7 +67,9 @@ public class DistributedLockAspect {
     } catch (Throwable e) {
       throw new ServerException();
     } finally {
-      multiLock.unlock();
+      if (multiLock.isHeldByCurrentThread()) {
+        multiLock.unlock();
+      }
     }
   }
 }
