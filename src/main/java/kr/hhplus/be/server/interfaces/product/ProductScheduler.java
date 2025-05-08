@@ -14,5 +14,6 @@ public class ProductScheduler {
   @Scheduled(cron = "0 0 * * * *", zone = "Asia/Seoul")
   public void calculateProductSellingRanking() {
     productService.saveTop5SellingProducts();
+    productService.saveTop5SellingProductIdsInCache();
   }
 }

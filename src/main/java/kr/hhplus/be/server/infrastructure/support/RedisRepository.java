@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.infrastructure.support;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import kr.hhplus.be.server.common.exception.ServerException;
@@ -23,14 +24,14 @@ public class RedisRepository {
     }
   }
 
-  public <T> T find(String key, Class<T> type) {
+  public <T> T find(String key, TypeReference<T> typeReference) {
     try {
       String jsonValue = redisTemplate.opsForValue().get(key);
       if (jsonValue == null) {
         return null;
       }
 
-      return objectMapper.readValue(jsonValue, type);
+      return objectMapper.readValue(jsonValue, typeReference);
     } catch (Exception e) {
       throw new ServerException();
     }

@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,15 +55,10 @@ public class ProductService {
   }
 
   public Top5SellingProducts findTop5SellingProducts() {
-    Optional<Top5SellingProducts> top5SellingProducts = productRepository.findTop5SellingProductsFromCache();
-    if (top5SellingProducts.isPresent()) {
-      return top5SellingProducts.get();
-    }
-
     LocalDate now = LocalDate.now();
     LocalDateTime from = now.minusDays(3).atStartOfDay();
     LocalDateTime to = LocalDateTime.now();
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankViewInCache(
         from,
         to
     );
@@ -130,11 +124,22 @@ public class ProductService {
         .toList();
 
     productRepository.saveAllRankingViews(productSellingRankViews);
+  }
 
-    Top5SellingProducts top5SellingProducts = findTop5SellingProducts();
-    if (!top5SellingProducts.isEmpty()) {
-      productRepository.saveTop5SellingProducts(CacheKey.TOP5_SELLING_PRODUCT, top5SellingProducts,
-          2, TimeUnit.HOURS);
+  public void saveTop5SellingProductIdsInCache() {
+    LocalDate now = LocalDate.now();
+    LocalDateTime from = now.minusDays(3).atStartOfDay();
+    LocalDateTime to = LocalDateTime.now();
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(from,
+        to);
+
+    if (productIdWithRanks != null && !productIdWithRanks.isEmpty()) {
+      productRepository.saveTop5SellingProductInCache(
+          CacheKey.TOP5_SELLING_PRODUCT,
+          productIdWithRanks,
+          2,
+          TimeUnit.HOURS
+      );
     }
   }
 }

@@ -1,13 +1,12 @@
 package kr.hhplus.be.server.infrastructure.product;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
-import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.product.ProductSellingRankView;
@@ -47,16 +46,6 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public Optional<Top5SellingProducts> findTop5SellingProductsFromCache() {
-    Top5SellingProducts top5SellingProducts = redisRepository.find(
-        CacheKey.TOP5_SELLING_PRODUCT.getKey(),
-        Top5SellingProducts.class
-    );
-
-    return Optional.ofNullable(top5SellingProducts);
-  }
-
-  @Override
   public List<ProductIdWithRank> findTop5SellingProducts(
       LocalDateTime from, LocalDateTime to) {
     return productCustomRepository.findTop5SellingProducts(
@@ -68,6 +57,30 @@ public class ProductRepositoryImpl implements ProductRepository {
       LocalDateTime from, LocalDateTime to) {
     return productCustomRepository.findTop5SellingProductsFromRankView(
         from, to);
+  }
+
+  @Override
+  public List<ProductIdWithRank> findTop5SellingProductsFromRankViewInCache(LocalDateTime from,
+      LocalDateTime to) {
+    List<ProductIdWithRank> productIdWithRanks = redisRepository.find(
+        CacheKey.TOP5_SELLING_PRODUCT.getKey(), new TypeReference<>() {
+        });
+    if (productIdWithRanks != null && !productIdWithRanks.isEmpty()) {
+      return productIdWithRanks;
+    }
+
+    List<ProductIdWithRank> result = productCustomRepository.findTop5SellingProductsFromRankView(
+        from, to);
+    if (result != null && !result.isEmpty()) {
+      redisRepository.save(
+          CacheKey.TOP5_SELLING_PRODUCT.getKey(),
+          result,
+          2,
+          TimeUnit.HOURS
+      );
+    }
+
+    return result;
   }
 
   @Override
@@ -90,8 +103,13 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public void saveTop5SellingProducts(CacheKey cacheKey, Top5SellingProducts top5SellingProducts,
-      long expireTime, TimeUnit timeUnit) {
-    redisRepository.save(cacheKey.getKey(), top5SellingProducts, expireTime, timeUnit);
+  public void saveTop5SellingProductInCache(CacheKey key,
+      List<ProductIdWithRank> productIdWithRanks, long ttl, TimeUnit timeUnit) {
+    redisRepository.save(
+        key.getKey(),
+        productIdWithRanks,
+        ttl,
+        timeUnit
+    );
   }
 }

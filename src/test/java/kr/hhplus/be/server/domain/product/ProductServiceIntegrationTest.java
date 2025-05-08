@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.product;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,11 +15,14 @@ import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
 import kr.hhplus.be.server.domain.order.OrderCommand.ProductAmountPair;
 import kr.hhplus.be.server.domain.order.OrderItem;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInventoryInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
+import kr.hhplus.be.server.infrastructure.support.RedisRepository;
+import kr.hhplus.be.server.support.CacheKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +35,9 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
   @Autowired
   private ProductService productService;
+
+  @Autowired
+  private RedisRepository redisRepository;
 
   private final List<ProductOption> productOptions = new ArrayList<>();
   private ProductOption limitedQuantityProductOption;
@@ -64,7 +71,8 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
       ProductInfo productInfo = ProductInfo.from(product);
       ProductOptionInfo productOptionInfo = ProductOptionInfo.from(option);
-      OrderItem orderItem = OrderItem.create(new ProductAmountPair(productInfo, productOptionInfo, 1L));
+      OrderItem orderItem = OrderItem.create(
+          new ProductAmountPair(productInfo, productOptionInfo, 1L));
       TestReflectionUtil.setField(orderItem, "createdAt",
           LocalDateTime.now().minusMinutes(59));
       testHelpRepository.save(orderItem);
@@ -222,5 +230,21 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     // then
     Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
     assertThat(top5SellingProducts.topSellingProducts()).isNotEmpty();
+  }
+
+  @DisplayName("상위 상품 아이디를 캐시에 저장한다")
+  @Test
+  void saveTop5SellingProductsToCache() {
+    // given
+    productService.saveTop5SellingProducts();
+
+    // when
+    productService.saveTop5SellingProductIdsInCache();
+
+    // then
+    List<ProductIdWithRank> productIdWithRanks = redisRepository.find(
+        CacheKey.TOP5_SELLING_PRODUCT.getKey(), new TypeReference<>() {
+        });
+    assertThat(productIdWithRanks).isNotEmpty();
   }
 }
