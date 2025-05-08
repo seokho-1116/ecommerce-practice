@@ -46,6 +46,10 @@ public class DistributedLockAspect {
       throw new IllegalArgumentException("락 키가 비어있습니다.");
     }
 
+    keys = keys.stream()
+        .sorted()
+        .toList();
+
     RLock[] locks = new RLock[keys.size()];
     for (int i = 0; i < keys.size(); i++) {
       CacheKey cacheKey = annotation.key();
