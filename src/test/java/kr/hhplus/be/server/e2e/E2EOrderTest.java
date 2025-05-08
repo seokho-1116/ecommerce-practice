@@ -6,7 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import java.util.List;
-import kr.hhplus.be.server.common.TestHelpRepository;
+import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponTestDataGenerator;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
@@ -29,16 +29,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class E2EOrderTest {
-
-  @Autowired
-  private TestHelpRepository testHelpRepository;
+class E2EOrderTest extends IntegrationTestSupport {
 
   @Autowired
   private UserTestDataGenerator userTestDataGenerator;
