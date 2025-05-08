@@ -16,5 +16,6 @@ public abstract class IntegrationTestSupport {
   @AfterEach
   void tearDown() {
     testHelpRepository.cleanup();
+    testHelpRepository.cleanCache();
   }
 }

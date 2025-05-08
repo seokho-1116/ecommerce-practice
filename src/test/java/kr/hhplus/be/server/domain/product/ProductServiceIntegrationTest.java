@@ -21,7 +21,6 @@ import kr.hhplus.be.server.domain.product.ProductDto.ProductInventoryInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
-import kr.hhplus.be.server.infrastructure.support.RedisRepository;
 import kr.hhplus.be.server.support.CacheKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,9 +34,6 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
   @Autowired
   private ProductService productService;
-
-  @Autowired
-  private RedisRepository redisRepository;
 
   private final List<ProductOption> productOptions = new ArrayList<>();
   private ProductOption limitedQuantityProductOption;
@@ -242,9 +238,26 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
     productService.saveTop5SellingProductIdsInCache();
 
     // then
-    List<ProductIdWithRank> productIdWithRanks = redisRepository.find(
-        CacheKey.TOP5_SELLING_PRODUCT.getKey(), new TypeReference<>() {
+    List<ProductIdWithRank> productIdWithRanks = testHelpRepository.findInCache(
+        CacheKey.TOP5_SELLING_PRODUCT, new TypeReference<>() {
         });
     assertThat(productIdWithRanks).isNotEmpty();
+  }
+
+  @DisplayName("상위 상품 조회 시 캐시에 없는 경우 캐시에 저장된다")
+  @Test
+  void getTop5SellingProductsFromCache() {
+    // given
+    productService.saveTop5SellingProducts();
+
+    // when
+    Top5SellingProducts top5SellingProducts = productService.findTop5SellingProducts();
+
+    // then
+    List<ProductIdWithRank> productIdWithRanks = testHelpRepository.findInCache(
+        CacheKey.TOP5_SELLING_PRODUCT, new TypeReference<>() {
+        });
+    assertThat(productIdWithRanks).isNotEmpty();
+    assertThat(top5SellingProducts.topSellingProducts()).isNotEmpty();
   }
 }

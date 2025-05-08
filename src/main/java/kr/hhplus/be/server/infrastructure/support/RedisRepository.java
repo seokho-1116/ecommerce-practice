@@ -36,4 +36,8 @@ public class RedisRepository {
       throw new ServerException();
     }
   }
+
+  public void flushAll() {
+    redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+  }
 }
