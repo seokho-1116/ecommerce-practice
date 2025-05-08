@@ -9,7 +9,11 @@ public enum CacheKey {
     this.key = key;
   }
 
-  public String appendAfterColon(String key) {
-    return this.name() + ":" + key;
+  public String appendAfterColon(String input) {
+    if (input == null || input.isEmpty()) {
+      return this.key;
+    }
+
+    return this.key + ":" + input;
   }
 }
