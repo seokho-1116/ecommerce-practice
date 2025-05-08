@@ -137,7 +137,7 @@ public class ProductService {
       productRepository.saveTop5SellingProductInCache(
           CacheKey.TOP5_SELLING_PRODUCT,
           productIdWithRanks,
-          2,
+          25,
           TimeUnit.HOURS
       );
     }

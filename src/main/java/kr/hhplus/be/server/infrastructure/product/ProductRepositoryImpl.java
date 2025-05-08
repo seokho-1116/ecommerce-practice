@@ -75,7 +75,7 @@ public class ProductRepositoryImpl implements ProductRepository {
       redisRepository.save(
           CacheKey.TOP5_SELLING_PRODUCT.getKey(),
           result,
-          2,
+          25,
           TimeUnit.HOURS
       );
     }
