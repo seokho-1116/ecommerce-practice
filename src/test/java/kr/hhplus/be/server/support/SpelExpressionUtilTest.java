@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Objects;
-import kr.hhplus.be.server.support.spel.ParseRequest;
-import kr.hhplus.be.server.support.spel.SpelExpressionUtil;
+import kr.hhplus.be.server.support.util.SpelExpressionUtil;
+import kr.hhplus.be.server.support.util.SpelExpressionUtil.SpelParseRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -27,7 +27,7 @@ class SpelExpressionUtilTest {
     String[] parameterNames = {"a", "b"};
     Object[] args = {1, 2};
 
-    ParseRequest.SpelParseRequest request = ParseRequest.SpelParseRequest.builder()
+    SpelParseRequest request = SpelParseRequest.builder()
         .expression(expression)
         .parameterNames(parameterNames)
         .args(args)
@@ -48,7 +48,7 @@ class SpelExpressionUtilTest {
     String[] parameterNames = {"a", "b"};
     Object[] args = {1, 2};
 
-    ParseRequest.SpelParseRequest request = ParseRequest.SpelParseRequest.builder()
+    SpelParseRequest request = SpelParseRequest.builder()
         .expression(expression)
         .parameterNames(parameterNames)
         .args(args)

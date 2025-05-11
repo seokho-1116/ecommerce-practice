@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import kr.hhplus.be.server.support.spel.SpelExpressionUtil;
+import kr.hhplus.be.server.support.util.SpelExpressionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

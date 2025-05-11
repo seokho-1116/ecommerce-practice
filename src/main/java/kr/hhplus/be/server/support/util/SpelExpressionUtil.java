@@ -1,6 +1,6 @@
-package kr.hhplus.be.server.support.spel;
+package kr.hhplus.be.server.support.util;
 
-import kr.hhplus.be.server.support.spel.ParseRequest.SpelParseRequest;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -23,5 +23,14 @@ public class SpelExpressionUtil {
 
     Expression result = spelExpressionParser.parseExpression(request.expression());
     return result.getValue(context, clazz);
+  }
+
+  @Builder
+  public record SpelParseRequest(
+      String expression,
+      String[] parameterNames,
+      Object[] args
+  ) {
+
   }
 }
