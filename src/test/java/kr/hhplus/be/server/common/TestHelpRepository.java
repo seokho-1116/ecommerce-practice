@@ -6,12 +6,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.metamodel.EntityType;
 import java.util.List;
 import java.util.Optional;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.infrastructure.support.RedisRepository;
 import kr.hhplus.be.server.support.CacheKey;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,10 +19,13 @@ public class TestHelpRepository {
 
   private final EntityManager entityManager;
   private final RedisRepository redisRepository;
+  private final StringRedisTemplate redisTemplate;
 
-  public TestHelpRepository(EntityManager entityManager, RedisRepository redisRepository) {
+  public TestHelpRepository(EntityManager entityManager, RedisRepository redisRepository,
+      StringRedisTemplate stringRedisTemplate) {
     this.entityManager = entityManager;
     this.redisRepository = redisRepository;
+    this.redisTemplate = stringRedisTemplate;
   }
 
   public <T> T save(T entity) {
@@ -90,7 +93,6 @@ public class TestHelpRepository {
   }
 
   public void cleanCache() {
-    //flush all
-    redisRepository.flushAll();
+    redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
   }
 }

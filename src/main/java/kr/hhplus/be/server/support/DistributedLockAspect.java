@@ -3,8 +3,7 @@ package kr.hhplus.be.server.support;
 import java.util.Comparator;
 import java.util.List;
 import kr.hhplus.be.server.common.exception.ServerException;
-import kr.hhplus.be.server.support.util.SpelExpressionUtil;
-import kr.hhplus.be.server.support.util.SpelExpressionUtil.SpelParseRequest;
+import kr.hhplus.be.server.support.SpelExpressionEvaluator.SpelParseRequest;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class DistributedLockAspect {
 
-  private final SpelExpressionUtil spelExpressionUtil;
+  private final SpelExpressionEvaluator spelExpressionEvaluator;
   private final RedissonClient redissonClient;
 
   @SuppressWarnings("unchecked")
@@ -37,7 +36,7 @@ public class DistributedLockAspect {
         .expression(annotation.expression())
         .build();
 
-    List<Object> keys = spelExpressionUtil.parse(request, List.class);
+    List<Object> keys = spelExpressionEvaluator.parse(request, List.class);
     if (keys == null || keys.isEmpty()) {
       throw new IllegalArgumentException("락 키가 비어있습니다.");
     }
@@ -51,14 +50,12 @@ public class DistributedLockAspect {
     try {
       boolean isAcquired = multiLock.tryLock(annotation.timeout(), annotation.timeUnit());
       if (!isAcquired) {
-        throw new ServerException();
+        throw new ServerException("분산락을 획득하지 못했습니다.");
       }
 
       return joinPoint.proceed();
-    } catch (RuntimeException e) {
-      throw e;
     } catch (Throwable e) {
-      throw new ServerException();
+      throw new ServerException(e);
     } finally {
       if (multiLock.isHeldByCurrentThread()) {
         multiLock.unlock();

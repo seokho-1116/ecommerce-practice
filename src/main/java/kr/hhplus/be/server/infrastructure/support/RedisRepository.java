@@ -20,7 +20,7 @@ public class RedisRepository {
       String jsonValue = objectMapper.writeValueAsString(value);
       redisTemplate.opsForValue().set(key, jsonValue, expireTime, timeUnit);
     } catch (Exception e) {
-      throw new ServerException();
+      throw new ServerException(e);
     }
   }
 
@@ -33,11 +33,7 @@ public class RedisRepository {
 
       return objectMapper.readValue(jsonValue, typeReference);
     } catch (Exception e) {
-      throw new ServerException();
+      throw new ServerException(e);
     }
-  }
-
-  public void flushAll() {
-    redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
   }
 }

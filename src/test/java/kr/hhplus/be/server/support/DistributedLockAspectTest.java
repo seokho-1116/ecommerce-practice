@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import kr.hhplus.be.server.support.util.SpelExpressionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 class DistributedLockAspectTest {
 
   @Mock
-  private SpelExpressionUtil spelExpressionUtil;
+  private SpelExpressionEvaluator spelExpressionEvaluator;
 
   @Mock
   private RedissonClient redissonClient;
@@ -35,7 +34,7 @@ class DistributedLockAspectTest {
 
   @BeforeEach
   void setUp() {
-    DistributedLockAspect distributedLockAspect = new DistributedLockAspect(spelExpressionUtil,
+    DistributedLockAspect distributedLockAspect = new DistributedLockAspect(spelExpressionEvaluator,
         redissonClient);
 
     testService = new TestService();
@@ -52,7 +51,7 @@ class DistributedLockAspectTest {
     when(redissonClient.getMultiLock(any())).thenReturn(rLock);
     when(rLock.tryLock(anyLong(), any())).thenReturn(true);
     when(rLock.isHeldByCurrentThread()).thenReturn(true);
-    when(spelExpressionUtil.parse(any(), any())).thenReturn(List.of("1"));
+    when(spelExpressionEvaluator.parse(any(), any())).thenReturn(List.of("1"));
 
     // when
     testService.testMethod(1L, 1L);

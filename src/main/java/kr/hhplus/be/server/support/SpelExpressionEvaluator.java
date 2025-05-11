@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.support.util;
+package kr.hhplus.be.server.support;
 
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SpelExpressionUtil {
+public class SpelExpressionEvaluator {
 
   private final ExpressionParser spelExpressionParser;
 
