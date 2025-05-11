@@ -5,18 +5,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Objects;
 import kr.hhplus.be.server.support.spel.ParseRequest;
-import kr.hhplus.be.server.support.spel.SpelExpressionSupport;
+import kr.hhplus.be.server.support.spel.SpelExpressionUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 @SuppressWarnings("unchecked")
-class SpelExpressionSupportTest {
+class SpelExpressionUtilTest {
 
-  private final SpelExpressionSupport spelExpressionSupport;
+  private final SpelExpressionUtil spelExpressionUtil;
 
-  SpelExpressionSupportTest() {
-    this.spelExpressionSupport = new SpelExpressionSupport(new SpelExpressionParser());
+  SpelExpressionUtilTest() {
+    this.spelExpressionUtil = new SpelExpressionUtil(new SpelExpressionParser());
   }
 
   @DisplayName("표현식을 평가해 결과를 반환한다")
@@ -34,7 +34,7 @@ class SpelExpressionSupportTest {
         .build();
 
     // when
-    List<Integer> result = (List<Integer>) spelExpressionSupport.parse(request, List.class);
+    List<Integer> result = (List<Integer>) spelExpressionUtil.parse(request, List.class);
 
     // then
     assertThat(result).contains(1, 2);
@@ -55,7 +55,7 @@ class SpelExpressionSupportTest {
         .build();
 
     // when
-    List<Integer> result = (List<Integer>) spelExpressionSupport.parse(request, List.class);
+    List<Integer> result = (List<Integer>) spelExpressionUtil.parse(request, List.class);
 
     // then
     assertThat(result).isNotEmpty()

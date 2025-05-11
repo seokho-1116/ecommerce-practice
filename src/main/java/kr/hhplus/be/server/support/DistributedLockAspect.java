@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import kr.hhplus.be.server.common.exception.ServerException;
 import kr.hhplus.be.server.support.spel.ParseRequest.SpelParseRequest;
-import kr.hhplus.be.server.support.spel.SpelExpressionSupport;
+import kr.hhplus.be.server.support.spel.SpelExpressionUtil;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class DistributedLockAspect {
 
-  private final SpelExpressionSupport spelExpressionSupport;
+  private final SpelExpressionUtil spelExpressionUtil;
   private final RedissonClient redissonClient;
 
   @SuppressWarnings("unchecked")
@@ -37,7 +37,7 @@ public class DistributedLockAspect {
         .expression(annotation.expression())
         .build();
 
-    List<Object> keys = spelExpressionSupport.parse(request, List.class);
+    List<Object> keys = spelExpressionUtil.parse(request, List.class);
     if (keys == null || keys.isEmpty()) {
       throw new IllegalArgumentException("락 키가 비어있습니다.");
     }
