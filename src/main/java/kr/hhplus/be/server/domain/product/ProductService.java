@@ -73,27 +73,7 @@ public class ProductService {
         .collect(Collectors.toMap(ProductWithQuantity::id, Function.identity()));
 
     List<ProductWithRank> productWithRanks = productIdWithRanks.stream()
-        .map(productIdWithRank -> {
-          Long productId = productIdWithRank.productId();
-          ProductWithQuantity productWithQuantity = productWithQuantities.get(productId);
-
-          if (productWithQuantity == null) {
-            return null;
-          }
-
-          Long quantity = productWithQuantity.options().stream()
-              .mapToLong(ProductWithQuantityOption::quantity)
-              .sum();
-
-          return new ProductWithRank(
-              productIdWithRank.rank(),
-              quantity,
-              productId,
-              productWithQuantity.name(),
-              productWithQuantity.description(),
-              productWithQuantity.basePrice()
-          );
-        })
+        .map(productIdWithRank -> ProductWithRank.of(productIdWithRank, productWithQuantities))
         .filter(Objects::nonNull)
         .toList();
 
@@ -130,7 +110,8 @@ public class ProductService {
     LocalDate now = LocalDate.now();
     LocalDateTime from = now.minusDays(3).atStartOfDay();
     LocalDateTime to = LocalDateTime.now();
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(from,
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(
+        from,
         to);
 
     if (productIdWithRanks != null && !productIdWithRanks.isEmpty()) {
