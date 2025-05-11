@@ -4,8 +4,10 @@ import kr.hhplus.be.server.common.TestHelpRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class IntegrationTestSupport {
 
   @Autowired
@@ -14,5 +16,6 @@ public abstract class IntegrationTestSupport {
   @AfterEach
   void tearDown() {
     testHelpRepository.cleanup();
+    testHelpRepository.cleanCache();
   }
 }
