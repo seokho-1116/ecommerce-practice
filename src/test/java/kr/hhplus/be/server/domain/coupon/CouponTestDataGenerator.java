@@ -31,19 +31,6 @@ public class CouponTestDataGenerator {
         .create();
   }
 
-  public Coupon validLimitedCoupon(Long availableCount) {
-    LocalDateTime now = LocalDateTime.now();
-    return Instancio.of(Coupon.class)
-        .ignore(field(Coupon::getId))
-        .set(field(Coupon::getIsActive), true)
-        .set(field(Coupon::getFrom), now.minusDays(3))
-        .set(field(Coupon::getTo), now.plusDays(3))
-        .set(field(Coupon::getQuantity), availableCount)
-        .ignore(field(Coupon::getCreatedAt))
-        .ignore(field(Coupon::getUpdatedAt))
-        .create();
-  }
-
   public UserCoupon userCoupon(User user, Coupon coupon) {
     return Instancio.of(UserCoupon.class)
         .ignore(field(UserCoupon::getId))

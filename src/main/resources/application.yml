@@ -22,10 +22,6 @@ spring:
         globally_quoted_identifiers: true
       hibernate.timezone.default_storage: NORMALIZE_UTC
       hibernate.jdbc.time_zone: UTC
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
 
 ---
 spring.config.activate.on-profile: local, test
