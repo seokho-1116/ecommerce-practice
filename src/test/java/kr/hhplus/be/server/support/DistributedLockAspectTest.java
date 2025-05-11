@@ -2,69 +2,76 @@ package kr.hhplus.be.server.support;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
+import kr.hhplus.be.server.support.spel.SpelExpressionSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 @ExtendWith(MockitoExtension.class)
 class DistributedLockAspectTest {
 
   @Mock
-  private ProceedingJoinPoint joinPoint;
+  private SpelExpressionSupport spelExpressionSupport;
 
   @Mock
   private RedissonClient redissonClient;
 
   @Mock
-  private MethodSignature methodSignature;
-
-  @Mock
   private RLock rLock;
 
-  @InjectMocks
-  private DistributedLockAspect distributedLockAspect;
+  private TestService testService;
 
-  @Test
-  @DisplayName("AOP가 정상적으로 동작해야 한다")
-  void testAroundDistributedLock() throws Throwable {
-    // given
-    when(joinPoint.getSignature()).thenReturn(methodSignature);
-    when(joinPoint.getArgs()).thenReturn(new Object[]{1L, 1L});
+  @BeforeEach
+  void setUp() {
+    DistributedLockAspect distributedLockAspect = new DistributedLockAspect(spelExpressionSupport,
+        redissonClient);
 
-    Method method = DistributedLockAspectTest.class.getDeclaredMethod("test", Long.class, Long.class);
-    when(methodSignature.getParameterNames()).thenReturn(new String[]{"param1", "param2"});
-    when(methodSignature.getMethod()).thenReturn(method);
+    testService = new TestService();
+    AspectJProxyFactory factory = new AspectJProxyFactory(testService);
+    factory.addAspect(distributedLockAspect);
 
-    when(redissonClient.getMultiLock(any())).thenReturn(rLock);
-    when(rLock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
-
-    // when
-    distributedLockAspect.aroundDistributedLock(joinPoint);
-
-    // then
-    verify(joinPoint, atLeastOnce()).proceed();
+    testService = factory.getProxy();
   }
 
-  @DistributedLock(
-      key = CacheKey.COUPON_ISSUE,
-      expression = "#param1",
-      timeout = 1000,
-      timeUnit = TimeUnit.MILLISECONDS
-  )
-  void test(Long param1, Long param2) {
-    // do nothing
+  @DisplayName("분산락 AOP가 정상적으로 동작해야 한다")
+  @Test
+  void testAroundDistributedLock() throws Throwable {
+    // given
+    when(redissonClient.getMultiLock(any())).thenReturn(rLock);
+    when(rLock.tryLock(anyLong(), any())).thenReturn(true);
+    when(rLock.isHeldByCurrentThread()).thenReturn(true);
+    when(spelExpressionSupport.parse(any(), any())).thenReturn(List.of("1"));
+
+    // when
+    testService.testMethod(1L, 1L);
+
+    // then
+    verify(rLock, times(1)).tryLock(anyLong(), any());
+    verify(rLock, times(1)).unlock();
+  }
+
+  static class TestService {
+
+    @DistributedLock(
+        key = CacheKey.COUPON_ISSUE,
+        expression = "#param1",
+        timeout = 1000L,
+        timeUnit = TimeUnit.MILLISECONDS
+    )
+    public void testMethod(Long param1, Long param2) {
+      // do nothing
+    }
   }
 }

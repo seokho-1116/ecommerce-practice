@@ -2,6 +2,8 @@ package kr.hhplus.be.server.domain.product;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
 
 public record ProductDto() {
 
@@ -25,6 +27,28 @@ public record ProductDto() {
       Long basePrice
   ) {
 
+    public static ProductWithRank of(ProductIdWithRank productIdWithRank,
+        Map<Long, ProductWithQuantity> productWithQuantities) {
+      Long productId = productIdWithRank.productId();
+      ProductWithQuantity productWithQuantity = productWithQuantities.get(productId);
+
+      if (productWithQuantity == null) {
+        return null;
+      }
+
+      Long quantity = productWithQuantity.options().stream()
+          .mapToLong(ProductWithQuantityOption::quantity)
+          .sum();
+
+      return new ProductWithRank(
+          productIdWithRank.rank(),
+          quantity,
+          productId,
+          productWithQuantity.name(),
+          productWithQuantity.description(),
+          productWithQuantity.basePrice()
+      );
+    }
   }
 
   public record ProductIdWithRank(
@@ -44,7 +68,8 @@ public record ProductDto() {
   ) {
 
     public static ProductWithQuantity from(Product product) {
-      List<ProductWithQuantityOption> productWithQuantityOptions = product.getProductOptions().stream()
+      List<ProductWithQuantityOption> productWithQuantityOptions = product.getProductOptions()
+          .stream()
           .map(productOption -> new ProductWithQuantityOption(
               productOption.getId(),
               productOption.getName(),
