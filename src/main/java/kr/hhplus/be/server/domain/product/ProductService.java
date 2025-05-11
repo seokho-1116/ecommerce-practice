@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
@@ -15,6 +16,7 @@ import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
+import kr.hhplus.be.server.support.CacheKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +57,8 @@ public class ProductService {
   public Top5SellingProducts findTop5SellingProducts() {
     LocalDate now = LocalDate.now();
     LocalDateTime from = now.minusDays(3).atStartOfDay();
-    LocalDateTime to = now.minusDays(1).atTime(LocalTime.MAX);
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(
+    LocalDateTime to = LocalDateTime.now();
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankViewInCache(
         from,
         to
     );
@@ -102,7 +104,12 @@ public class ProductService {
     return productRepository.findAll();
   }
 
-  public void saveTop5SellingProductsBefore(LocalDateTime from, LocalDateTime to) {
+  public void saveTop5SellingProducts() {
+    LocalTime now = LocalTime.now();
+    int oneHourAgo = now.getHour() - 1;
+    LocalDateTime from = LocalDate.now().atTime(oneHourAgo, 0, 0, 0);
+    LocalDateTime to = LocalDate.now().atTime(now.getHour(), 0, 0, 0);
+
     List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProducts(
         from, to);
 
@@ -117,5 +124,22 @@ public class ProductService {
         .toList();
 
     productRepository.saveAllRankingViews(productSellingRankViews);
+  }
+
+  public void saveTop5SellingProductIdsInCache() {
+    LocalDate now = LocalDate.now();
+    LocalDateTime from = now.minusDays(3).atStartOfDay();
+    LocalDateTime to = LocalDateTime.now();
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(from,
+        to);
+
+    if (productIdWithRanks != null && !productIdWithRanks.isEmpty()) {
+      productRepository.saveTop5SellingProductInCache(
+          CacheKey.TOP5_SELLING_PRODUCT,
+          productIdWithRanks,
+          25,
+          TimeUnit.HOURS
+      );
+    }
   }
 }

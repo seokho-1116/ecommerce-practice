@@ -1,7 +1,11 @@
 package kr.hhplus.be.server.support;
 
+import lombok.Getter;
+
+@Getter
 public enum CacheKey {
-  COUPON_ISSUE("coupon:issue"),;
+  COUPON_ISSUE("coupon:issue"),
+  TOP5_SELLING_PRODUCT("top5_selling_product");
 
   private final String key;
 
