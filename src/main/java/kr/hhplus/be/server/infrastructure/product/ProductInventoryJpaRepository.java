@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 public interface ProductInventoryJpaRepository extends JpaRepository<ProductInventory, Long> {
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "3000")})
+  @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout]", value = "3000")})
   List<ProductInventory> findProductInventoriesForUpdateByProductOptionIdIn(
       List<Long> productOptionIds);
 }
