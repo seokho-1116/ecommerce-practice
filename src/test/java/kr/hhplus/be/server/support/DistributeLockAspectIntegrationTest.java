@@ -27,7 +27,7 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
     testService = factory.getProxy();
   }
 
-  @DisplayName("분산락 AOP가 정상 동작하여 값을 순차적으로 증가시킨다.")
+  @DisplayName("분산락 AOP가 정상 동작하여 값을 순차적으로 증가시킨다")
   @Test
   void testDistributedLock() throws InterruptedException {
     // given
@@ -40,6 +40,8 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
       new Thread(() -> {
         try {
           testService.testMethod(key);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
         } finally {
           latch.countDown();
         }
@@ -51,31 +53,37 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
     assertThat(testService.getGlobalValue()).isEqualTo(concurrentThreadCount);
   }
 
-  @DisplayName("AOP가 적용되지 않은 메서드는 분산락을 사용하지 않는다.")
+  @DisplayName("AOP가 적용되지 않은 메서드는 분산락을 사용하지 않는다")
   @Test
   void testNotAop() throws InterruptedException {
     // given
     Long key = 1L;
-    CountDownLatch latch = new CountDownLatch(2);
+    CountDownLatch startLatch = new CountDownLatch(1);
     int concurrentThreadCount = 2;
+    CountDownLatch latch = new CountDownLatch(concurrentThreadCount);
 
     // when
     for (int i = 0; i < concurrentThreadCount; i++) {
       new Thread(() -> {
         try {
+          startLatch.await();
+
           testService.notAop(key);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
         } finally {
           latch.countDown();
         }
       }).start();
     }
+    startLatch.countDown();
     latch.await();
 
     // then
     assertThat(testService.getGlobalValue()).isNotEqualTo(concurrentThreadCount);
   }
 
-  @DisplayName("잘못된 키를 사용한 경우 예외가 발생한다.")
+  @DisplayName("잘못된 키를 사용한 경우 예외가 발생한다")
   @Test
   void testWrongKey() {
     // given
@@ -97,8 +105,10 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
         timeout = 1000L,
         timeUnit = TimeUnit.MILLISECONDS
     )
-    public void testMethod(Long key) {
-      globalValue++;
+    public void testMethod(Long key) throws InterruptedException {
+      long value = globalValue;
+      Thread.sleep(10);
+      globalValue = value + 1;
     }
 
     @DistributedLock(
@@ -107,12 +117,16 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
         timeout = 1000L,
         timeUnit = TimeUnit.MILLISECONDS
     )
-    public void wrongKey(Long key) {
-      globalValue++;
+    public void wrongKey(Long key) throws InterruptedException {
+      long value = globalValue;
+      Thread.sleep(10);
+      globalValue = value + 1;
     }
 
-    public void notAop(Long key) {
-      globalValue++;
+    public void notAop(Long key) throws InterruptedException {
+      long value = globalValue;
+      Thread.sleep(10);
+      globalValue = value + 1;
     }
 
     public Long getGlobalValue() {
