@@ -46,9 +46,9 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public List<ProductIdWithRank> findTop5SellingProducts(
+  public List<ProductIdWithRank> findAllSellingProductsWithRank(
       LocalDateTime from, LocalDateTime to) {
-    return productCustomRepository.findTop5SellingProducts(
+    return productCustomRepository.findAllSellingProductsWithRank(
         from, to);
   }
 

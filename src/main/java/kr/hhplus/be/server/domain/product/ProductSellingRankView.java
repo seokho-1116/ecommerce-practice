@@ -21,17 +21,15 @@ public class ProductSellingRankView extends BaseEntity {
 
   private Long productId;
   private Long totalSales;
-  private Long rank;
   private LocalDateTime from;
   private LocalDateTime to;
 
   @Builder
-  public ProductSellingRankView(Long id, Long productId, Long totalSales, Long rank,
+  public ProductSellingRankView(Long id, Long productId, Long totalSales,
       LocalDateTime from, LocalDateTime to) {
     this.id = id;
     this.productId = productId;
     this.totalSales = totalSales;
-    this.rank = rank;
     this.from = from;
     this.to = to;
   }

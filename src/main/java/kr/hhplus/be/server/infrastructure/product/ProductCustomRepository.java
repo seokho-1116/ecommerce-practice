@@ -15,7 +15,7 @@ public class ProductCustomRepository {
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 
-  public List<ProductIdWithRank> findTop5SellingProducts(
+  public List<ProductIdWithRank> findAllSellingProductsWithRank(
       LocalDateTime from, LocalDateTime to) {
     String query = """
         WITH ranked_products AS (
@@ -31,7 +31,6 @@ public class ProductCustomRepository {
                ranked_products.totalSales,
                ranked_products.sellingRank
         FROM ranked_products
-        WHERE ranked_products.sellingRank <= 5
         ORDER BY ranked_products.sellingRank
         """;
 

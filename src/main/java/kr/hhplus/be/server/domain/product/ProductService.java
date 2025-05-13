@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import kr.hhplus.be.server.support.CacheKey;
@@ -90,14 +89,13 @@ public class ProductService {
     LocalDateTime from = LocalDate.now().atTime(oneHourAgo, 0, 0, 0);
     LocalDateTime to = LocalDate.now().atTime(now.getHour(), 0, 0, 0);
 
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProducts(
+    List<ProductIdWithRank> productIdWithRanks = productRepository.findAllSellingProductsWithRank(
         from, to);
 
     List<ProductSellingRankView> productSellingRankViews = productIdWithRanks.stream()
         .map(productIdWithRank -> ProductSellingRankView.builder()
             .productId(productIdWithRank.productId())
             .totalSales(productIdWithRank.totalSales())
-            .rank(productIdWithRank.rank())
             .from(from)
             .to(to)
             .build())

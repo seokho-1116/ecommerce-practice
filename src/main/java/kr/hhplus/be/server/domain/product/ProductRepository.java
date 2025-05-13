@@ -16,7 +16,7 @@ public interface ProductRepository {
 
   void saveAll(List<ProductInventory> productInventories);
 
-  List<ProductIdWithRank> findTop5SellingProducts(
+  List<ProductIdWithRank> findAllSellingProductsWithRank(
       LocalDateTime from,
       LocalDateTime to
   );
