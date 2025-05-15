@@ -5,9 +5,14 @@ plugins {
 }
 
 fun getGitHash(): String {
-    return providers.exec {
-        commandLine("git", "rev-parse", "--short", "HEAD")
-    }.standardOutput.asText.get().trim()
+    val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD")
+        .directory(project.rootDir)
+        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+        .redirectError(ProcessBuilder.Redirect.PIPE)
+        .start()
+
+    val output = process.inputStream.bufferedReader().readText().trim()
+    return output.ifEmpty { "unknown" }
 }
 
 group = "kr.hhplus.be"
@@ -41,6 +46,9 @@ dependencies {
     implementation("io.lettuce:lettuce-core:6.5.5.RELEASE")
     implementation("org.redisson:redisson:3.46.0")
 
+    // monitoring
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
@@ -59,6 +67,10 @@ dependencies {
     testImplementation("org.testcontainers:mysql")
     testImplementation("org.instancio:instancio-core:5.4.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.named<Jar>("jar") {
+    enabled = false
 }
 
 tasks.withType<Test> {

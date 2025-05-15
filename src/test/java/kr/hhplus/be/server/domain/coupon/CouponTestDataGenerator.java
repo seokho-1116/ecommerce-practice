@@ -50,7 +50,7 @@ public class CouponTestDataGenerator {
         .set(field(UserCoupon::getIsActive), true)
         .ignore(field(UserCoupon::getCreatedAt))
         .ignore(field(UserCoupon::getUpdatedAt))
-        .set(field(UserCoupon::getUser), user)
+        .set(field(UserCoupon::getUserId), user.getId())
         .set(field(UserCoupon::getCoupon), coupon)
         .create();
   }
@@ -62,7 +62,7 @@ public class CouponTestDataGenerator {
         .set(field(UserCoupon::getIsUsed), false)
         .ignore(field(UserCoupon::getCreatedAt))
         .ignore(field(UserCoupon::getUpdatedAt))
-        .set(field(UserCoupon::getUser), user)
+        .set(field(UserCoupon::getUserId), user.getId())
         .set(field(UserCoupon::getCoupon), coupon)
         .create();
   }

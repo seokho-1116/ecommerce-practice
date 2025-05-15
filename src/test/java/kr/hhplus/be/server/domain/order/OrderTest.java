@@ -67,7 +67,7 @@ class OrderTest {
         .id(1L)
         .build();
     UserCoupon userCoupon = UserCoupon.builder()
-        .user(user)
+        .userId(user.getId())
         .coupon(coupon)
         .isUsed(false)
         .build();
@@ -102,7 +102,7 @@ class OrderTest {
         .build();
     UserCoupon userCoupon = UserCoupon.builder()
         .coupon(coupon)
-        .user(user)
+        .userId(user.getId())
         .isUsed(false)
         .build();
     UserCouponInfo userCouponInfo = UserCouponInfo.from(userCoupon);
