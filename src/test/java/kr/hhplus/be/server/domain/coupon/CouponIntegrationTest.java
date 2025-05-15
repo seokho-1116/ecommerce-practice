@@ -2,13 +2,17 @@ package kr.hhplus.be.server.domain.coupon;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
+import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
+import kr.hhplus.be.server.support.CacheKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,12 +31,16 @@ class CouponIntegrationTest extends IntegrationTestSupport {
 
   private UserCoupon userCoupon;
   private User user;
+  private User user2;
   private Coupon coupon;
 
   @BeforeEach
   void setup() {
     user = userTestDataGenerator.user();
     testHelpRepository.save(user);
+
+    user2 = userTestDataGenerator.user();
+    testHelpRepository.save(user2);
 
     coupon = couponTestDataGenerator.validateCoupon();
     TestReflectionUtil.setField(coupon, "quantity", 10L);
@@ -56,15 +64,20 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     assertThat(result.isUsed()).isTrue();
   }
 
-  @DisplayName("쿠폰을 발급하면 쿠폰이 발급된다")
+  @DisplayName("쿠폰을 발급을 요청하면 쿠폰이 발급 요청이 수행된다")
   @Test
   void issueTest() {
     // given
     // when
-    UserCouponInfo issuedCoupon = couponService.issue(user, coupon.getId());
+    CouponIssueInfo issuedCoupon = couponService.issue(user.getId(), coupon.getId());
 
     // then
-    assertThat(issuedCoupon.isUsed()).isFalse();
+    String couponId = String.valueOf(coupon.getId());
+    String key = CacheKey.COUPON_EVENT_QUEUE.appendAfterColon(couponId);
+    Set<Long> userIds = testHelpRepository.findZsetInCache(key, 0, 100, new TypeReference<>() {
+    });
+    assertThat(issuedCoupon).isNotNull();
+    assertThat(userIds).contains(user.getId());
   }
 
   @DisplayName("동시에 쿠폰을 사용하면 쿠폰이 한 장만 사용된다")
@@ -106,25 +119,31 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     CountDownLatch latch = new CountDownLatch(concurrentRequest);
 
     // when
-    for (int i = 0; i < concurrentRequest; i++) {
-      new Thread(() -> {
-        try {
-          couponService.issue(user, coupon.getId());
-        } catch (Exception ignore) {
-          // ignore
-        } finally {
-          latch.countDown();
-        }
-      }).start();
-    }
+    new Thread(() -> {
+      try {
+        couponService.issue(user.getId(), coupon.getId());
+      } catch (Exception ignore) {
+        // ignore
+      } finally {
+        latch.countDown();
+      }
+    }).start();
+
+    new Thread(() -> {
+      try {
+        couponService.issue(user2.getId(), coupon.getId());
+      } catch (Exception ignore) {
+        // ignore
+      } finally {
+        latch.countDown();
+      }
+    }).start();
+
     latch.await();
 
     // then
-    Long couponQuantity = couponService.findAllCoupons().stream()
-        .filter(issue -> issue.getId().equals(coupon.getId()))
-        .map(Coupon::getQuantity)
-        .findAny()
-        .orElse(-1L);
-    assertThat(couponQuantity).isEqualTo(coupon.getQuantity() - concurrentRequest);
+    Set<Long> userIds = testHelpRepository.findZsetInCache(CacheKey.COUPON_EVENT_QUEUE.getKey(), 0, 100, new TypeReference<>() {
+    });
+    assertThat(userIds).hasSize(concurrentRequest);
   }
 }

@@ -3,8 +3,9 @@ package kr.hhplus.be.server.domain.coupon;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponNotFoundException;
+import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
-import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.support.CacheKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +30,13 @@ public class CouponService {
     couponRepository.saveUserCoupon(userCoupon);
   }
 
-  @Transactional
-  public UserCouponInfo issue(User user, Long couponId) {
-    Coupon coupon = couponRepository.findForUpdateById(couponId)
+  public CouponIssueInfo issue(Long userId, Long couponId) {
+    Coupon coupon = couponRepository.findById(couponId)
         .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
 
-    UserCoupon userCoupon = coupon.issue(user);
-    couponRepository.save(coupon);
+    couponRepository.addQueue(CacheKey.COUPON_EVENT_QUEUE.getKey(), userId, System.currentTimeMillis());
 
-    UserCoupon result = couponRepository.saveUserCoupon(userCoupon);
-    return UserCouponInfo.from(result);
+    return CouponIssueInfo.from(userId, coupon.getId());
   }
 
   public List<Coupon> findAllCoupons() {

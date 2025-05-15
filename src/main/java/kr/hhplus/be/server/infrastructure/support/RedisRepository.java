@@ -67,4 +67,12 @@ public class RedisRepository {
         })
         .toList();
   }
+
+  public void addIfAbsent(String key, String value, long currentTimeMillis) {
+    try {
+      redisTemplate.opsForZSet().addIfAbsent(key, value, currentTimeMillis);
+    } catch (Exception e) {
+      throw new ServerException(e);
+    }
+  }
 }

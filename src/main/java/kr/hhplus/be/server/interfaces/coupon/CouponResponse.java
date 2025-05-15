@@ -4,9 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.Coupon;
-import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
+import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
-import kr.hhplus.be.server.domain.coupon.UserCoupon;
 
 public class CouponResponse {
 
@@ -17,43 +16,15 @@ public class CouponResponse {
       @Schema(description = "쿠폰 ID")
       Long couponId,
 
-      @Schema(description = "유저 쿠폰 ID")
-      Long userCouponId,
-
-      @Schema(description = "쿠폰 이름")
-      String couponName,
-
-      @Schema(description = "할인율")
-      Double discountRate,
-
-      @Schema(description = "할인 금액")
-      Long discountAmount,
-
-      @Schema(description = "쿠폰 타입")
-      CouponType couponType,
-
-      @Schema(description = "쿠폰 사용 가능 시작일")
-      LocalDateTime from,
-
-      @Schema(description = "쿠폰 사용 가능 종료일")
-      LocalDateTime to,
-
-      @Schema(description = "쿠폰 발급일")
-      LocalDateTime createdAt
+      @Schema(description = "쿠폰 발급 요청 성공 시간")
+      LocalDateTime issuedAt
   ) {
 
-    public static CouponIssueResponse from(UserCouponInfo userCoupon) {
+    public static CouponIssueResponse from(CouponIssueInfo userCoupon) {
       return new CouponIssueResponse(
           userCoupon.userId(),
           userCoupon.couponId(),
-          userCoupon.id(),
-          userCoupon.couponName(),
-          userCoupon.discountRate(),
-          userCoupon.discountAmount(),
-          userCoupon.couponType(),
-          userCoupon.from(),
-          userCoupon.to(),
-          userCoupon.createdAt()
+          userCoupon.issuedAt()
       );
     }
   }

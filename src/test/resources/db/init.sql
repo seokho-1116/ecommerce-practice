@@ -12,7 +12,8 @@ create table coupon
     quantity        bigint       null,
     coupon_type     varchar(30)     null,
     `from`          datetime     null,
-    `to`            datetime     null
+    `to`            datetime     null,
+    coupon_status  varchar(30)     null
 );
 
 create table `order`

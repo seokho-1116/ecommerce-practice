@@ -7,6 +7,16 @@ public class CouponDto {
 
   private CouponDto() {}
 
+  public record CouponIssueInfo(
+      Long userId,
+      Long couponId,
+      LocalDateTime issuedAt
+  ) {
+    public static CouponIssueInfo from(Long userId, Long couponId) {
+      return new CouponIssueInfo(userId, couponId, LocalDateTime.now());
+    }
+  }
+
   public record UserCouponInfo(
       Long id,
       Long userId,
