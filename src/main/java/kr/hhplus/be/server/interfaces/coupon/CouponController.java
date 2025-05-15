@@ -3,9 +3,13 @@ package kr.hhplus.be.server.interfaces.coupon;
 import jakarta.validation.Valid;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.Coupon;
+import kr.hhplus.be.server.domain.coupon.CouponDto.CouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
+import kr.hhplus.be.server.domain.coupon.CouponEventCommand;
 import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.coupon.CouponRequest.CouponEventRequest;
+import kr.hhplus.be.server.interfaces.coupon.CouponRequest.CouponIssueRequest;
 import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponIssueResponse;
 import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponSummaryResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,17 @@ public class CouponController implements CouponControllerSpec {
 
     CouponIssueResponse response = CouponIssueResponse.from(userCoupon);
 
+    return CommonResponseWrapper.ok(response);
+  }
+
+  @PostMapping("/event")
+  public CommonResponseWrapper<CouponSummaryResponse> saveCouponEvent(
+      @RequestBody @Valid CouponEventRequest request) {
+    CouponEventCommand event = request.toCommand();
+
+    CouponInfo couponInfo = couponService.saveCouponEvent(event);
+
+    CouponSummaryResponse response = CouponSummaryResponse.from(couponInfo);
     return CommonResponseWrapper.ok(response);
   }
 }

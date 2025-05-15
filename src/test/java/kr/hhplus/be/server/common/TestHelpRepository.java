@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.common.exception.ServerException;
-import kr.hhplus.be.server.support.CacheKey;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
@@ -91,7 +90,7 @@ public class TestHelpRepository {
     return entityType.getName().replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
   }
 
-  public <T> T findInCache(CacheKey key, TypeReference<T> typeReference) {
+  public <T> T findInCache(String key, TypeReference<T> typeReference) {
     try {
       String jsonValue = redisTemplate.opsForValue().get(key);
       if (jsonValue == null) {

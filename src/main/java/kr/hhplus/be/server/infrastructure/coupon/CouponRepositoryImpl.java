@@ -25,21 +25,33 @@ public class CouponRepositoryImpl implements CouponRepository {
   }
 
   @Override
+  public List<UserCoupon> findUserCouponsByUserId(Long userId) {
+    return userCouponJpaRepository.findAllByUserId(userId);
+  }
+
+  @Override
   public UserCoupon saveUserCoupon(UserCoupon userCoupon) {
     return userCouponJpaRepository.save(userCoupon);
   }
 
   @Override
   public Optional<Coupon> findById(Long couponId) {
-    CacheKey cacheKey = CacheKey.COUPON;
-    String key = cacheKey.appendAfterColon(String.valueOf(couponId));
+    return couponJpaRepository.findById(couponId);
+  }
+
+  @Override
+  public Optional<Coupon> findByIdInCache(Long couponId) {
+    String key = CacheKey.COUPON.appendAfterColon(String.valueOf(couponId));
     Coupon coupon = redisRepository.find(key, new TypeReference<>() {
     });
     if (coupon != null) {
       return Optional.of(coupon);
     }
 
-    return couponJpaRepository.findById(couponId);
+    Optional<Coupon> optionalCoupon = couponJpaRepository.findById(couponId);
+    optionalCoupon.ifPresent(value -> redisRepository.save(key, value));
+
+    return optionalCoupon;
   }
 
   @Override
@@ -53,12 +65,41 @@ public class CouponRepositoryImpl implements CouponRepository {
   }
 
   @Override
-  public void save(Coupon coupon) {
-    couponJpaRepository.save(coupon);
+  public Coupon save(Coupon coupon) {
+    return couponJpaRepository.save(coupon);
   }
 
   @Override
   public void addQueue(String key, Long userId, long currentTimeMillis) {
-    redisRepository.addIfAbsent(key, String.valueOf(userId), currentTimeMillis);
+    redisRepository.saveIfAbsent(key, String.valueOf(userId), currentTimeMillis);
+  }
+
+  @Override
+  public Optional<Coupon> findEventCoupon(String key) {
+    Coupon coupon = redisRepository.find(key, new TypeReference<>() {
+    });
+
+    return Optional.ofNullable(coupon);
+  }
+
+  @Override
+  public List<Long> findAllUserIdInQueue(String key, long startInclusive, long endExclusive) {
+    return redisRepository.findRangeInZset(key, startInclusive, endExclusive, new TypeReference<>() {
+    });
+  }
+
+  @Override
+  public void saveInCache(String key, Coupon coupon) {
+    redisRepository.save(key, coupon);
+  }
+
+  @Override
+  public void deleteEventCoupon(String key) {
+    redisRepository.delete(key);
+  }
+
+  @Override
+  public Optional<UserCoupon> findUserCouponForUpdateByUserIdAndCouponId(Long userId, Long couponId) {
+    return userCouponJpaRepository.findUserCouponByUserIdAndCouponId(userId, couponId);
   }
 }

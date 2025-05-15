@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.domain.coupon.Coupon;
+import kr.hhplus.be.server.domain.coupon.CouponDto.CouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 
@@ -54,6 +55,19 @@ public class CouponResponse {
       @Schema(description = "쿠폰 발급일")
       LocalDateTime createdAt
   ) {
+
+    public static CouponSummaryResponse from(CouponInfo coupon) {
+      return new CouponSummaryResponse(
+          coupon.id(),
+          coupon.name(),
+          coupon.discountRate(),
+          coupon.discountAmount(),
+          coupon.couponType(),
+          coupon.from(),
+          coupon.to(),
+          coupon.createdAt()
+      );
+    }
 
     public static List<CouponSummaryResponse> from(List<Coupon> coupons) {
       return coupons.stream()

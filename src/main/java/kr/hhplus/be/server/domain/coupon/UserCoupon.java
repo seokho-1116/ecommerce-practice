@@ -10,7 +10,6 @@ import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import kr.hhplus.be.server.domain.BaseEntity;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponIllegalStateException;
-import kr.hhplus.be.server.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +27,7 @@ public class UserCoupon extends BaseEntity {
   private Long id;
 
   private Boolean isUsed;
+  private Long userId;
 
   @Version
   private Long version;
@@ -35,10 +35,6 @@ public class UserCoupon extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "coupon_id")
   private Coupon coupon;
-
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
 
   public long calculateDiscountPrice(long totalPrice) {
     return coupon.calculateDiscountPrice(totalPrice);

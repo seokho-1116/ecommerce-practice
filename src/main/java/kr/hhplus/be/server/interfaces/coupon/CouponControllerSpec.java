@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
+import kr.hhplus.be.server.interfaces.coupon.CouponRequest.CouponEventRequest;
+import kr.hhplus.be.server.interfaces.coupon.CouponRequest.CouponIssueRequest;
 import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponIssueResponse;
 import kr.hhplus.be.server.interfaces.coupon.CouponResponse.CouponSummaryResponse;
 
@@ -54,4 +56,24 @@ public interface CouponControllerSpec {
       }
   )
   CommonResponseWrapper<CouponIssueResponse> issue(@RequestBody CouponIssueRequest request);
+
+  @Operation(
+      summary = "쿠폰 이벤트 생성",
+      description = "쿠폰 이벤트를 생성합니다.",
+      tags = {"쿠폰"}
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "쿠폰 이벤트 생성 성공",
+              useReturnTypeSchema = true
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "서버 오류"
+          )
+      }
+  )
+  CommonResponseWrapper<CouponSummaryResponse> saveCouponEvent(CouponEventRequest request);
 }

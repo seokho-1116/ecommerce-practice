@@ -92,9 +92,22 @@ public class Coupon extends BaseEntity {
     }
 
     return UserCoupon.builder()
-        .user(user)
+        .userId(user.getId())
         .isUsed(false)
         .coupon(this)
         .build();
+  }
+
+  public void updateCouponStatus(CouponStatus couponStatus) {
+    this.couponStatus = couponStatus;
+  }
+
+  public boolean isNotAvailableForIssue() {
+    LocalDateTime now = LocalDateTime.now();
+    return !CouponStatus.AVAILABLE.equals(couponStatus)
+        || now.isBefore(from)
+        || now.isAfter(to)
+        || quantity == null
+        || quantity <= 0;
   }
 }

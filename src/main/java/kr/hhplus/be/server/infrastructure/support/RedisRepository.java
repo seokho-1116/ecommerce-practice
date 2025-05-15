@@ -19,6 +19,15 @@ public class RedisRepository {
   private final StringRedisTemplate redisTemplate;
   private final ObjectMapper objectMapper;
 
+  public void save(String key, Object value) {
+    try {
+      String jsonValue = objectMapper.writeValueAsString(value);
+      redisTemplate.opsForValue().set(key, jsonValue);
+    } catch (Exception e) {
+      throw new ServerException(e);
+    }
+  }
+
   public void save(String key, Object value, long expireTime, TimeUnit timeUnit) {
     try {
       String jsonValue = objectMapper.writeValueAsString(value);
@@ -49,9 +58,10 @@ public class RedisRepository {
     }
   }
 
-  public <T> List<Pair<T, Long>> findReverseRangeInZset(String key, long start, long end,
+  public <T> List<Pair<T, Long>> findReverseRangeInZsetWithRank(String key, long start, long end,
       TypeReference<T> typeReference) {
-    Set<TypedTuple<String>> result = redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
+    Set<TypedTuple<String>> result = redisTemplate.opsForZSet()
+        .reverseRangeWithScores(key, start, end);
     if (result == null) {
       return List.of();
     }
@@ -68,11 +78,51 @@ public class RedisRepository {
         .toList();
   }
 
-  public void addIfAbsent(String key, String value, long currentTimeMillis) {
+  public <T> List<T> findRangeInZset(String key, long start, long end,
+      TypeReference<T> typeReference) {
+    Set<String> result = redisTemplate.opsForZSet().range(key, start, end);
+    if (result == null || result.isEmpty()) {
+      return List.of();
+    }
+
+    return result.stream()
+        .map(value -> {
+          try {
+            return objectMapper.readValue(value, typeReference);
+          } catch (Exception e) {
+            throw new ServerException(e);
+          }
+        })
+        .toList();
+  }
+
+  public <T> List<T> findReverseRangeInZset(String key, long start, long end,
+      TypeReference<T> typeReference) {
+    Set<String> result = redisTemplate.opsForZSet().reverseRange(key, start, end);
+    if (result == null || result.isEmpty()) {
+      return List.of();
+    }
+
+    return result.stream()
+        .map(value -> {
+          try {
+            return objectMapper.readValue(value, typeReference);
+          } catch (Exception e) {
+            throw new ServerException(e);
+          }
+        })
+        .toList();
+  }
+
+  public void saveIfAbsent(String key, String value, long currentTimeMillis) {
     try {
       redisTemplate.opsForZSet().addIfAbsent(key, value, currentTimeMillis);
     } catch (Exception e) {
       throw new ServerException(e);
     }
+  }
+
+  public void delete(String key) {
+    redisTemplate.delete(key);
   }
 }

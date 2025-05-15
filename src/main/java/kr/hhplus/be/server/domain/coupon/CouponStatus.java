@@ -4,5 +4,5 @@ public enum CouponStatus {
 
   GENERAL,
   AVAILABLE,
-  ISSUE_COMPLETE,
+  COMPLETE,
 }

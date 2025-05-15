@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.domain.product.Product;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithTotalSales;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductInventory;
@@ -54,7 +53,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
   @Override
   public List<Pair<Long, Long>> findAllTopSellingProducts(String key, long start, long end) {
-    return redisRepository.findReverseRangeInZset(key, start, end, new TypeReference<>() {});
+    return redisRepository.findReverseRangeInZsetWithRank(key, start, end, new TypeReference<>() {});
   }
 
   @Override
