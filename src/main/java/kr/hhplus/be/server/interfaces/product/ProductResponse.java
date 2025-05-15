@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
@@ -70,11 +70,8 @@ public record ProductResponse(
 
   public record TopSellingProductsResponse(
 
-      @Schema(description = "상위 상품 집계 시작 시간")
-      LocalDateTime from,
-
-      @Schema(description = "상위 상품 집계 종료 시간")
-      LocalDateTime to,
+      @Schema(description = "상위 상품 집계일")
+      LocalDate date,
 
       @Schema(description = "상위 판매 상품 목록")
       List<TopSellingProduct> topSellingProducts
@@ -94,8 +91,7 @@ public record ProductResponse(
           .toList();
 
       return new TopSellingProductsResponse(
-          top5SellingProducts.from(),
-          top5SellingProducts.to(),
+          top5SellingProducts.date(),
           topSellingProductResponses
       );
     }
