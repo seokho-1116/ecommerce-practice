@@ -2,10 +2,14 @@ package kr.hhplus.be.server.infrastructure.support;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import kr.hhplus.be.server.common.exception.ServerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -35,5 +39,32 @@ public class RedisRepository {
     } catch (Exception e) {
       throw new ServerException(e);
     }
+  }
+
+  public void upsertScoreInZset(String key, String value, double score) {
+    try {
+      redisTemplate.opsForZSet().incrementScore(key, value, score);
+    } catch (Exception e) {
+      throw new ServerException(e);
+    }
+  }
+
+  public <T> List<Pair<T, Long>> findReverseRangeInZset(String key, long start, long end,
+      TypeReference<T> typeReference) {
+    Set<TypedTuple<String>> result = redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
+    if (result == null) {
+      return List.of();
+    }
+
+    return result.stream()
+        .map(tuple -> {
+          try {
+            T value = objectMapper.readValue(tuple.getValue(), typeReference);
+            return Pair.of(value, tuple.getScore() == null ? 0L : tuple.getScore().longValue());
+          } catch (Exception e) {
+            throw new ServerException(e);
+          }
+        })
+        .toList();
   }
 }

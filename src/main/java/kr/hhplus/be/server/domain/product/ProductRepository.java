@@ -2,10 +2,9 @@ package kr.hhplus.be.server.domain.product;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithTotalSales;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
-import kr.hhplus.be.server.support.CacheKey;
+import org.springframework.data.util.Pair;
 
 public interface ProductRepository {
 
@@ -16,21 +15,12 @@ public interface ProductRepository {
 
   void saveAll(List<ProductInventory> productInventories);
 
-  List<ProductIdWithRank> findAllSellingProductsWithRank(
+  List<ProductIdWithTotalSales> findAllSellingProductsWithRank(
       LocalDateTime from,
       LocalDateTime to
   );
 
-  List<ProductIdWithRank> findTop5SellingProductsFromRankView(
-      LocalDateTime from,
-      LocalDateTime to
-  );
-
-
-  List<ProductIdWithRank> findTop5SellingProductsFromRankViewInCache(
-      LocalDateTime from,
-      LocalDateTime to
-  );
+  List<Pair<Long, Long>> findAllTopSellingProducts(String key, long start, long end);
 
   List<ProductWithQuantity> findAll();
 
@@ -38,5 +28,5 @@ public interface ProductRepository {
 
   void saveAllRankingViews(List<ProductSellingRankView> productSellingRankViews);
 
-  void saveTop5SellingProductInCache(CacheKey key, List<ProductIdWithRank> productIdWithRanks, long ttl, TimeUnit timeUnit);
+  void saveInRankingBoard(Long productId, Long totalSales, String rankingBoardName);
 }
