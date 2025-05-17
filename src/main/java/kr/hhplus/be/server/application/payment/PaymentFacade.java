@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.payment;
 
+import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.payment.PaymentCommand;
@@ -10,7 +11,6 @@ import kr.hhplus.be.server.domain.product.ProductDeductCommand;
 import kr.hhplus.be.server.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @RequiredArgsConstructor
@@ -20,24 +20,21 @@ public class PaymentFacade {
   private final ProductService productService;
   private final PointService pointService;
   private final PaymentEventPublisher paymentEventPublisher;
-  private final TransactionTemplate transactionTemplate;
 
+  @Transactional
   public PaymentResult payOrder(PaymentCommand paymentCommand) {
-    PaymentResult result = transactionTemplate.execute(status -> {
-      OrderInfo order = orderService.findNotPaidOrderById(paymentCommand.orderId());
+    OrderInfo order = orderService.findNotPaidOrderById(paymentCommand.orderId());
 
-      ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.orderItems());
-      productService.deductInventory(productDeductCommand);
+    ProductDeductCommand productDeductCommand = ProductDeductCommand.from(order.orderItems());
+    productService.deductInventory(productDeductCommand);
 
-      long remainingPoint = pointService.use(paymentCommand.userId(), order.finalPrice());
+    long remainingPoint = pointService.use(paymentCommand.userId(), order.finalPrice());
 
-      OrderInfo orderResult = orderService.pay(order.id());
-      return PaymentResult.of(orderResult, remainingPoint);
-    });
+    OrderInfo orderResult = orderService.pay(order.id());
 
-    PaymentSuccessEvent event = PaymentSuccessEvent.from(result.order());
+    PaymentSuccessEvent event = PaymentSuccessEvent.from(order);
     paymentEventPublisher.publish(event);
 
-    return result;
+    return PaymentResult.of(orderResult, remainingPoint);
   }
 }

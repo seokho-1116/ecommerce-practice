@@ -23,7 +23,7 @@ import kr.hhplus.be.server.domain.product.ProductDto.ProductInventoryInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
-import kr.hhplus.be.server.support.CacheKey;
+import kr.hhplus.be.server.support.CacheKeyHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -240,8 +240,8 @@ class ProductServiceIntegrationTest extends IntegrationTestSupport {
 
     //then
     String yyyyMMdd = LocalDate.now().format(BASIC_ISO_DATE);
-    String rankingBoardName = CacheKey.PRODUCT_SELLING_RANK.appendAfterColon(yyyyMMdd);
-    Set<Long> productIdWithTotalSales = testHelpRepository.findZsetInCache(rankingBoardName, 0, 100,
+    CacheKeyHolder<String> key = ProductCacheKey.PRODUCT_SELLING_RANK.value(yyyyMMdd);
+    Set<Long> productIdWithTotalSales = testHelpRepository.findZsetInCache(key.generate(), 0, 100,
         new TypeReference<>() {
         });
     assertThat(productIdWithTotalSales).isNotEmpty();

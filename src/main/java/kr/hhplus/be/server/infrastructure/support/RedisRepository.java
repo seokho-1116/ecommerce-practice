@@ -96,7 +96,4 @@ public class RedisRepository {
     redisTemplate.opsForZSet().addIfAbsent(key, value, currentTimeMillis);
   }
 
-  public void delete(String key) {
-    redisTemplate.delete(key);
-  }
 }

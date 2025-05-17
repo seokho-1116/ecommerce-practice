@@ -16,7 +16,7 @@ import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
-import kr.hhplus.be.server.support.CacheKey;
+import kr.hhplus.be.server.support.CacheKeyHolder;
 import kr.hhplus.be.server.support.util.TimeUtil;
 import kr.hhplus.be.server.support.util.TimeUtil.Between;
 import lombok.RequiredArgsConstructor;
@@ -63,8 +63,9 @@ public class ProductService {
   public Top5SellingProducts findTop5SellingProducts() {
     LocalDate now = LocalDate.now();
     String yyyyMMdd = now.format(BASIC_ISO_DATE);
-    String rankingBoardName = CacheKey.PRODUCT_SELLING_RANK.appendAfterColon(yyyyMMdd);
-    List<Pair<Long, Long>> productIdRankPairs = productRepository.findAllTopSellingProducts(rankingBoardName, 0, 5);
+    CacheKeyHolder<String> key = ProductCacheKey.PRODUCT_SELLING_RANK.value(yyyyMMdd);
+    List<Pair<Long, Long>> productIdRankPairs = productRepository.findAllTopSellingProducts(key, 0,
+        5);
 
     List<Long> productIds = productIdRankPairs.stream()
         .map(Pair::getFirst)
@@ -103,14 +104,14 @@ public class ProductService {
     productRepository.saveAllRankingViews(productSellingRankViews);
 
     String yyyyMMdd = LocalDateTime.now().plusMinutes(30).format(BASIC_ISO_DATE);
-    String rankingBoardName = CacheKey.PRODUCT_SELLING_RANK.appendAfterColon(yyyyMMdd);
     List<ProductSellingRankView> filtered = productSellingRankViews.stream()
         .sorted(Comparator.comparing(ProductSellingRankView::getTotalSales).reversed())
         .limit(MAXIMUM_PRODUCT_RANKING_COUNT)
         .toList();
+    CacheKeyHolder<String> key = ProductCacheKey.PRODUCT_SELLING_RANK.value(yyyyMMdd);
     for (ProductSellingRankView productSellingRankView : filtered) {
       productRepository.saveInRankingBoard(productSellingRankView.getProductId(),
-          productSellingRankView.getTotalSales(), rankingBoardName);
+          productSellingRankView.getTotalSales(), key);
     }
   }
 }

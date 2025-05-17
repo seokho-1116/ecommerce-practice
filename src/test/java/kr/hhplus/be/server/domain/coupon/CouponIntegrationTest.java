@@ -13,7 +13,7 @@ import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
-import kr.hhplus.be.server.support.CacheKey;
+import kr.hhplus.be.server.support.CacheKeyHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,7 +82,8 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     CouponIssueInfo issuedCoupon = couponService.issue(user.getId(), coupon.getId());
 
     // then
-    Set<Long> userIds = testHelpRepository.findZsetInCache(CacheKey.COUPON_EVENT_QUEUE.getKey(), 0,
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
+    Set<Long> userIds = testHelpRepository.findZsetInCache(key.generate(), 0,
         100, new TypeReference<>() {
         });
     assertThat(issuedCoupon).isNotNull();
@@ -151,7 +152,8 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     latch.await();
 
     // then
-    Set<Long> userIds = testHelpRepository.findZsetInCache(CacheKey.COUPON_EVENT_QUEUE.getKey(), 0,
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
+    Set<Long> userIds = testHelpRepository.findZsetInCache(key.generate(), 0,
         100, new TypeReference<>() {
         });
     assertThat(userIds).hasSize(concurrentRequest);
@@ -167,8 +169,8 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     CouponIssueInfo result = couponService.issue(user.getId(), couponId);
 
     // then
-    String key = CacheKey.COUPON.appendAfterColon(String.valueOf(couponId));
-    Coupon saveInCache = testHelpRepository.findInCache(key, new TypeReference<>() {
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON.value(couponId);
+    Coupon saveInCache = testHelpRepository.findInCache(key.generate(), new TypeReference<>() {
     });
     assertThat(result).isNotNull();
     assertThat(saveInCache.getId()).isEqualTo(couponId);
@@ -192,15 +194,16 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   @Test
   void issueAvailableCouponsTest() {
     // given
-    couponRepository.saveInCache(CacheKey.COUPON_EVENT.getKey(), notIssuedCoupon);
     couponService.issue(user2.getId(), notIssuedCoupon.getId());
 
     // when
     couponService.issueAvailableCoupons();
 
     // then
-    List<UserCoupon> userCoupons = couponRepository.findUserCouponsByUserId(user2.getId());
-    assertThat(userCoupons).hasSize(1);
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(notIssuedCoupon.getId());
+    Set<Long> userIds = testHelpRepository.findZsetInCache(key.generate(), 0, 100, new TypeReference<>() {
+        });
+    assertThat(userIds).contains(user2.getId());
   }
 
   @DisplayName("이벤트 쿠폰 발급 요청 시 쿠폰이 발급 완료 상태에 도달된 경우 상태가 변경된다")
@@ -208,7 +211,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   void issueAvailableCouponsWithCompletedStatusTest() {
     // given
     couponService.issue(user.getId(), notIssuedCoupon.getId());
-    couponRepository.saveInCache(CacheKey.COUPON_EVENT.getKey(), notIssuedCoupon);
+    couponRepository.saveEventCoupon(notIssuedCoupon);
 
     // when
     couponService.issueAvailableCoupons();
@@ -223,7 +226,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   @Test
   void concurrentIssueWithLimitedQuantityTest() throws InterruptedException {
     // given
-    couponRepository.saveInCache(CacheKey.COUPON_EVENT.getKey(), notIssuedCoupon);
+    couponRepository.saveEventCoupon(notIssuedCoupon);
     couponService.issue(user2.getId(), notIssuedCoupon.getId());
     couponService.issue(user2.getId(), notIssuedCoupon.getId());
 

@@ -100,7 +100,7 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
     private Long globalValue = 0L;
 
     @DistributedLock(
-        key = CacheKey.COUPON_ISSUE,
+        key = LockKey.COUPON_ISSUE,
         expression = "#key",
         timeout = 1000L,
         timeUnit = TimeUnit.MILLISECONDS
@@ -112,7 +112,7 @@ class DistributeLockAspectIntegrationTest extends IntegrationTestSupport {
     }
 
     @DistributedLock(
-        key = CacheKey.COUPON_ISSUE,
+        key = LockKey.COUPON_ISSUE,
         expression = "#dummy",
         timeout = 1000L,
         timeUnit = TimeUnit.MILLISECONDS

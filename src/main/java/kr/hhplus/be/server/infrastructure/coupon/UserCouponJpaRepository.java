@@ -11,9 +11,9 @@ import org.springframework.data.jpa.repository.QueryHints;
 
 public interface UserCouponJpaRepository extends JpaRepository<UserCoupon, Long> {
 
+  List<UserCoupon> findAllByUserId(Long userId);
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")})
-  Optional<UserCoupon> findUserCouponByUserIdAndCouponId(Long userId, Long couponId);
-
-  List<UserCoupon> findAllByUserId(Long userId);
+  Optional<UserCoupon> findForUpdateByUserIdAndCouponId(Long userId, Long couponId);
 }

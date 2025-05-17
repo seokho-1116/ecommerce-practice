@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithTotalSales;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
+import kr.hhplus.be.server.support.CacheKeyHolder;
 import org.springframework.data.util.Pair;
 
 public interface ProductRepository {
@@ -20,7 +21,7 @@ public interface ProductRepository {
       LocalDateTime to
   );
 
-  List<Pair<Long, Long>> findAllTopSellingProducts(String key, long start, long end);
+  List<Pair<Long, Long>> findAllTopSellingProducts(CacheKeyHolder<String> key, long startInclusive, long endExclusive);
 
   List<ProductWithQuantity> findAll();
 
@@ -28,5 +29,5 @@ public interface ProductRepository {
 
   void saveAllRankingViews(List<ProductSellingRankView> productSellingRankViews);
 
-  void saveInRankingBoard(Long productId, Long totalSales, String rankingBoardName);
+  void saveInRankingBoard(Long productId, Long totalSales, CacheKeyHolder<String> key);
 }

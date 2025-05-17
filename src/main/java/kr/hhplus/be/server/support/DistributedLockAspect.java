@@ -66,11 +66,11 @@ public class DistributedLockAspect {
   private RLock getMultiLock(List<String> keys, DistributedLock annotation) {
     RLock[] locks = new RLock[keys.size()];
     for (int i = 0; i < keys.size(); i++) {
-      CacheKey cacheKey = annotation.key();
-      String key = String.valueOf(keys.get(i));
+      String stringKey = String.valueOf(keys.get(i));
+      LockKey lockKey = annotation.key();
 
-      String lockKey = cacheKey.appendAfterColon(key);
-      locks[i] = redissonClient.getLock(lockKey);
+      String generatedKey = lockKey.generate(stringKey);
+      locks[i] = redissonClient.getLock(generatedKey);
     }
 
     return redissonClient.getMultiLock(locks);
