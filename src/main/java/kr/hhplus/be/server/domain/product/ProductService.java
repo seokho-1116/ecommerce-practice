@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithTotalSales;
@@ -17,6 +18,8 @@ import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import kr.hhplus.be.server.support.CacheKeyHolder;
+import kr.hhplus.be.server.support.DistributedLock;
+import kr.hhplus.be.server.support.LockKey;
 import kr.hhplus.be.server.support.util.TimeUtil;
 import kr.hhplus.be.server.support.util.TimeUtil.Between;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,12 @@ public class ProductService {
         .toList();
   }
 
+  @DistributedLock(
+      key = LockKey.COUPON_ISSUE,
+      expression = "#productDeductCommand.productOptionIds()",
+      timeout = 5,
+      timeUnit = TimeUnit.SECONDS
+  )
   @Transactional
   public void deductInventory(ProductDeductCommand productDeductCommand) {
     if (productDeductCommand == null || productDeductCommand.isEmpty()) {

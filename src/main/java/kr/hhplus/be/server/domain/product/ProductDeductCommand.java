@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.groupingBy;
 import java.util.List;
 import java.util.Map;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderItemInfo;
-import kr.hhplus.be.server.domain.order.OrderItem;
 
 public record ProductDeductCommand(
     Map<Long, Long> productOptionIdToAmountMap

@@ -1,10 +1,14 @@
 package kr.hhplus.be.server.support;
 
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization;
+
 import java.util.Comparator;
 import java.util.List;
 import kr.hhplus.be.server.common.exception.ServerException;
 import kr.hhplus.be.server.support.SpelExpressionEvaluator.SpelParseRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,7 +18,9 @@ import org.redisson.api.RedissonClient;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
 
+@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -57,8 +63,21 @@ public class DistributedLockAspect {
     } catch (Throwable e) {
       throw new ServerException(e);
     } finally {
-      if (multiLock.isHeldByCurrentThread()) {
-        multiLock.unlock();
+      if (isActualTransactionActive()) {
+        registerSynchronization(new TransactionSynchronization() {
+          @Override
+          public void afterCompletion(int status) {
+            if (multiLock.isHeldByCurrentThread()) {
+              multiLock.unlock();
+              log.debug("Unlocking distributed lock for keys: {}", sortedKeys);
+            }
+          }
+        });
+      } else {
+        if (multiLock.isHeldByCurrentThread()) {
+          multiLock.unlock();
+          log.debug("Unlocking distributed lock for keys: {}", sortedKeys);
+        }
       }
     }
   }
