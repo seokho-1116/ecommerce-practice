@@ -1,24 +1,4 @@
 services:
-  nginx:
-    image: nginx:1.25.2
-    ports:
-      - "80:80"
-    volumes:
-      - ./docker_file/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - spring
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-
-  nginx_exporter:
-    image: nginx/nginx-prometheus-exporter
-    ports:
-      - "9113:9113"
-    command: -nginx.scrape-uri=http://server-java-nginx-1:80/nginx_status
-
   mysql:
     image: mysql:8.0
     ports:
@@ -97,29 +77,8 @@ services:
       - influxdb2-admin-password
       - influxdb2-admin-token
     volumes:
-      - type: volume
-        source: influxdb2-data
-        target: /var/lib/influxdb2
-      - type: volume
-        source: influxdb2-config
-        target: /etc/influxdb2
-
-  spring:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=load
-    depends_on:
-      - mysql
-      - redis
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
-    ports:
-      - "8080:8080"
+      - ./docker_file/influxdb2:/var/lib/influxdb2
+      - ./docker_file/influxdb2/config:/etc/influxdb2
 
 secrets:
   influxdb2-admin-username:
@@ -128,6 +87,3 @@ secrets:
     file: ./docker_file/.env.influxdb2-admin-password
   influxdb2-admin-token:
     file: ./docker_file/.env.influxdb2-admin-token
-volumes:
-  influxdb2-data:
-  influxdb2-config:
