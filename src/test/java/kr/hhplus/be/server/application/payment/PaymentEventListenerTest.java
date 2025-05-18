@@ -1,9 +1,11 @@
-package kr.hhplus.be.server.domain.payment;
+package kr.hhplus.be.server.application.payment;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
+import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
+import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +26,7 @@ class PaymentEventListenerTest {
   @Test
   void listenPaymentSuccessEvent() {
     // given
-    PaymentEvent.PaymentSuccessEvent event = new PaymentEvent.PaymentSuccessEvent(1L, 1L);
+    PaymentSuccessEvent event = new PaymentSuccessEvent(1L, 1L);
 
     // when
     paymentEventListener.handlePaymentSuccessEvent(event);
