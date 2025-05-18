@@ -1,5 +1,6 @@
-package kr.hhplus.be.server.domain.payment;
+package kr.hhplus.be.server.application.payment;
 
+import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
 import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
