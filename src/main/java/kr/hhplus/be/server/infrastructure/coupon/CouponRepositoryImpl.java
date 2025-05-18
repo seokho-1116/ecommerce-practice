@@ -10,14 +10,19 @@ import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.infrastructure.support.RedisRepository;
 import kr.hhplus.be.server.support.CacheKeyHolder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
 public class CouponRepositoryImpl implements CouponRepository {
 
+  private static final String LOCAL_CACHE_NAME = "coupon";
+
   private final CouponJpaRepository couponJpaRepository;
   private final UserCouponJpaRepository userCouponJpaRepository;
+  private final CacheManager cacheManager;
   private final RedisRepository redisRepository;
 
   @Override
@@ -38,7 +43,18 @@ public class CouponRepositoryImpl implements CouponRepository {
   @Override
   public Optional<Coupon> findById(Long couponId) {
     CacheKeyHolder<Long> key = CouponCacheKey.COUPON.value(couponId);
-    Coupon coupon = redisRepository.find(key.generate(), new TypeReference<>() {
+    String generated = key.generate();
+    
+    Cache cache = cacheManager.getCache(LOCAL_CACHE_NAME);
+    if (cache != null) {
+      Coupon cached = cache.get(generated, Coupon.class);
+
+      if (cached != null) {
+        return Optional.of(cached);
+      }
+    }
+
+    Coupon coupon = redisRepository.find(generated, new TypeReference<>() {
     });
     if (coupon != null) {
       return Optional.of(coupon);
@@ -85,6 +101,14 @@ public class CouponRepositoryImpl implements CouponRepository {
 
   @Override
   public void saveEventCoupon(Coupon coupon) {
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON.value(coupon.getId());
+    String generated = key.generate();
+
+    Cache cache = cacheManager.getCache(LOCAL_CACHE_NAME);
+    if (cache != null) {
+      cache.put(generated, coupon);
+    }
+    
     redisRepository.save(CouponCacheKey.COUPON_EVENT.generate(null), coupon);
   }
 
