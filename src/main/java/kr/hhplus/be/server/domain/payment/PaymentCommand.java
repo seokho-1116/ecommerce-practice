@@ -17,19 +17,19 @@ public class PaymentCommand {
   }
 
   public record PaymentSuccessCommand(
-      Long userId,
       Long orderId,
+      Long userId,
       Long amount
   ) {
 
     public PaymentSuccessCommand {
-      if (userId == null || orderId == null || amount == null) {
-        throw new PaymentIllegalStateException("사용자 ID, 주문 ID, 금액은 필수입니다.");
+      if (orderId == null || userId == null || amount == null) {
+        throw new PaymentIllegalStateException("주문 ID, 사용자 ID, 결제 금액은 필수입니다.");
       }
     }
 
-    public static PaymentSuccessCommand of(Long userId, Long orderId, Long finalPrice) {
-      return new PaymentSuccessCommand(userId, orderId, finalPrice);
+    public static PaymentSuccessCommand of(Long orderId, Long userId, Long finalPrice) {
+      return new PaymentSuccessCommand(orderId, userId, finalPrice);
     }
   }
 }

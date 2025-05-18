@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.payment;
 
 import jakarta.transaction.Transactional;
 import java.util.Optional;
+import kr.hhplus.be.server.domain.payment.PaymentBusinessException.PaymentIllegalStateException;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.PaymentSuccessCommand;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentInfo;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class PaymentService {
   public PaymentInfo pay(PaymentSuccessCommand command) {
     Optional<Payment> existingPayment = paymentRepository.findByOrderIdAndUserId(command.orderId(), command.userId());
     if (existingPayment.isPresent()) {
-      throw new PaymentBusinessException("이미 결제된 주문입니다.");
+      throw new PaymentIllegalStateException("이미 결제된 주문입니다.");
     }
 
     Payment payment = Payment.success(command);
