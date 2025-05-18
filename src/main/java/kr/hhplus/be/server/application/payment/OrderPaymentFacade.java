@@ -6,7 +6,7 @@ import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.PaymentSuccessCommand;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentInfo;
-import kr.hhplus.be.server.domain.payment.PaymentEventPublisher;
+import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentService;
 import kr.hhplus.be.server.domain.payment.PaymentSuccessEvent;
 import kr.hhplus.be.server.domain.point.PointService;
@@ -23,7 +23,7 @@ public class OrderPaymentFacade {
   private final OrderService orderService;
   private final ProductService productService;
   private final PointService pointService;
-  private final PaymentEventPublisher paymentEventPublisher;
+  private final PaymentDataClient paymentDataClient;
 
   @Transactional
   public PaymentResult payOrder(OrderPaymentCommand orderPaymentCommand) {
@@ -44,7 +44,7 @@ public class OrderPaymentFacade {
     PaymentInfo paymentInfo = paymentService.pay(paymentSuccessCommand);
 
     PaymentSuccessEvent event = PaymentSuccessEvent.from(paymentInfo);
-    paymentEventPublisher.publish(event);
+    paymentDataClient.publish(event);
 
     return PaymentResult.of(paymentInfo, remainingPoint);
   }
