@@ -64,8 +64,8 @@ class DistributedLockAspectTest {
   static class TestService {
 
     @DistributedLock(
-        key = LockKey.COUPON_ISSUE,
-        expression = "#param1",
+        name = LockKey.COUPON_ISSUE,
+        key = "#param1",
         timeout = 1000L,
         timeUnit = TimeUnit.MILLISECONDS
     )

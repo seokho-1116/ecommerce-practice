@@ -39,7 +39,7 @@ public class DistributedLockAspect {
     SpelParseRequest request = SpelParseRequest.builder()
         .args(joinPoint.getArgs())
         .parameterNames(signature.getParameterNames())
-        .expression(annotation.expression())
+        .expression(annotation.key())
         .build();
 
     List<Object> keys = spelExpressionEvaluator.parse(request, List.class);
@@ -86,7 +86,7 @@ public class DistributedLockAspect {
     RLock[] locks = new RLock[keys.size()];
     for (int i = 0; i < keys.size(); i++) {
       String stringKey = String.valueOf(keys.get(i));
-      LockKey lockKey = annotation.key();
+      LockKey lockKey = annotation.name();
 
       String generatedKey = lockKey.generate(stringKey);
       locks[i] = redissonClient.getLock(generatedKey);

@@ -42,8 +42,8 @@ public class ProductService {
   }
 
   @DistributedLock(
-      key = LockKey.COUPON_ISSUE,
-      expression = "#productDeductCommand.productOptionIds()",
+      name = LockKey.COUPON_ISSUE,
+      key = "#productDeductCommand.productOptionIds()",
       timeout = 5,
       timeUnit = TimeUnit.SECONDS
   )
