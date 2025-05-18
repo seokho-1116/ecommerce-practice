@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.payment;
 
-public interface PaymentEventPublisher {
+public interface PaymentDataClient {
 
   void publish(PaymentSuccessEvent event);
 }
