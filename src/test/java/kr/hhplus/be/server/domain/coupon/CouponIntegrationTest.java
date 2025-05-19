@@ -183,7 +183,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     couponService.issue(user2.getId(), notIssuedCoupon.getId());
 
     // when
-    couponService.issueAvailableCoupons();
+    couponService.issueCouponFromQueue();
 
     // then
     List<UserCoupon> userCoupons = couponRepository.findUserCouponsByUserId(user2.getId());
@@ -197,7 +197,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     couponService.issue(user2.getId(), notIssuedCoupon.getId());
 
     // when
-    couponService.issueAvailableCoupons();
+    couponService.issueCouponFromQueue();
 
     // then
     CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(notIssuedCoupon.getId());
@@ -214,7 +214,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     couponRepository.saveEventCoupon(notIssuedCoupon);
 
     // when
-    couponService.issueAvailableCoupons();
+    couponService.issueCouponFromQueue();
 
     // then
     Coupon saved = couponRepository.findById(notIssuedCoupon.getId())
@@ -237,7 +237,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     for (int i = 0; i < concurrentRequest; i++) {
       new Thread(() -> {
         try {
-          couponService.issueAvailableCoupons();
+          couponService.issueCouponFromQueue();
         } catch (Exception ignore) {
           // ignore
         } finally {

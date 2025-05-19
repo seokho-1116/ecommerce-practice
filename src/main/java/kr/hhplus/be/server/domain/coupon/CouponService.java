@@ -70,7 +70,7 @@ public class CouponService {
   }
 
   @Transactional
-  public void issueAvailableCoupons() {
+  public void issueCouponFromQueue() {
     Optional<Coupon> optionalCouponEvent = couponRepository.findEventCoupon();
     if (optionalCouponEvent.isEmpty()) {
       return;
