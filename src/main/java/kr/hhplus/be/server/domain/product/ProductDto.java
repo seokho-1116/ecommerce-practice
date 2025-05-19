@@ -1,15 +1,15 @@
 package kr.hhplus.be.server.domain.product;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
+import org.springframework.data.util.Pair;
 
 public record ProductDto() {
 
   public record Top5SellingProducts(
-      LocalDateTime from,
-      LocalDateTime to,
+      LocalDate date,
       List<ProductWithRank> topSellingProducts
   ) {
 
@@ -27,9 +27,9 @@ public record ProductDto() {
       Long basePrice
   ) {
 
-    public static ProductWithRank of(ProductIdWithRank productIdWithRank,
+    public static ProductWithRank of(Pair<Long, Long> productIdRankPair,
         Map<Long, ProductWithQuantity> productWithQuantities) {
-      Long productId = productIdWithRank.productId();
+      Long productId = productIdRankPair.getFirst();
       ProductWithQuantity productWithQuantity = productWithQuantities.get(productId);
 
       if (productWithQuantity == null) {
@@ -41,7 +41,7 @@ public record ProductDto() {
           .sum();
 
       return new ProductWithRank(
-          productIdWithRank.rank(),
+          productIdRankPair.getSecond(),
           quantity,
           productId,
           productWithQuantity.name(),
@@ -53,6 +53,13 @@ public record ProductDto() {
 
   public record ProductIdWithRank(
       Long rank,
+      Long productId,
+      Long totalSales
+  ) {
+
+  }
+
+  public record ProductIdWithTotalSales(
       Long productId,
       Long totalSales
   ) {

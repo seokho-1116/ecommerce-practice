@@ -1,28 +1,34 @@
 package kr.hhplus.be.server.domain.product;
 
+import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
+
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithTotalSales;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity.ProductWithQuantityOption;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithRank;
 import kr.hhplus.be.server.domain.product.ProductDto.Top5SellingProducts;
 import kr.hhplus.be.server.support.CacheKey;
+import kr.hhplus.be.server.support.util.TimeUtil;
+import kr.hhplus.be.server.support.util.TimeUtil.Between;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+
+  private static final int TOP5_SELLING_PRODUCT_HOUR_RANGE = 1;
+  private static final int MAXIMUM_PRODUCT_RANKING_COUNT = 100;
 
   private final ProductRepository productRepository;
 
@@ -56,15 +62,12 @@ public class ProductService {
 
   public Top5SellingProducts findTop5SellingProducts() {
     LocalDate now = LocalDate.now();
-    LocalDateTime from = now.minusDays(3).atStartOfDay();
-    LocalDateTime to = LocalDateTime.now();
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankViewInCache(
-        from,
-        to
-    );
+    String yyyyMMdd = now.format(BASIC_ISO_DATE);
+    String rankingBoardName = CacheKey.PRODUCT_SELLING_RANK.appendAfterColon(yyyyMMdd);
+    List<Pair<Long, Long>> productIdRankPairs = productRepository.findAllTopSellingProducts(rankingBoardName, 0, 5);
 
-    List<Long> productIds = productIdWithRanks.stream()
-        .map(ProductIdWithRank::productId)
+    List<Long> productIds = productIdRankPairs.stream()
+        .map(Pair::getFirst)
         .toList();
     List<Product> products = productRepository.findAllByIdIn(productIds);
 
@@ -72,55 +75,42 @@ public class ProductService {
         .map(ProductWithQuantity::from)
         .collect(Collectors.toMap(ProductWithQuantity::id, Function.identity()));
 
-    List<ProductWithRank> productWithRanks = productIdWithRanks.stream()
-        .map(productIdWithRank -> ProductWithRank.of(productIdWithRank, productWithQuantities))
+    List<ProductWithRank> productWithRanks = productIdRankPairs.stream()
+        .map(productIdRankPair -> ProductWithRank.of(productIdRankPair, productWithQuantities))
         .filter(Objects::nonNull)
         .toList();
 
-    return new Top5SellingProducts(from, to, productWithRanks);
+    return new Top5SellingProducts(now, productWithRanks);
   }
 
   public List<ProductWithQuantity> findAllProducts() {
     return productRepository.findAll();
   }
 
-  public void saveTop5SellingProducts() {
-    LocalTime now = LocalTime.now();
-    int oneHourAgo = now.getHour() - 1;
-    LocalDateTime from = LocalDate.now().atTime(oneHourAgo, 0, 0, 0);
-    LocalDateTime to = LocalDate.now().atTime(now.getHour(), 0, 0, 0);
+  public void saveAllSellingProducts() {
+    Between between = TimeUtil.getBetweenHourRangeFromNow(TOP5_SELLING_PRODUCT_HOUR_RANGE);
+    List<ProductIdWithTotalSales> productIds = productRepository.findAllSellingProductsWithRank(
+        between.from(), between.to());
 
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProducts(
-        from, to);
-
-    List<ProductSellingRankView> productSellingRankViews = productIdWithRanks.stream()
+    List<ProductSellingRankView> productSellingRankViews = productIds.stream()
         .map(productIdWithRank -> ProductSellingRankView.builder()
             .productId(productIdWithRank.productId())
             .totalSales(productIdWithRank.totalSales())
-            .rank(productIdWithRank.rank())
-            .from(from)
-            .to(to)
+            .from(between.from())
+            .to(between.to())
             .build())
         .toList();
-
     productRepository.saveAllRankingViews(productSellingRankViews);
-  }
 
-  public void saveTop5SellingProductIdsInCache() {
-    LocalDate now = LocalDate.now();
-    LocalDateTime from = now.minusDays(3).atStartOfDay();
-    LocalDateTime to = LocalDateTime.now();
-    List<ProductIdWithRank> productIdWithRanks = productRepository.findTop5SellingProductsFromRankView(
-        from,
-        to);
-
-    if (productIdWithRanks != null && !productIdWithRanks.isEmpty()) {
-      productRepository.saveTop5SellingProductInCache(
-          CacheKey.TOP5_SELLING_PRODUCT,
-          productIdWithRanks,
-          25,
-          TimeUnit.HOURS
-      );
+    String yyyyMMdd = LocalDateTime.now().plusMinutes(30).format(BASIC_ISO_DATE);
+    String rankingBoardName = CacheKey.PRODUCT_SELLING_RANK.appendAfterColon(yyyyMMdd);
+    List<ProductSellingRankView> filtered = productSellingRankViews.stream()
+        .sorted(Comparator.comparing(ProductSellingRankView::getTotalSales).reversed())
+        .limit(MAXIMUM_PRODUCT_RANKING_COUNT)
+        .toList();
+    for (ProductSellingRankView productSellingRankView : filtered) {
+      productRepository.saveInRankingBoard(productSellingRankView.getProductId(),
+          productSellingRankView.getTotalSales(), rankingBoardName);
     }
   }
 }
