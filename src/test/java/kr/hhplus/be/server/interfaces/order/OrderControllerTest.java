@@ -74,7 +74,7 @@ class OrderControllerTest {
 
     UserCoupon userCoupon = UserCoupon.builder()
         .id(1L)
-        .user(user)
+        .userId(user.getId())
         .coupon(coupon)
         .build();
     UserCouponInfo userCouponInfo = UserCouponInfo.from(userCoupon);

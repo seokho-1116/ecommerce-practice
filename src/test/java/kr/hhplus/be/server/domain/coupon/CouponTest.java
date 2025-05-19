@@ -9,6 +9,8 @@ import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponIllegalSt
 import kr.hhplus.be.server.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class CouponTest {
 
@@ -339,5 +341,103 @@ class CouponTest {
 
     // then
     assertThat(coupon.getQuantity()).isEqualTo(9L);
+  }
+
+  @DisplayName("쿠폰 수량이 0이거나 null인 경우 쿠폰 발급 상태가 아니다")
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+          "0, true",
+          ", true"
+      }
+  )
+  void issueCouponWithZeroOrNullQuantityTest(Long quantity, boolean expected) {
+    // given
+    Coupon coupon = Coupon.builder()
+        .from(LocalDateTime.now().minusMonths(1))
+        .to(LocalDateTime.now().plusMonths(1))
+        .quantity(quantity)
+        .couponType(CouponType.FIXED)
+        .couponStatus(CouponStatus.AVAILABLE)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    boolean isAvailable = coupon.isNotAvailableForIssue();
+
+    // then
+    assertThat(isAvailable).isEqualTo(expected);
+  }
+
+  @DisplayName("시작일이 지금보다 이후인 경우 쿠폰 발급 상태가 아니다")
+  @Test
+  void issueCouponWithFutureStartDateTest() {
+    // given
+    LocalDateTime from = LocalDateTime.now().plusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(2);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(10L)
+        .couponType(CouponType.FIXED)
+        .couponStatus(CouponStatus.AVAILABLE)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    boolean isAvailable = coupon.isNotAvailableForIssue();
+
+    // then
+    assertThat(isAvailable).isTrue();
+  }
+
+  @DisplayName("종료일이 지금보다 이전인 경우 쿠폰 발급 상태가 아니다")
+  @Test
+  void issueCouponWithPastEndDateTest() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusMonths(2);
+    LocalDateTime to = LocalDateTime.now().minusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(10L)
+        .couponType(CouponType.FIXED)
+        .couponStatus(CouponStatus.AVAILABLE)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    boolean isAvailable = coupon.isNotAvailableForIssue();
+
+    // then
+    assertThat(isAvailable).isTrue();
+  }
+
+  @DisplayName("쿠폰 상태가 사용 불가인 경우 쿠폰 발급 상태가 아니다")
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+          "GENERAL, true",
+          "COMPLETE, true",
+      }
+  )
+  void issueCouponWithUnavailableStatusTest(CouponStatus couponStatus, boolean expected) {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(10L)
+        .couponType(CouponType.FIXED)
+        .couponStatus(couponStatus)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    boolean isAvailable = coupon.isNotAvailableForIssue();
+
+    // then
+    assertThat(isAvailable).isEqualTo(expected);
   }
 }

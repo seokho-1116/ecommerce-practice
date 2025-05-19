@@ -1,13 +1,15 @@
 package kr.hhplus.be.server.common;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
 import jakarta.persistence.metamodel.EntityType;
 import java.util.List;
 import java.util.Optional;
-import kr.hhplus.be.server.infrastructure.support.RedisRepository;
-import kr.hhplus.be.server.support.CacheKey;
+import java.util.Set;
+import java.util.stream.Collectors;
+import kr.hhplus.be.server.common.exception.ServerException;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
@@ -18,14 +20,14 @@ import org.springframework.stereotype.Component;
 public class TestHelpRepository {
 
   private final EntityManager entityManager;
-  private final RedisRepository redisRepository;
   private final StringRedisTemplate redisTemplate;
+  private final ObjectMapper objectMapper;
 
-  public TestHelpRepository(EntityManager entityManager, RedisRepository redisRepository,
-      StringRedisTemplate stringRedisTemplate) {
+  public TestHelpRepository(EntityManager entityManager, StringRedisTemplate stringRedisTemplate,
+      ObjectMapper objectMapper) {
     this.entityManager = entityManager;
-    this.redisRepository = redisRepository;
     this.redisTemplate = stringRedisTemplate;
+    this.objectMapper = objectMapper;
   }
 
   public <T> T save(T entity) {
@@ -88,11 +90,39 @@ public class TestHelpRepository {
     return entityType.getName().replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
   }
 
-  public <T> T findInCache(CacheKey key, TypeReference<T> typeReference) {
-    return redisRepository.find(key.getKey(), typeReference);
+  public <T> T findInCache(String key, TypeReference<T> typeReference) {
+    try {
+      String jsonValue = redisTemplate.opsForValue().get(key);
+      if (jsonValue == null) {
+        return null;
+      }
+
+      return objectMapper.readValue(jsonValue, typeReference);
+    } catch (Exception e) {
+      throw new ServerException(e);
+    }
   }
 
   public void cleanCache() {
     redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+  }
+
+  public <T> Set<T> findZsetInCache(String key, long start, long end,
+      TypeReference<T> typeReference) {
+    Set<String> result = redisTemplate.opsForZSet().range(key, start, end);
+
+    if (result == null || result.isEmpty()) {
+      return Set.of();
+    }
+
+    return result.stream()
+        .map(value -> {
+          try {
+            return objectMapper.readValue(value, typeReference);
+          } catch (Exception e) {
+            throw new ServerException(e);
+          }
+        })
+        .collect(Collectors.toSet());
   }
 }

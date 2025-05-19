@@ -7,6 +7,46 @@ public class CouponDto {
 
   private CouponDto() {}
 
+  public record CouponInfo(
+      Long id,
+      String name,
+      String description,
+      Double discountRate,
+      Long discountAmount,
+      Long quantity,
+      CouponType couponType,
+      LocalDateTime from,
+      LocalDateTime to,
+      CouponStatus couponStatus,
+      LocalDateTime createdAt
+  ) {
+    public static CouponInfo from(Coupon coupon) {
+      return new CouponInfo(
+          coupon.getId(),
+          coupon.getName(),
+          coupon.getDescription(),
+          coupon.getDiscountRate(),
+          coupon.getDiscountAmount(),
+          coupon.getQuantity(),
+          coupon.getCouponType(),
+          coupon.getFrom(),
+          coupon.getTo(),
+          coupon.getCouponStatus(),
+          coupon.getCreatedAt()
+      );
+    }
+  }
+
+  public record CouponIssueInfo(
+      Long userId,
+      Long couponId,
+      LocalDateTime issuedAt
+  ) {
+    public static CouponIssueInfo from(Long userId, Long couponId) {
+      return new CouponIssueInfo(userId, couponId, LocalDateTime.now());
+    }
+  }
+
   public record UserCouponInfo(
       Long id,
       Long userId,
@@ -25,7 +65,7 @@ public class CouponDto {
     public static UserCouponInfo from(UserCoupon userCoupon) {
       return new UserCouponInfo(
           userCoupon.getId(),
-          userCoupon.getUser().getId(),
+          userCoupon.getUserId(),
           userCoupon.getCoupon().getId(),
           userCoupon.getCoupon().getName(),
           userCoupon.getCoupon().getDiscountRate(),

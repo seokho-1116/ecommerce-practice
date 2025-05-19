@@ -34,9 +34,13 @@ public class Coupon extends BaseEntity {
   private LocalDateTime from;
   private LocalDateTime to;
 
+  @Enumerated(EnumType.STRING)
+  private CouponStatus couponStatus;
+
   @Builder
   public Coupon(Long id, String name, String description, Double discountRate, Long discountAmount,
-      Long quantity, CouponType couponType, LocalDateTime from, LocalDateTime to
+      Long quantity, CouponType couponType, LocalDateTime from, LocalDateTime to,
+      CouponStatus couponStatus
   ) {
     if (from == null || to == null) {
       throw new CouponIllegalStateException("쿠폰 사용 기간이 설정되어야 합니다.");
@@ -71,6 +75,7 @@ public class Coupon extends BaseEntity {
     this.couponType = couponType;
     this.from = from;
     this.to = to;
+    this.couponStatus = couponStatus;
   }
 
   public long calculateDiscountPrice(long totalPrice) {
@@ -87,9 +92,22 @@ public class Coupon extends BaseEntity {
     }
 
     return UserCoupon.builder()
-        .user(user)
+        .userId(user.getId())
         .isUsed(false)
         .coupon(this)
         .build();
+  }
+
+  public void updateCouponStatus(CouponStatus couponStatus) {
+    this.couponStatus = couponStatus;
+  }
+
+  public boolean isNotAvailableForIssue() {
+    LocalDateTime now = LocalDateTime.now();
+    return !CouponStatus.AVAILABLE.equals(couponStatus)
+        || now.isBefore(from)
+        || now.isAfter(to)
+        || quantity == null
+        || quantity <= 0;
   }
 }

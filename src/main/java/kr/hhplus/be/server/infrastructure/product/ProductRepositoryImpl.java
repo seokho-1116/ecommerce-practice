@@ -3,16 +3,15 @@ package kr.hhplus.be.server.infrastructure.product;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import kr.hhplus.be.server.domain.product.Product;
-import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithRank;
+import kr.hhplus.be.server.domain.product.ProductDto.ProductIdWithTotalSales;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductWithQuantity;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.product.ProductSellingRankView;
 import kr.hhplus.be.server.infrastructure.support.RedisRepository;
-import kr.hhplus.be.server.support.CacheKey;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -46,41 +45,15 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public List<ProductIdWithRank> findTop5SellingProducts(
+  public List<ProductIdWithTotalSales> findAllSellingProductsWithRank(
       LocalDateTime from, LocalDateTime to) {
-    return productCustomRepository.findTop5SellingProducts(
+    return productCustomRepository.findAllSellingProductsWithRank(
         from, to);
   }
 
   @Override
-  public List<ProductIdWithRank> findTop5SellingProductsFromRankView(
-      LocalDateTime from, LocalDateTime to) {
-    return productCustomRepository.findTop5SellingProductsFromRankView(
-        from, to);
-  }
-
-  @Override
-  public List<ProductIdWithRank> findTop5SellingProductsFromRankViewInCache(LocalDateTime from,
-      LocalDateTime to) {
-    List<ProductIdWithRank> productIdWithRanks = redisRepository.find(
-        CacheKey.TOP5_SELLING_PRODUCT.getKey(), new TypeReference<>() {
-        });
-    if (productIdWithRanks != null && !productIdWithRanks.isEmpty()) {
-      return productIdWithRanks;
-    }
-
-    List<ProductIdWithRank> result = productCustomRepository.findTop5SellingProductsFromRankView(
-        from, to);
-    if (result != null && !result.isEmpty()) {
-      redisRepository.save(
-          CacheKey.TOP5_SELLING_PRODUCT.getKey(),
-          result,
-          25,
-          TimeUnit.HOURS
-      );
-    }
-
-    return result;
+  public List<Pair<Long, Long>> findAllTopSellingProducts(String key, long start, long end) {
+    return redisRepository.findReverseRangeInZsetWithRank(key, start, end, new TypeReference<>() {});
   }
 
   @Override
@@ -103,13 +76,11 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public void saveTop5SellingProductInCache(CacheKey key,
-      List<ProductIdWithRank> productIdWithRanks, long ttl, TimeUnit timeUnit) {
-    redisRepository.save(
-        key.getKey(),
-        productIdWithRanks,
-        ttl,
-        timeUnit
+  public void saveInRankingBoard(Long productId, Long totalSales, String rankingBoardName) {
+    redisRepository.upsertScoreInZset(
+        rankingBoardName,
+        String.valueOf(productId),
+        totalSales
     );
   }
 }
