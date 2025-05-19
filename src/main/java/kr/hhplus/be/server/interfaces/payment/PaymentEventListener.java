@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.payment;
+package kr.hhplus.be.server.interfaces.payment;
 
 import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
