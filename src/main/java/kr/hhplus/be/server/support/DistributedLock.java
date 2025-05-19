@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DistributedLock {
 
-  CacheKey key();
+  LockKey name();
 
-  String expression();
+  String key();
 
   long timeout() default 3000L;
 

@@ -10,6 +10,7 @@ import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.product.ProductSellingRankView;
 import kr.hhplus.be.server.infrastructure.support.RedisRepository;
+import kr.hhplus.be.server.support.CacheKeyHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
@@ -52,8 +53,13 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public List<Pair<Long, Long>> findAllTopSellingProducts(String key, long start, long end) {
-    return redisRepository.findReverseRangeInZsetWithRank(key, start, end, new TypeReference<>() {});
+  public List<Pair<Long, Long>> findAllTopSellingProducts(CacheKeyHolder<String> key, long startInclusive,
+      long endExclusive) {
+    long start = startInclusive < 0 ? 0 : startInclusive;
+    long end = endExclusive < 0 ? 0 : endExclusive - 1;
+    return redisRepository.findReverseRangeInZsetWithRank(key.generate(), start, end,
+        new TypeReference<>() {
+        });
   }
 
   @Override
@@ -76,9 +82,9 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public void saveInRankingBoard(Long productId, Long totalSales, String rankingBoardName) {
+  public void saveInRankingBoard(Long productId, Long totalSales, CacheKeyHolder<String> key) {
     redisRepository.upsertScoreInZset(
-        rankingBoardName,
+        key.generate(),
         String.valueOf(productId),
         totalSales
     );

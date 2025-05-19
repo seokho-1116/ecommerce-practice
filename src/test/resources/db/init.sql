@@ -146,3 +146,15 @@ create table product_selling_rank_view(
     `from`       datetime     null,
     `to`         datetime     null
 );
+
+create table payment(
+    id          bigint auto_increment
+        primary key,
+    is_active   bit          null,
+    created_at  datetime     null,
+    updated_at  datetime     null,
+    order_id    bigint       null,
+    amount      bigint       null,
+    status      varchar(30)     null,
+    user_id    bigint       null
+)

@@ -11,6 +11,7 @@ import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponTestDataGenerator;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
@@ -142,6 +143,6 @@ class E2EOrderTest extends IntegrationTestSupport {
         });
 
     assertThat(orderPaymentResponseWrapper.data().amount()).isGreaterThanOrEqualTo(0L);
-    assertThat(orderPaymentResponseWrapper.data().status()).isEqualTo(OrderStatus.PAID);
+    assertThat(orderPaymentResponseWrapper.data().status()).isEqualTo(PaymentStatus.SUCCESS);
   }
 }

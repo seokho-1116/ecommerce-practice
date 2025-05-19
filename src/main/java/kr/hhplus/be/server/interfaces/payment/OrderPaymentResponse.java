@@ -3,7 +3,7 @@ package kr.hhplus.be.server.interfaces.payment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import kr.hhplus.be.server.application.payment.PaymentResult;
-import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
 
 public record OrderPaymentResponse(
     @Schema(description = "주문 ID")
@@ -12,27 +12,31 @@ public record OrderPaymentResponse(
     @Schema(description = "유저 ID")
     Long userId,
 
+    @Schema(description = "결제 ID")
+    Long paymentId,
+
     @Schema(description = "주문 총 가격")
     Long amount,
-
-    @Schema(description = "주문 상태")
-    OrderStatus status,
 
     @Schema(description = "잔여 포인트")
     Long remainingPoint,
 
-    @Schema(description = "주문 생성일")
+    @Schema(description = "결제 상태")
+    PaymentStatus status,
+
+    @Schema(description = "결제 시점")
     LocalDateTime createdAt
 ) {
 
   public static OrderPaymentResponse from(PaymentResult paymentResult) {
     return new OrderPaymentResponse(
-        paymentResult.order().id(),
-        paymentResult.order().userId(),
-        paymentResult.order().totalPrice(),
-        paymentResult.order().status(),
+        paymentResult.paymentInfo().orderId(),
+        paymentResult.paymentInfo().userId(),
+        paymentResult.paymentInfo().id(),
+        paymentResult.paymentInfo().amount(),
         paymentResult.remainingPoint(),
-        LocalDateTime.now()
+        paymentResult.paymentInfo().status(),
+        paymentResult.paymentInfo().createdAt()
     );
   }
 }

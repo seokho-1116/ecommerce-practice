@@ -8,7 +8,7 @@ import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponNotFoundE
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
-import kr.hhplus.be.server.support.CacheKey;
+import kr.hhplus.be.server.support.CacheKeyHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -36,11 +36,11 @@ public class CouponService {
   }
 
   public CouponIssueInfo issue(Long userId, Long couponId) {
-    Coupon coupon = couponRepository.findByIdInCache(couponId)
+    Coupon coupon = couponRepository.findById(couponId)
         .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
 
-    couponRepository.addQueue(CacheKey.COUPON_EVENT_QUEUE.getKey(), userId,
-        System.currentTimeMillis());
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
+    couponRepository.addQueue(key, userId, System.currentTimeMillis());
 
     return CouponIssueInfo.from(userId, coupon.getId());
   }
@@ -64,17 +64,14 @@ public class CouponService {
         .build();
 
     Coupon savedCoupon = couponRepository.save(coupon);
-
-    String key = CacheKey.COUPON.appendAfterColon(String.valueOf(savedCoupon.getId()));
-    couponRepository.saveInCache(key, savedCoupon);
-    couponRepository.saveInCache(CacheKey.COUPON_EVENT.getKey(), savedCoupon);
+    couponRepository.saveEventCoupon(coupon);
 
     return CouponInfo.from(savedCoupon);
   }
 
+  @Transactional
   public void issueAvailableCoupons() {
-    Optional<Coupon> optionalCouponEvent = couponRepository.findEventCoupon(
-        CacheKey.COUPON_EVENT.getKey());
+    Optional<Coupon> optionalCouponEvent = couponRepository.findEventCoupon();
     if (optionalCouponEvent.isEmpty()) {
       return;
     }
@@ -84,8 +81,8 @@ public class CouponService {
       return;
     }
 
-    List<Long> userIds = couponRepository.findAllUserIdInQueue(CacheKey.COUPON_EVENT_QUEUE.getKey(),
-        0, coupon.getQuantity() - 1);
+    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
+    List<Long> userIds = couponRepository.findAllUserIdInQueue(key, 0, coupon.getQuantity());
 
     AtomicInteger savedCount = new AtomicInteger();
     for (Long userId : userIds) {
@@ -110,7 +107,7 @@ public class CouponService {
           status -> couponRepository.findForUpdateById(coupon.getId())
               .ifPresent(eventCoupon -> {
                 eventCoupon.updateCouponStatus(CouponStatus.COMPLETE);
-                couponRepository.deleteEventCoupon(CacheKey.COUPON_EVENT.getKey());
+                couponRepository.saveEventCoupon(eventCoupon);
                 couponRepository.save(eventCoupon);
               }));
     }

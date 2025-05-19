@@ -51,11 +51,7 @@ public class RedisRepository {
   }
 
   public void upsertScoreInZset(String key, String value, double score) {
-    try {
-      redisTemplate.opsForZSet().incrementScore(key, value, score);
-    } catch (Exception e) {
-      throw new ServerException(e);
-    }
+    redisTemplate.opsForZSet().incrementScore(key, value, score);
   }
 
   public <T> List<Pair<T, Long>> findReverseRangeInZsetWithRank(String key, long start, long end,
@@ -96,33 +92,8 @@ public class RedisRepository {
         .toList();
   }
 
-  public <T> List<T> findReverseRangeInZset(String key, long start, long end,
-      TypeReference<T> typeReference) {
-    Set<String> result = redisTemplate.opsForZSet().reverseRange(key, start, end);
-    if (result == null || result.isEmpty()) {
-      return List.of();
-    }
-
-    return result.stream()
-        .map(value -> {
-          try {
-            return objectMapper.readValue(value, typeReference);
-          } catch (Exception e) {
-            throw new ServerException(e);
-          }
-        })
-        .toList();
-  }
-
   public void saveIfAbsent(String key, String value, long currentTimeMillis) {
-    try {
-      redisTemplate.opsForZSet().addIfAbsent(key, value, currentTimeMillis);
-    } catch (Exception e) {
-      throw new ServerException(e);
-    }
+    redisTemplate.opsForZSet().addIfAbsent(key, value, currentTimeMillis);
   }
 
-  public void delete(String key) {
-    redisTemplate.delete(key);
-  }
 }
