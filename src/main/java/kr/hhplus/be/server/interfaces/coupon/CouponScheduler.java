@@ -16,7 +16,7 @@ public class CouponScheduler {
   @Scheduled(cron = "* * * * * *", zone = "Asia/Seoul")
   public void issueCoupons() {
     log.info("CouponScheduler - issueCoupons");
-    couponService.issueAvailableCoupons();
+    couponService.issueCouponFromQueue();
     log.info("CouponScheduler - issueCoupons - end");
   }
 }
