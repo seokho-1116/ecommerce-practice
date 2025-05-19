@@ -5,8 +5,7 @@ import lombok.Getter;
 @Getter
 public enum CacheKey {
   COUPON_ISSUE("coupon:issue"),
-  TOP5_SELLING_PRODUCT("top5_selling_product"),
-  PRODUCT_SELLING_RANK("product_selling_rank");
+  TOP5_SELLING_PRODUCT("top5_selling_product");
 
   private final String key;
 
