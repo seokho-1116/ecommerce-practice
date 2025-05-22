@@ -11,7 +11,6 @@ import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponTestDataGenerator;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderStatus;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
@@ -68,7 +67,7 @@ class E2EOrderTest extends IntegrationTestSupport {
       testHelpRepository.save(productInventory);
     }
 
-    Coupon coupon = couponTestDataGenerator.validateCoupon();
+    Coupon coupon = couponTestDataGenerator.validCoupon();
     testHelpRepository.save(coupon);
 
     UserCoupon userCoupon = couponTestDataGenerator.notUsedUserCoupon(user, coupon);

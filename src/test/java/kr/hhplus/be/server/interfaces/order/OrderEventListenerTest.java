@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.payment;
+package kr.hhplus.be.server.interfaces.order;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
 import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
-import kr.hhplus.be.server.interfaces.order.OrderEventListener;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -23,7 +23,7 @@ public class CouponService {
   public UserCouponInfo findUserCouponByUserCouponId(Long userCouponId) {
     return couponRepository.findUserCouponByUserCouponId(userCouponId)
         .map(UserCouponInfo::from)
-        .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
+        .orElse(null);
   }
 
   @Transactional

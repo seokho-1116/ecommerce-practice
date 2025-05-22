@@ -24,4 +24,10 @@ public class OrderEvent {
       );
     }
   }
+
+  public record UseCouponEvent(
+      Long userCouponId
+  ) {
+
+  }
 }
