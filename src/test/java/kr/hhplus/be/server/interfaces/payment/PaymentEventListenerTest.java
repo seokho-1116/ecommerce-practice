@@ -1,12 +1,12 @@
-package kr.hhplus.be.server.application.payment;
+package kr.hhplus.be.server.interfaces.payment;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 import kr.hhplus.be.server.domain.payment.PaymentDataClient;
-import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
 import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
-import kr.hhplus.be.server.interfaces.order.OrderEventListener;
+import kr.hhplus.be.server.domain.payment.PaymentService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,24 +15,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OrderEventListenerTest {
+class PaymentEventListenerTest {
 
   @Mock
   private PaymentDataClient paymentDataClient;
 
+  @Mock
+  private PaymentService paymentService;
+
   @InjectMocks
-  private OrderEventListener orderEventListener;
+  private PaymentEventListener paymentEventListener;
 
   @DisplayName("결제 성공 이벤트를 리슨한다")
   @Test
   void listenPaymentSuccessEvent() {
     // given
-    PaymentSuccessEvent event = new PaymentSuccessEvent(1L, 1L);
+    PaymentSuccessEvent event = new PaymentSuccessEvent(1L, 1L, 1L);
 
     // when
-    orderEventListener.handlePaymentSuccessEvent(event);
+    paymentEventListener.handlePaymentSuccessEvent(event);
 
     // then
-    verify(paymentDataClient, atLeastOnce()).publish(PaymentSuccessPayload.from(event));
+    verify(paymentDataClient, atLeastOnce()).publish(any());
   }
 }

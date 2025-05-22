@@ -1,18 +1,15 @@
 package kr.hhplus.be.server.interfaces.order;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import kr.hhplus.be.server.application.order.OrderPaymentResult;
 import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderItemInfo;
 import kr.hhplus.be.server.domain.order.OrderStatus;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
 
 public record OrderResponse(
 
@@ -155,12 +152,11 @@ public record OrderResponse(
       Long amount
   ) {
 
-    public static OrderPaymentResponse from(
-        OrderPaymentResult orderPaymentResult) {
+    public static OrderPaymentResponse from(OrderInfo orderInfo){
       return new OrderPaymentResponse(
-          orderPaymentResult.orderId(),
-          orderPaymentResult.userId(),
-          orderPaymentResult.finalPrice()
+          orderInfo.id(),
+          orderInfo.userId(),
+          orderInfo.finalPrice()
       );
     }
   }

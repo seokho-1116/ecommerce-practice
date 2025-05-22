@@ -7,14 +7,11 @@ import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.order.OrderCommand;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
-import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
 import kr.hhplus.be.server.domain.order.OrderService;
-import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.user.UserDto.UserInfo;
 import kr.hhplus.be.server.domain.user.UserService;
-import kr.hhplus.be.server.infrastructure.order.OrderEventPublisherImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +23,6 @@ public class OrderFacade {
   private final ProductService productService;
   private final CouponService couponService;
   private final UserService userService;
-  private final OrderEventPublisherImpl orderEventPublisher;
 
   @Transactional
   public OrderResult createOrder(OrderCreateCommand orderCreateCommand) {
@@ -43,17 +39,5 @@ public class OrderFacade {
     couponService.use(userCoupon.id());
 
     return OrderResult.of(order, userCoupon);
-  }
-
-  @Transactional
-  public OrderPaymentResult payOrder(OrderPaymentCommand orderPaymentCommand) {
-    OrderInfo order = orderService.findNotPaidOrderById(orderPaymentCommand.orderId());
-
-    OrderInfo orderResult = orderService.pay(order.id());
-
-    OrderSuccessEvent orderSuccessEvent = OrderSuccessEvent.from(orderResult);
-    orderEventPublisher.success(orderSuccessEvent);
-
-    return OrderPaymentResult.from(orderResult);
   }
 }

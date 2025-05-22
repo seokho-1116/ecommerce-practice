@@ -6,14 +6,16 @@ public class PaymentEvent {
 
   public record PaymentSuccessEvent(
       Long orderId,
-      Long userId
+      Long userId,
+      Long finalPrice
   ) {
 
     public static PaymentSuccessEvent from(
         PaymentInfo paymentInfo) {
       return new PaymentSuccessEvent(
           paymentInfo.orderId(),
-          paymentInfo.userId()
+          paymentInfo.userId(),
+          paymentInfo.amount()
       );
     }
   }

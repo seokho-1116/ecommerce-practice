@@ -5,6 +5,7 @@ import java.util.Optional;
 import kr.hhplus.be.server.domain.payment.PaymentBusinessException.PaymentIllegalStateException;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.PaymentSuccessCommand;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentInfo;
+import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,10 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
+  private final PaymentEventPublisher paymentEventPublisher;
 
   @Transactional
-  public PaymentInfo pay(PaymentSuccessCommand command) {
+  public void pay(PaymentSuccessCommand command) {
     Optional<Payment> existingPayment = paymentRepository.findByOrderIdAndUserId(command.orderId(), command.userId());
     if (existingPayment.isPresent()) {
       throw new PaymentIllegalStateException("이미 결제된 주문입니다.");
@@ -25,6 +27,8 @@ public class PaymentService {
 
     Payment saved = paymentRepository.save(payment);
 
-    return PaymentInfo.from(saved);
+    PaymentInfo paymentInfo = PaymentInfo.from(saved);
+    PaymentSuccessEvent paymentSuccessEvent = PaymentSuccessEvent.from(paymentInfo);
+    paymentEventPublisher.success(paymentSuccessEvent);
   }
 }

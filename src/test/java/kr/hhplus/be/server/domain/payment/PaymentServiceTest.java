@@ -3,6 +3,8 @@ package kr.hhplus.be.server.domain.payment;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -20,6 +22,9 @@ class PaymentServiceTest {
 
   @Mock
   private PaymentRepository paymentRepository;
+
+  @Mock
+  private PaymentEventPublisher paymentEventPublisher;
 
   @InjectMocks
   private PaymentService paymentService;
@@ -41,5 +46,27 @@ class PaymentServiceTest {
     // then
     assertThatThrownBy(() -> paymentService.pay(command))
         .isInstanceOf(PaymentIllegalStateException.class);
+  }
+
+  @DisplayName("결제 성공 시 결제 이벤트가 발행되어야 한다")
+  @Test
+  void pay_Success_PaymentEventPublished() {
+    // given
+    Long orderId = 1L;
+    Long userId = 1L;
+    Long amount = 1000L;
+    PaymentSuccessCommand command = new PaymentSuccessCommand(orderId, userId, amount);
+    Payment payment = Payment.success(command);
+
+    when(paymentRepository.findByOrderIdAndUserId(anyLong(), anyLong()))
+        .thenReturn(Optional.empty());
+    when(paymentRepository.save(any(Payment.class)))
+        .thenReturn(payment);
+
+    // when
+    paymentService.pay(command);
+
+    // then
+    verify(paymentEventPublisher, atLeastOnce()).success(any());
   }
 }
