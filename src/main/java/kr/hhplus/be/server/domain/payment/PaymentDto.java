@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.payment;
 
 import java.time.LocalDateTime;
+import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
 
 public class PaymentDto {
 
@@ -21,6 +22,19 @@ public class PaymentDto {
           payment.getAmount(),
           payment.getStatus(),
           payment.getCreatedAt()
+      );
+    }
+  }
+
+  public record PaymentSuccessPayload(
+      Long orderId,
+      Long userId
+  ) {
+
+    public static PaymentSuccessPayload from(PaymentSuccessEvent event) {
+      return new PaymentSuccessPayload(
+          event.orderId(),
+          event.userId()
       );
     }
   }

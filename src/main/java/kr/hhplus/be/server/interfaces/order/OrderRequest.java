@@ -6,6 +6,7 @@ import java.util.List;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand.Item;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand.ProductIdItemPair;
+import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 
 public record OrderRequest(
     @NotNull
@@ -46,5 +47,18 @@ public record OrderRequest(
       Long amount
   ) {
 
+  }
+
+  public record OrderPaymentRequest(
+      @NotNull
+      Long userId
+  ) {
+
+    public OrderPaymentCommand toCommand(long orderId) {
+      return new OrderPaymentCommand(
+          userId,
+          orderId
+      );
+    }
   }
 }

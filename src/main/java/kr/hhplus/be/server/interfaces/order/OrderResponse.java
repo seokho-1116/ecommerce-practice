@@ -7,11 +7,8 @@ import java.util.stream.Collectors;
 import kr.hhplus.be.server.application.order.OrderResult;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponType;
-import kr.hhplus.be.server.domain.coupon.UserCoupon;
-import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderItemInfo;
-import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 
 public record OrderResponse(
@@ -144,4 +141,23 @@ public record OrderResponse(
     }
   }
 
+  public record OrderPaymentResponse(
+      @Schema(description = "주문 ID")
+      Long orderId,
+
+      @Schema(description = "유저 ID")
+      Long userId,
+
+      @Schema(description = "주문 총 가격")
+      Long amount
+  ) {
+
+    public static OrderPaymentResponse from(OrderInfo orderInfo){
+      return new OrderPaymentResponse(
+          orderInfo.id(),
+          orderInfo.userId(),
+          orderInfo.finalPrice()
+      );
+    }
+  }
 }
