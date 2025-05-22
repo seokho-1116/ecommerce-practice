@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.order;
 
-import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import java.util.Map;
 
 public class OrderEvent {
 
@@ -9,13 +9,18 @@ public class OrderEvent {
 
   public record OrderSuccessEvent(
       Long orderId,
-      Long userId
+      Long userId,
+      Long finalPrice,
+      Map<Long, Long> productOptionIdAmountMap
   ) {
 
-    public static OrderSuccessEvent from(OrderInfo orderResult) {
+    public static OrderSuccessEvent from(Order order,
+        Map<Long, Long> productOptionIdAmountMap) {
       return new OrderSuccessEvent(
-          orderResult.id(),
-          orderResult.userId()
+          order.getId(),
+          order.getUserId(),
+          order.getFinalPrice(),
+          productOptionIdAmountMap
       );
     }
   }

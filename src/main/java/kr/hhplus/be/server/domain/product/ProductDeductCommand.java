@@ -1,24 +1,13 @@
 package kr.hhplus.be.server.domain.product;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-
 import java.util.List;
 import java.util.Map;
-import kr.hhplus.be.server.domain.order.OrderDto.OrderItemInfo;
 
 public record ProductDeductCommand(
     Map<Long, Long> productOptionIdToAmountMap
 ) {
 
-  public static ProductDeductCommand from(List<OrderItemInfo> orderItems) {
-    if (orderItems == null || orderItems.isEmpty()) {
-      return new ProductDeductCommand(Map.of());
-    }
-
-    Map<Long, Long> productOptionIdToAmountMap = orderItems.stream()
-        .collect(groupingBy(OrderItemInfo::productOptionId, counting()));
-
+  public static ProductDeductCommand from(Map<Long, Long> productOptionIdToAmountMap) {
     return new ProductDeductCommand(productOptionIdToAmountMap);
   }
 
