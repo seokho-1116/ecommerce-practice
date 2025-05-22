@@ -27,9 +27,6 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
   private OrderService orderService;
 
   @Autowired
-  private OrderRepository orderRepository;
-
-  @Autowired
   private ApplicationEvents events;
 
   private Order notPaidOrder;

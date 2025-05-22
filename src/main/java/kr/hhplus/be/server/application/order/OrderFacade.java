@@ -7,6 +7,8 @@ import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.order.OrderCommand;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderEvent.UseCouponEvent;
+import kr.hhplus.be.server.domain.order.OrderEventPublisher;
 import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductService;
@@ -23,6 +25,7 @@ public class OrderFacade {
   private final ProductService productService;
   private final CouponService couponService;
   private final UserService userService;
+  private final OrderEventPublisher orderEventPublisher;
 
   @Transactional
   public OrderResult createOrder(OrderCreateCommand orderCreateCommand) {
@@ -36,7 +39,10 @@ public class OrderFacade {
     OrderCommand orderCommand = orderCreateCommand.toOrderCommand(products, user, userCoupon);
     OrderInfo order = orderService.createOrder(orderCommand);
 
-    couponService.use(userCoupon.id());
+    if (userCoupon != null) {
+      UseCouponEvent event = new UseCouponEvent(userCoupon.id());
+      orderEventPublisher.useCoupon(event);
+    }
 
     return OrderResult.of(order, userCoupon);
   }

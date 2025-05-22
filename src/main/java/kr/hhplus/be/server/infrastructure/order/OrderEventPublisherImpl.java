@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.infrastructure.order;
 
 import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.UseCouponEvent;
 import kr.hhplus.be.server.domain.order.OrderEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -14,6 +15,11 @@ public class OrderEventPublisherImpl implements OrderEventPublisher {
 
   @Override
   public void success(OrderSuccessEvent event) {
+    applicationEventPublisher.publishEvent(event);
+  }
+
+  @Override
+  public void useCoupon(UseCouponEvent event) {
     applicationEventPublisher.publishEvent(event);
   }
 }
