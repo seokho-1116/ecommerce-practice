@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
-import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaySuccessEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaymentSuccessEvent;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -106,6 +106,6 @@ class OrderServiceTest {
     orderService.payOrder(command);
 
     // then
-    verify(orderEventPublisher, atLeastOnce()).paySuccess(any(OrderPaySuccessEvent.class));
+    verify(orderEventPublisher, atLeastOnce()).paySuccess(any(OrderPaymentSuccessEvent.class));
   }
 }

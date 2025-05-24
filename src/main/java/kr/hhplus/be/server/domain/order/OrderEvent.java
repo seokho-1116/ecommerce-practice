@@ -25,16 +25,16 @@ public class OrderEvent {
     }
   }
 
-  public record OrderPaySuccessEvent(
+  public record OrderPaymentSuccessEvent(
       Long orderId,
       Long userId,
       Long finalPrice,
       Map<Long, Long> productOptionIdAmountMap
   ) {
 
-    public static OrderPaySuccessEvent from(Order order,
+    public static OrderPaymentSuccessEvent from(Order order,
         Map<Long, Long> productOptionIdAmountMap) {
-      return new OrderPaySuccessEvent(
+      return new OrderPaymentSuccessEvent(
           order.getId(),
           order.getUserId(),
           order.getFinalPrice(),

@@ -27,12 +27,14 @@ public class CouponService {
   }
 
   @Transactional
-  public void use(Long userCouponId) {
-    UserCoupon userCoupon = couponRepository.findUserCouponByUserCouponId(userCouponId)
-        .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
+  public void use(Long userId, Long orderId) {
+    List<UserCoupon> userCoupons = couponRepository.findAllUserCouponsByUserIdAndOrderId(userId,
+        orderId);
 
-    userCoupon.use();
-    couponRepository.saveUserCoupon(userCoupon);
+    for (UserCoupon userCoupon : userCoupons) {
+      userCoupon.use();
+      couponRepository.saveUserCoupon(userCoupon);
+    }
   }
 
   public CouponIssueInfo issue(Long userId, Long couponId) {

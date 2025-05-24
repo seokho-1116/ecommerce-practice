@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.product;
 
-import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaySuccessEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaymentSuccessEvent;
 import kr.hhplus.be.server.domain.product.ProductDeductCommand;
 import kr.hhplus.be.server.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class ProductEventListener {
   private final ProductService productService;
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-  public void handleProductEvent(OrderPaySuccessEvent event) {
+  public void handleProductEvent(OrderPaymentSuccessEvent event) {
     ProductDeductCommand command = ProductDeductCommand.from(event.productOptionIdAmountMap());
     productService.deductInventory(command);
   }
