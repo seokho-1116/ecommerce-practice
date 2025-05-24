@@ -7,7 +7,7 @@ import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.order.OrderCommand;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
-import kr.hhplus.be.server.domain.order.OrderEvent.UseCouponEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
 import kr.hhplus.be.server.domain.order.OrderEventPublisher;
 import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
@@ -39,10 +39,8 @@ public class OrderFacade {
     OrderCommand orderCommand = orderCreateCommand.toOrderCommand(products, user, userCoupon);
     OrderInfo order = orderService.createOrder(orderCommand);
 
-    if (userCoupon != null) {
-      UseCouponEvent event = new UseCouponEvent(userCoupon.id());
-      orderEventPublisher.useCoupon(event);
-    }
+    OrderSuccessEvent event = OrderSuccessEvent.from(order, userCoupon);
+    orderEventPublisher.orderSuccess(event);
 
     return OrderResult.of(order, userCoupon);
   }

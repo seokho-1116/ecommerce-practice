@@ -11,11 +11,6 @@ public class UserService {
 
   private final UserRepository userRepository;
 
-  public User findUserById(Long userId) {
-    return userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
-  }
-
   public UserInfo findUserInfoById(Long userId) {
     return userRepository.findById(userId)
         .map(UserInfo::from)

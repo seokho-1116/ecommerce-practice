@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.point;
 
-import kr.hhplus.be.server.domain.order.OrderEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaySuccessEvent;
 import kr.hhplus.be.server.domain.point.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ public class PointEventListener {
   private final PointService pointService;
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-  public void handlePointEvent(OrderEvent.OrderSuccessEvent event) {
+  public void handlePointEvent(OrderPaySuccessEvent event) {
     pointService.charge(event.userId(), event.finalPrice());
   }
 }

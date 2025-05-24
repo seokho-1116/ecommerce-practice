@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.coupon;
 
 import kr.hhplus.be.server.domain.coupon.CouponService;
-import kr.hhplus.be.server.domain.order.OrderEvent.UseCouponEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ public class CouponListener {
   private final CouponService couponService;
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-  public void handleUseCouponEvent(UseCouponEvent event) {
-    couponService.use(event.userCouponId());
+  public void handleOrderSuccessEvent(OrderSuccessEvent event) {
+    couponService.reserveCouponForOrder(event.userCouponId(), event.orderId());
   }
 }

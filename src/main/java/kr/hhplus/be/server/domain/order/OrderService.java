@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
-import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaySuccessEvent;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,9 +44,9 @@ public class OrderService {
 
     Map<Long, Long> productOptionIdToAmountMap = savedOrder.getOrderItems().stream()
         .collect(groupingBy(OrderItem::getProductOptionId, counting()));
-    OrderSuccessEvent orderSuccessEvent = OrderSuccessEvent.from(savedOrder,
+    OrderPaySuccessEvent orderPaySuccessEvent = OrderPaySuccessEvent.from(savedOrder,
         productOptionIdToAmountMap);
-    orderEventPublisher.success(orderSuccessEvent);
+    orderEventPublisher.paySuccess(orderPaySuccessEvent);
 
     return OrderInfo.from(savedOrder);
   }

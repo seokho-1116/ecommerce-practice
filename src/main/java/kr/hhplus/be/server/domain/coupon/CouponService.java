@@ -117,4 +117,16 @@ public class CouponService {
     return userIds.size() >= coupon.getQuantity() && (savedCount == 0
         || savedCount == coupon.getQuantity());
   }
+
+  public void reserveCouponForOrder(Long userCouponId, Long orderId) {
+    if (userCouponId == null) {
+      return;
+    }
+
+    couponRepository.findUserCouponByUserCouponId(userCouponId)
+        .ifPresent(userCoupon -> {
+          userCoupon.reserve(orderId);
+          couponRepository.saveUserCoupon(userCoupon);
+        });
+  }
 }
