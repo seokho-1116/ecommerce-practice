@@ -123,4 +123,9 @@ public class CouponRepositoryImpl implements CouponRepository {
     });
     return Optional.ofNullable(coupon);
   }
+
+  @Override
+  public List<UserCoupon> findAllUserCouponsByUserIdAndOrderId(Long userId, Long orderId) {
+    return userCouponJpaRepository.findAllByUserIdAndOrderId(userId, orderId);
+  }
 }

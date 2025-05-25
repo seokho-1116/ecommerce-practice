@@ -119,6 +119,7 @@ create table user_coupon
     is_used    bit      null,
     coupon_id  bigint   null,
     user_id    bigint   null,
+    order_id   bigint   null,
     version    bigint   null
 );
 

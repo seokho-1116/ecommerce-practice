@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.payment;
 
-import kr.hhplus.be.server.domain.order.OrderEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaymentSuccessEvent;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.PaymentSuccessCommand;
 import kr.hhplus.be.server.domain.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class PaymentEventListener {
   private final PaymentService paymentService;
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-  public void handlePaymentEvent(OrderEvent.OrderSuccessEvent event) {
+  public void handlePaymentEvent(OrderPaymentSuccessEvent event) {
     PaymentSuccessCommand command = PaymentSuccessCommand.of(event.orderId(), event.orderId(),
         event.finalPrice());
     paymentService.pay(command);

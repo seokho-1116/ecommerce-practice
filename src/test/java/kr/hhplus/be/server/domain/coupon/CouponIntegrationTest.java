@@ -10,9 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
-import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
 import kr.hhplus.be.server.support.CacheKeyHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,17 +25,11 @@ class CouponIntegrationTest extends IntegrationTestSupport {
   @Autowired
   private CouponRepository couponRepository;
 
-  @Autowired
-  private CouponTestDataGenerator couponTestDataGenerator;
-
-  @Autowired
-  private UserTestDataGenerator userTestDataGenerator;
-
-  private UserCoupon userCoupon;
   private User user;
   private User user2;
   private Coupon coupon;
   private Coupon notIssuedCoupon;
+  private final Long orderId = 100L;
 
   @BeforeEach
   void setup() {
@@ -47,31 +39,38 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     user2 = userTestDataGenerator.user();
     testHelpRepository.save(user2);
 
-    coupon = couponTestDataGenerator.validateCoupon();
+    coupon = couponTestDataGenerator.validCoupon();
     TestReflectionUtil.setField(coupon, "quantity", 10L);
     testHelpRepository.save(coupon);
 
-    notIssuedCoupon = couponTestDataGenerator.validateCoupon();
+    notIssuedCoupon = couponTestDataGenerator.validCoupon();
     TestReflectionUtil.setField(notIssuedCoupon, "quantity", 1L);
     TestReflectionUtil.setField(notIssuedCoupon, "couponStatus", CouponStatus.AVAILABLE);
     testHelpRepository.save(notIssuedCoupon);
 
-    userCoupon = couponTestDataGenerator.notUsedUserCoupon(user, coupon);
+    UserCoupon userCoupon = couponTestDataGenerator.notUsedUserCoupon(user, coupon);
+    TestReflectionUtil.setField(userCoupon, "orderId", orderId);
     testHelpRepository.save(userCoupon);
+
+    UserCoupon userCoupon2 = couponTestDataGenerator.notUsedUserCoupon(user, coupon);
+    TestReflectionUtil.setField(userCoupon2, "orderId", orderId);
+    testHelpRepository.save(userCoupon2);
   }
 
-  @DisplayName("쿠폰을 사용하면 쿠폰이 사용된다")
+  @DisplayName("쿠폰을 사용하면 해당 사용자의 주문에 연결된 모든 쿠폰이 사용된다")
   @Test
   void useTest() {
     // given
-    Long userCouponId = userCoupon.getId();
+    Long userId = user.getId();
 
     // when
-    couponService.use(userCouponId);
+    couponService.use(userId, orderId);
 
     // then
-    UserCouponInfo result = couponService.findUserCouponByUserCouponId(userCouponId);
-    assertThat(result.isUsed()).isTrue();
+    List<UserCoupon> userCoupons = couponRepository.findAllUserCouponsByUserIdAndOrderId(userId, orderId);
+    assertThat(userCoupons)
+        .isNotEmpty()
+        .allMatch(UserCoupon::getIsUsed);
   }
 
   @DisplayName("쿠폰을 발급을 요청하면 쿠폰이 발급 요청이 수행된다")
@@ -90,7 +89,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     assertThat(userIds).contains(user.getId());
   }
 
-  @DisplayName("동시에 쿠폰을 사용하면 쿠폰이 한 장만 사용된다")
+  @DisplayName("동시에 쿠폰을 사용하면 쿠폰이 한 번만 사용된다")
   @Test
   void concurrentUseTest() throws InterruptedException {
     // given
@@ -103,10 +102,7 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     for (int i = 0; i < concurrentRequest; i++) {
       new Thread(() -> {
         try {
-          Long userCouponId = userCoupon.getId();
-
-          couponService.use(userCouponId);
-
+          couponService.use(user.getId(), orderId);
           successCount.incrementAndGet();
         } catch (Exception e) {
           failureCount.incrementAndGet();
@@ -118,6 +114,11 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     latch.await();
 
     // then
+    // 동시 요청 중 하나만 성공해야 함 (이미 사용된 쿠폰으로 인해)
+    List<UserCoupon> userCoupons = couponRepository.findAllUserCouponsByUserIdAndOrderId(user.getId(), orderId);
+    assertThat(userCoupons)
+        .isNotEmpty()
+        .allMatch(UserCoupon::getIsUsed);
     assertThat(successCount.get()).isEqualTo(1);
   }
 
@@ -250,5 +251,20 @@ class CouponIntegrationTest extends IntegrationTestSupport {
 
     List<UserCoupon> userCoupons2 = couponRepository.findUserCouponsByUserId(user2.getId());
     assertThat(userCoupons2).hasSize(1);
+  }
+
+  @DisplayName("주문 ID가 없는 사용자의 쿠폰을 사용하려고 하면 아무 쿠폰도 사용되지 않는다")
+  @Test
+  void useTestWithNoOrderId() {
+    // given
+    Long userId = user.getId();
+    Long nonExistentOrderId = 999L;
+
+    // when
+    couponService.use(userId, nonExistentOrderId);
+
+    // then
+    List<UserCoupon> userCoupons = couponRepository.findAllUserCouponsByUserIdAndOrderId(userId, orderId);
+    assertThat(userCoupons).noneMatch(UserCoupon::getIsUsed);
   }
 }

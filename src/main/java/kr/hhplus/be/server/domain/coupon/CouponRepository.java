@@ -29,4 +29,6 @@ public interface CouponRepository {
   Optional<UserCoupon> findUserCouponForUpdateByUserIdAndCouponId(Long userId, Long couponId);
 
   Optional<Coupon> findEventCoupon();
+
+  List<UserCoupon> findAllUserCouponsByUserIdAndOrderId(Long userId, Long orderId);
 }
