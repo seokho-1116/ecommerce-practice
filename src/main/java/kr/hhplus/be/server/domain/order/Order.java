@@ -70,9 +70,9 @@ public class Order extends BaseEntity {
     this.userId = userId;
   }
 
-  public static Order newOrder(UserInfo user, List<OrderItem> orderItems, UserCouponInfo userCoupon) {
+  public static Order newOrder(Long userId, List<OrderItem> orderItems, UserCouponInfo userCoupon) {
     Order order = Order.builder()
-        .userId(user.id())
+        .userId(userId)
         .status(OrderStatus.CREATED)
         .totalPrice(0L)
         .discountPrice(0L)

@@ -5,23 +5,18 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
-import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderCommandIllegalStateException;
-import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductDto.ProductOptionInfo;
-import kr.hhplus.be.server.domain.product.ProductOption;
-import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserDto.UserInfo;
 
 public record OrderCommand(
-    UserInfo user,
+    Long userId,
     List<ProductAmountPair> productAmountPairs,
     UserCouponInfo userCoupon
 ) {
 
   public OrderCommand {
-    if (user == null) {
+    if (userId == null) {
       throw new OrderCommandIllegalStateException("주문자 정보는 필수입니다.");
     }
 
@@ -74,7 +69,7 @@ public record OrderCommand(
           .toList();
     }
 
-    public OrderCommand toOrderCommand(List<ProductInfo> products, UserInfo user,
+    public OrderCommand toOrderCommand(List<ProductInfo> products, Long userId,
         UserCouponInfo userCoupon) {
       Map<Long, ProductInfo> productIdMap = products.stream()
           .collect(Collectors.toMap(ProductInfo::id, Function.identity()));
@@ -95,7 +90,7 @@ public record OrderCommand(
           })
           .toList();
 
-      return new OrderCommand(user, productAmountPairs, userCoupon);
+      return new OrderCommand(userId, productAmountPairs, userCoupon);
     }
 
     public record ProductIdItemPair(
