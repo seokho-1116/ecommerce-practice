@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaymentSuccessEvent;
 import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +27,15 @@ public class OrderService {
         .map(OrderItem::create)
         .toList();
 
-    Order order = Order.newOrder(orderCommand.user(), orderItems, orderCommand.userCoupon());
+    Order order = Order.newOrder(orderCommand.userId(), orderItems, orderCommand.userCoupon());
 
     Order savedOrder = orderRepository.save(order);
+    OrderInfo orderInfo = OrderInfo.from(savedOrder);
 
-    return OrderInfo.from(savedOrder);
+    OrderSuccessEvent event = OrderSuccessEvent.from(orderInfo, orderCommand.userCoupon());
+    orderEventPublisher.orderSuccess(event);
+
+    return orderInfo;
   }
 
   @Transactional
@@ -44,9 +49,9 @@ public class OrderService {
 
     Map<Long, Long> productOptionIdToAmountMap = savedOrder.getOrderItems().stream()
         .collect(groupingBy(OrderItem::getProductOptionId, counting()));
-    OrderSuccessEvent orderSuccessEvent = OrderSuccessEvent.from(savedOrder,
+    OrderPaymentSuccessEvent orderPaymentSuccessEvent = OrderPaymentSuccessEvent.from(savedOrder,
         productOptionIdToAmountMap);
-    orderEventPublisher.success(orderSuccessEvent);
+    orderEventPublisher.paySuccess(orderPaymentSuccessEvent);
 
     return OrderInfo.from(savedOrder);
   }

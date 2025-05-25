@@ -7,7 +7,7 @@ import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
-import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaymentSuccessEvent;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
@@ -96,10 +96,10 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
     orderService.payOrder(command);
 
     // then
-    List<OrderSuccessEvent> result = events.stream(OrderSuccessEvent.class)
+    List<OrderPaymentSuccessEvent> result = events.stream(OrderPaymentSuccessEvent.class)
         .toList();
     assertThat(result).hasSize(1)
-        .extracting(OrderSuccessEvent::orderId)
+        .extracting(OrderPaymentSuccessEvent::orderId)
         .containsExactly(notPaidOrder.getId());
   }
 }
