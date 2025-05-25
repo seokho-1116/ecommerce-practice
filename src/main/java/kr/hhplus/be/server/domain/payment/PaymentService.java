@@ -15,7 +15,7 @@ public class PaymentService {
   private final PaymentRepository paymentRepository;
 
   @Transactional
-  public PaymentInfo pay(PaymentSuccessCommand command) {
+  public void pay(PaymentSuccessCommand command) {
     Optional<Payment> existingPayment = paymentRepository.findByOrderIdAndUserId(command.orderId(), command.userId());
     if (existingPayment.isPresent()) {
       throw new PaymentIllegalStateException("이미 결제된 주문입니다.");
@@ -25,6 +25,6 @@ public class PaymentService {
 
     Payment saved = paymentRepository.save(payment);
 
-    return PaymentInfo.from(saved);
+    PaymentInfo.from(saved);
   }
 }
