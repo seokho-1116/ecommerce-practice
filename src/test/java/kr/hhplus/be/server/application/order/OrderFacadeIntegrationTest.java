@@ -9,7 +9,7 @@ import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand.Item;
 import kr.hhplus.be.server.domain.order.OrderCommand.OrderCreateCommand.ProductIdItemPair;
-import kr.hhplus.be.server.domain.order.OrderEvent.UseCouponEvent;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderSuccessEvent;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
@@ -86,11 +86,11 @@ class OrderFacadeIntegrationTest extends IntegrationTestSupport {
     orderFacade.createOrder(command);
 
     // then
-    List<UseCouponEvent> result = events.stream(UseCouponEvent.class)
+    List<OrderSuccessEvent> result = events.stream(OrderSuccessEvent.class)
         .toList();
     assertThat(result).hasSize(1);
     assertThat(result)
-        .extracting(UseCouponEvent::userCouponId)
+        .extracting(OrderSuccessEvent::userCouponId)
         .containsExactly(userCouponId);
   }
 }

@@ -28,6 +28,7 @@ public class UserCoupon extends BaseEntity {
 
   private Boolean isUsed;
   private Long userId;
+  private Long orderId;
 
   @Version
   private Long version;
@@ -41,6 +42,16 @@ public class UserCoupon extends BaseEntity {
   }
 
   public void use() {
+    validate();
+    this.isUsed = true;
+  }
+
+  public void reserve(Long orderId) {
+    validate();
+    this.orderId = orderId;
+  }
+
+  private void validate() {
     if (Boolean.TRUE.equals(this.isUsed) || Boolean.FALSE.equals(coupon.getIsActive())) {
       throw new CouponIllegalStateException("이미 사용된 쿠폰입니다.");
     }
@@ -49,7 +60,5 @@ public class UserCoupon extends BaseEntity {
     if (now.isBefore(coupon.getFrom()) || now.isAfter(coupon.getTo())) {
       throw new CouponIllegalStateException("쿠폰 사용 기간이 아닙니다.");
     }
-
-    this.isUsed = true;
   }
 }
