@@ -23,16 +23,18 @@ public class CouponService {
   public UserCouponInfo findUserCouponByUserCouponId(Long userCouponId) {
     return couponRepository.findUserCouponByUserCouponId(userCouponId)
         .map(UserCouponInfo::from)
-        .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
+        .orElse(null);
   }
 
   @Transactional
-  public void use(Long userCouponId) {
-    UserCoupon userCoupon = couponRepository.findUserCouponByUserCouponId(userCouponId)
-        .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
+  public void use(Long userId, Long orderId) {
+    List<UserCoupon> userCoupons = couponRepository.findAllUserCouponsByUserIdAndOrderId(userId,
+        orderId);
 
-    userCoupon.use();
-    couponRepository.saveUserCoupon(userCoupon);
+    for (UserCoupon userCoupon : userCoupons) {
+      userCoupon.use();
+      couponRepository.saveUserCoupon(userCoupon);
+    }
   }
 
   public CouponIssueInfo issue(Long userId, Long couponId) {
@@ -116,5 +118,17 @@ public class CouponService {
   private boolean couponEventComplete(List<Long> userIds, Coupon coupon, int savedCount) {
     return userIds.size() >= coupon.getQuantity() && (savedCount == 0
         || savedCount == coupon.getQuantity());
+  }
+
+  public void reserveCouponForOrder(Long userCouponId, Long orderId) {
+    if (userCouponId == null) {
+      return;
+    }
+
+    couponRepository.findUserCouponByUserCouponId(userCouponId)
+        .ifPresent(userCoupon -> {
+          userCoupon.reserve(orderId);
+          couponRepository.saveUserCoupon(userCoupon);
+        });
   }
 }

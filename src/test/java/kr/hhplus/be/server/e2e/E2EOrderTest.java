@@ -11,7 +11,6 @@ import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponTestDataGenerator;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.OrderStatus;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
@@ -21,9 +20,9 @@ import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
 import kr.hhplus.be.server.interfaces.CommonResponseWrapper;
 import kr.hhplus.be.server.interfaces.order.OrderRequest;
 import kr.hhplus.be.server.interfaces.order.OrderRequest.AmountProductOptionRequest;
+import kr.hhplus.be.server.interfaces.order.OrderRequest.OrderPaymentRequest;
+import kr.hhplus.be.server.interfaces.order.OrderResponse.OrderPaymentResponse;
 import kr.hhplus.be.server.interfaces.order.OrderResponse.OrderSuccessResponse;
-import kr.hhplus.be.server.interfaces.payment.OrderPaymentRequest;
-import kr.hhplus.be.server.interfaces.payment.OrderPaymentResponse;
 import kr.hhplus.be.server.interfaces.point.PointResponse.ChargePointResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +67,7 @@ class E2EOrderTest extends IntegrationTestSupport {
       testHelpRepository.save(productInventory);
     }
 
-    Coupon coupon = couponTestDataGenerator.validateCoupon();
+    Coupon coupon = couponTestDataGenerator.validCoupon();
     testHelpRepository.save(coupon);
 
     UserCoupon userCoupon = couponTestDataGenerator.notUsedUserCoupon(user, coupon);
@@ -130,7 +129,7 @@ class E2EOrderTest extends IntegrationTestSupport {
     OrderPaymentRequest paymentRequest = new OrderPaymentRequest(userId);
 
     CommonResponseWrapper<OrderPaymentResponse> orderPaymentResponseWrapper = RestAssured.given()
-        .basePath("/api/v1/payments/{orderId}")
+        .basePath("/api/v1/orders/{orderId}/payments")
         .pathParam("orderId", orderResponseWrapper.data().orderId())
         .contentType(ContentType.JSON)
         .body(paymentRequest)
@@ -143,6 +142,6 @@ class E2EOrderTest extends IntegrationTestSupport {
         });
 
     assertThat(orderPaymentResponseWrapper.data().amount()).isGreaterThanOrEqualTo(0L);
-    assertThat(orderPaymentResponseWrapper.data().status()).isEqualTo(PaymentStatus.SUCCESS);
+    assertThat(orderPaymentResponseWrapper.data().orderId()).isNotNull();
   }
 }

@@ -16,4 +16,6 @@ public interface UserCouponJpaRepository extends JpaRepository<UserCoupon, Long>
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")})
   Optional<UserCoupon> findForUpdateByUserIdAndCouponId(Long userId, Long couponId);
+
+  List<UserCoupon> findAllByUserIdAndOrderId(Long userId, Long orderId);
 }

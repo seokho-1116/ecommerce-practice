@@ -16,6 +16,7 @@ import kr.hhplus.be.server.domain.coupon.CouponType;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderService;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.order.OrderRequest.AmountProductOptionRequest;
@@ -35,6 +36,9 @@ class OrderControllerTest {
 
   @MockitoBean
   private OrderFacade orderFacade;
+
+  @MockitoBean
+  private OrderService orderService;
 
   @Autowired
   private ObjectMapper objectMapper;

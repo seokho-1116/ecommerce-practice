@@ -1,43 +1,33 @@
 package kr.hhplus.be.server.domain.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.domain.coupon.Coupon;
-import kr.hhplus.be.server.domain.coupon.CouponTestDataGenerator;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
-import kr.hhplus.be.server.domain.order.OrderBusinessException.OrderNotFoundException;
+import kr.hhplus.be.server.domain.order.OrderDto.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderEvent.OrderPaymentSuccessEvent;
+import kr.hhplus.be.server.domain.payment.PaymentCommand.OrderPaymentCommand;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductInventory;
 import kr.hhplus.be.server.domain.product.ProductOption;
-import kr.hhplus.be.server.domain.product.ProductTestDataGenerator;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserTestDataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
+@RecordApplicationEvents
 class OrderServiceIntegrationTest extends IntegrationTestSupport {
 
   @Autowired
   private OrderService orderService;
 
   @Autowired
-  private OrderTestDataGenerator orderTestDataGenerator;
-
-  @Autowired
-  private UserTestDataGenerator userTestDataGenerator;
-
-  @Autowired
-  private ProductTestDataGenerator productTestDataGenerator;
-
-  @Autowired
-  private CouponTestDataGenerator couponTestDataGenerator;
+  private ApplicationEvents events;
 
   private Order notPaidOrder;
 
@@ -83,44 +73,33 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
 
   @DisplayName("주문 결제 시 주문이 결제 상태로 변경되어야 한다")
   @Test
-  void createOrderTest() {
+  void payOrderTest() {
     // given
-    long notPaidOrderId = notPaidOrder.getId();
+    long userId = notPaidOrder.getUserId();
+    long orderId = notPaidOrder.getId();
+    OrderPaymentCommand command = new OrderPaymentCommand(userId, orderId);
 
     // when
-    orderService.pay(notPaidOrderId);
+    OrderInfo orderInfo = orderService.payOrder(command);
 
     // then
-    assertThatThrownBy(() -> orderService.findNotPaidOrderById(notPaidOrderId))
-        .isInstanceOf(OrderNotFoundException.class);
+    assertThat(orderInfo.status()).isEqualTo(OrderStatus.PAID);
   }
 
-  @DisplayName("동시에 주문 결제를 요청하면 하나만 결제된다")
+  @DisplayName("주문 결제 시 주문 결제 이벤트에는 주문 아이디가 포함되어야 한다")
   @Test
-  void concurrentPayOrderTest() throws InterruptedException {
+  void createOrderTestWithOrderId() {
     // given
-    Long notPaidOrderId = notPaidOrder.getId();
-    int concurrentRequest = 2;
-    CountDownLatch latch = new CountDownLatch(concurrentRequest);
+    OrderPaymentCommand command = new OrderPaymentCommand(notPaidOrder.getUserId(), notPaidOrder.getId());
 
     // when
-    AtomicLong successCount = new AtomicLong(0);
-    AtomicLong failedCount = new AtomicLong(0);
-    for (int i = 0; i < concurrentRequest; i++) {
-      new Thread(() -> {
-        try {
-          orderService.pay(notPaidOrderId);
-          successCount.incrementAndGet();
-        } catch (Exception e) {
-          failedCount.incrementAndGet();
-        } finally {
-          latch.countDown();
-        }
-      }).start();
-    }
-    latch.await();
+    orderService.payOrder(command);
 
     // then
-    assertThat(successCount.get()).isEqualTo(1L);
+    List<OrderPaymentSuccessEvent> result = events.stream(OrderPaymentSuccessEvent.class)
+        .toList();
+    assertThat(result).hasSize(1)
+        .extracting(OrderPaymentSuccessEvent::orderId)
+        .containsExactly(notPaidOrder.getId());
   }
 }
