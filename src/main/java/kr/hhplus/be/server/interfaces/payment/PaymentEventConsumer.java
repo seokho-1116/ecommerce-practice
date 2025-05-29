@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.order;
+package kr.hhplus.be.server.interfaces.payment;
 
 import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class OrderEventListener {
+public class PaymentEventConsumer {
 
   private final PaymentDataClient paymentDataClient;
 

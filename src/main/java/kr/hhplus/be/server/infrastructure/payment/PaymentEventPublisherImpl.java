@@ -13,6 +13,6 @@ public class PaymentEventPublisherImpl implements PaymentEventPublisher {
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   public void success(PaymentSuccessEvent event) {
-    kafkaTemplate.send("payment-success", String.valueOf(event.orderId()), event);
+    kafkaTemplate.send("payment.v1.success", String.valueOf(event.orderId()), event);
   }
 }
