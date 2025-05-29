@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.payment;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -11,13 +12,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentEventPublisherImplTest {
 
   @Mock
-  private ApplicationEventPublisher publisher;
+  private KafkaTemplate<String, Object> kafkaTemplate;
 
   @InjectMocks
   private PaymentEventPublisherImpl paymentEventPublisherImpl;
@@ -32,6 +33,6 @@ class PaymentEventPublisherImplTest {
     paymentEventPublisherImpl.success(event);
 
     // then
-    verify(publisher, atLeastOnce()).publishEvent(event);
+    verify(kafkaTemplate, atLeastOnce()).send(any(), any(), any());
   }
 }
