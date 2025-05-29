@@ -98,10 +98,6 @@ public class Coupon extends BaseEntity {
         .build();
   }
 
-  public void updateCouponStatus(CouponStatus couponStatus) {
-    this.couponStatus = couponStatus;
-  }
-
   public boolean isNotAvailableForIssue() {
     LocalDateTime now = LocalDateTime.now();
     return !CouponStatus.AVAILABLE.equals(couponStatus)
@@ -109,5 +105,16 @@ public class Coupon extends BaseEntity {
         || now.isAfter(to)
         || quantity == null
         || quantity <= 0;
+  }
+
+  public void deductQuantity(int size) {
+    if (quantity == null || quantity < size) {
+      throw new CouponIllegalStateException("쿠폰 수량이 부족합니다.");
+    }
+
+    this.quantity -= size;
+    if (quantity <= 0) {
+      this.couponStatus = CouponStatus.COMPLETE;
+    }
   }
 }
