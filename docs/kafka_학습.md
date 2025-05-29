@@ -2,7 +2,7 @@
 
 작성자: 홍석호
 
-작성일: 2025-04-23
+작성일: 2025-05-30
 
 Kafka에 대한 이해도를 높이기 위해 작성된 문서입니다.
 
@@ -145,7 +145,7 @@ max.in.flight.requests.per.connection은 블로킹 없이 한 커넥션에서 �
 하지만, 불필요한 유휴 컨슈머는 자원을 낭비하게 됩니다. 따라서, 컨슈머의 개수를 파티션의 개수와 맞추는 것이 좋습니다.
 
 #### 컨슈머가 파티션보다 적은 경우
-![consumer_lt_partition.png](image/consumer_lt_partition.png)![img.png](img.png)
+![consumer_lt_partition.png](image/consumer_lt_partition.png)
 컨슈머가 파티션보다 적은 경우에는 컨슈머가 여러 개의 파티션을 읽게 됩니다. 이 경우, 컨슈머는 병렬로 메시지를 읽을 수 있습니다.
 하지만, cpu 집약적인 작업의 경우 컨슈머의 전반적인 처리량이 낮아질 수 있습니다.
 
