@@ -14,13 +14,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OrderEventListenerTest {
+class OrderEventConsumerTest {
 
   @Mock
   private PaymentDataClient paymentDataClient;
 
   @InjectMocks
-  private OrderEventListener orderEventListener;
+  private OrderEventConsumer orderEventListener;
 
   @DisplayName("결제 성공 이벤트를 리슨한다")
   @Test

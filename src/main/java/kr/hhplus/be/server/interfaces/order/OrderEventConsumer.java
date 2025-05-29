@@ -4,20 +4,23 @@ import kr.hhplus.be.server.domain.payment.PaymentDataClient;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentSuccessPayload;
 import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class OrderEventListener {
+public class OrderEventConsumer {
 
   private final PaymentDataClient paymentDataClient;
 
-  @KafkaListener(topics = "payment.v1.success", concurrency = "1")
-  public void handlePaymentSuccessEvent(PaymentSuccessEvent event, Acknowledgment ack) {
+  @Async
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void handlePaymentSuccessEvent(PaymentSuccessEvent event) {
     PaymentSuccessPayload payload = PaymentSuccessPayload.from(event);
     paymentDataClient.publish(payload);
-    ack.acknowledge();
   }
 }
