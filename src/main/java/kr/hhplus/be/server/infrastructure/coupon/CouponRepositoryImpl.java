@@ -24,15 +24,11 @@ public class CouponRepositoryImpl implements CouponRepository {
   private final UserCouponJpaRepository userCouponJpaRepository;
   private final CacheManager cacheManager;
   private final RedisRepository redisRepository;
+  private final UserCouponCustomRepository userCouponCustomRepository;
 
   @Override
   public Optional<UserCoupon> findUserCouponByUserCouponId(Long userCouponId) {
     return userCouponJpaRepository.findById(userCouponId);
-  }
-
-  @Override
-  public List<UserCoupon> findUserCouponsByUserId(Long userId) {
-    return userCouponJpaRepository.findAllByUserId(userId);
   }
 
   @Override
@@ -44,7 +40,7 @@ public class CouponRepositoryImpl implements CouponRepository {
   public Optional<Coupon> findById(Long couponId) {
     CacheKeyHolder<Long> key = CouponCacheKey.COUPON.value(couponId);
     String generated = key.generate();
-    
+
     Cache cache = cacheManager.getCache(LOCAL_CACHE_NAME);
     if (cache != null) {
       Coupon cached = cache.get(generated, Coupon.class);
@@ -67,11 +63,6 @@ public class CouponRepositoryImpl implements CouponRepository {
   }
 
   @Override
-  public Optional<Coupon> findForUpdateById(Long couponId) {
-    return couponJpaRepository.findForUpdateById(couponId);
-  }
-
-  @Override
   public List<Coupon> findAllCoupons() {
     return couponJpaRepository.findAll();
   }
@@ -87,19 +78,6 @@ public class CouponRepositoryImpl implements CouponRepository {
   }
 
   @Override
-  public void addQueue(CacheKeyHolder<Long> key, Long userId, long currentTimeMillis) {
-    redisRepository.saveIfAbsent(key.generate(), String.valueOf(userId), currentTimeMillis);
-  }
-
-  @Override
-  public List<Long> findAllUserIdInQueue(CacheKeyHolder<Long> key, long startInclusive, long endExclusive) {
-    long start = startInclusive < 0 ? 0 : startInclusive;
-    long end = endExclusive < 0 ? 0 : endExclusive - 1;
-    return redisRepository.findRangeInZset(key.generate(), start, end, new TypeReference<>() {
-    });
-  }
-
-  @Override
   public void saveEventCoupon(Coupon coupon) {
     CacheKeyHolder<Long> key = CouponCacheKey.COUPON.value(coupon.getId());
     String generated = key.generate();
@@ -108,24 +86,22 @@ public class CouponRepositoryImpl implements CouponRepository {
     if (cache != null) {
       cache.put(generated, coupon);
     }
-    
+
     redisRepository.save(CouponCacheKey.COUPON_EVENT.generate(null), coupon);
-  }
-
-  @Override
-  public Optional<UserCoupon> findUserCouponForUpdateByUserIdAndCouponId(Long userId, Long couponId) {
-    return userCouponJpaRepository.findForUpdateByUserIdAndCouponId(userId, couponId);
-  }
-
-  @Override
-  public Optional<Coupon> findEventCoupon() {
-    Coupon coupon = redisRepository.find(CouponCacheKey.COUPON_EVENT.generate(null), new TypeReference<>() {
-    });
-    return Optional.ofNullable(coupon);
   }
 
   @Override
   public List<UserCoupon> findAllUserCouponsByUserIdAndOrderId(Long userId, Long orderId) {
     return userCouponJpaRepository.findAllByUserIdAndOrderId(userId, orderId);
+  }
+
+  @Override
+  public List<UserCoupon> findUserCouponsByCouponId(Long couponId) {
+    return userCouponJpaRepository.findAllByCouponId(couponId);
+  }
+
+  @Override
+  public void saveAllUserCoupons(List<UserCoupon> userCoupons) {
+    userCouponCustomRepository.saveAll(userCoupons);
   }
 }
