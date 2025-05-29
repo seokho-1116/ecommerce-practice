@@ -56,6 +56,9 @@ dependencies {
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
+    // kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
     // DB
     runtimeOnly("com.mysql:mysql-connector-j")
 
@@ -67,6 +70,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("io.rest-assured:rest-assured:5.5.1")
+    testImplementation("org.testcontainers:kafka:1.21.0")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mysql")
     testImplementation("org.instancio:instancio-core:5.4.0")
