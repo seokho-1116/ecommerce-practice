@@ -110,4 +110,15 @@ public class Coupon extends BaseEntity {
         || quantity == null
         || quantity <= 0;
   }
+
+  public void deductQuantity(int size) {
+    if (quantity == null || quantity < size) {
+      throw new CouponIllegalStateException("쿠폰 수량이 부족합니다.");
+    }
+
+    this.quantity -= size;
+    if (quantity <= 0) {
+      this.couponStatus = CouponStatus.COMPLETE;
+    }
+  }
 }

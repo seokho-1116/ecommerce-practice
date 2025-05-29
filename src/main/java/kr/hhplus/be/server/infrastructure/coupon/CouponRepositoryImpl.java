@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.infrastructure.coupon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import jakarta.persistence.criteria.Predicate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import kr.hhplus.be.server.domain.coupon.Coupon;
@@ -12,6 +14,8 @@ import kr.hhplus.be.server.support.CacheKeyHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -24,6 +28,7 @@ public class CouponRepositoryImpl implements CouponRepository {
   private final UserCouponJpaRepository userCouponJpaRepository;
   private final CacheManager cacheManager;
   private final RedisRepository redisRepository;
+  private final UserCouponCustomRepository userCouponCustomRepository;
 
   @Override
   public Optional<UserCoupon> findUserCouponByUserCouponId(Long userCouponId) {
@@ -44,7 +49,7 @@ public class CouponRepositoryImpl implements CouponRepository {
   public Optional<Coupon> findById(Long couponId) {
     CacheKeyHolder<Long> key = CouponCacheKey.COUPON.value(couponId);
     String generated = key.generate();
-    
+
     Cache cache = cacheManager.getCache(LOCAL_CACHE_NAME);
     if (cache != null) {
       Coupon cached = cache.get(generated, Coupon.class);
@@ -92,7 +97,8 @@ public class CouponRepositoryImpl implements CouponRepository {
   }
 
   @Override
-  public List<Long> findAllUserIdInQueue(CacheKeyHolder<Long> key, long startInclusive, long endExclusive) {
+  public List<Long> findAllUserIdInQueue(CacheKeyHolder<Long> key, long startInclusive,
+      long endExclusive) {
     long start = startInclusive < 0 ? 0 : startInclusive;
     long end = endExclusive < 0 ? 0 : endExclusive - 1;
     return redisRepository.findRangeInZset(key.generate(), start, end, new TypeReference<>() {
@@ -108,24 +114,55 @@ public class CouponRepositoryImpl implements CouponRepository {
     if (cache != null) {
       cache.put(generated, coupon);
     }
-    
+
     redisRepository.save(CouponCacheKey.COUPON_EVENT.generate(null), coupon);
   }
 
   @Override
-  public Optional<UserCoupon> findUserCouponForUpdateByUserIdAndCouponId(Long userId, Long couponId) {
+  public Optional<UserCoupon> findUserCouponForUpdateByUserIdAndCouponId(Long userId,
+      Long couponId) {
     return userCouponJpaRepository.findForUpdateByUserIdAndCouponId(userId, couponId);
   }
 
   @Override
   public Optional<Coupon> findEventCoupon() {
-    Coupon coupon = redisRepository.find(CouponCacheKey.COUPON_EVENT.generate(null), new TypeReference<>() {
-    });
+    Coupon coupon = redisRepository.find(CouponCacheKey.COUPON_EVENT.generate(null),
+        new TypeReference<>() {
+        });
     return Optional.ofNullable(coupon);
   }
 
   @Override
   public List<UserCoupon> findAllUserCouponsByUserIdAndOrderId(Long userId, Long orderId) {
     return userCouponJpaRepository.findAllByUserIdAndOrderId(userId, orderId);
+  }
+
+  @Override
+  public List<UserCoupon> findUserCouponsByUserIdAndCouponIdIn(
+      List<Pair<Long, Long>> userIdAndCouponIdPairs) {
+    if (userIdAndCouponIdPairs == null || userIdAndCouponIdPairs.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    Specification<UserCoupon> specification = createSpecification(userIdAndCouponIdPairs);
+    return userCouponJpaRepository.findAll(specification);
+  }
+
+  private Specification<UserCoupon> createSpecification(List<Pair<Long, Long>> pairs) {
+    return (root, query, criteriaBuilder) -> {
+      List<Predicate> predicates = pairs.stream()
+          .map(pair -> criteriaBuilder.and(
+              criteriaBuilder.equal(root.get("userId"), pair.getFirst()),
+              criteriaBuilder.equal(root.get("couponId"), pair.getSecond())
+          ))
+          .toList();
+
+      return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+    };
+  }
+
+  @Override
+  public void saveAllUserCoupons(List<UserCoupon> userCoupons) {
+    userCouponCustomRepository.saveAll(userCoupons);
   }
 }

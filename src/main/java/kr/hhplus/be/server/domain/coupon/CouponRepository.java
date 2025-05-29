@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.coupon;
 import java.util.List;
 import java.util.Optional;
 import kr.hhplus.be.server.support.CacheKeyHolder;
+import org.springframework.data.util.Pair;
 
 public interface CouponRepository {
 
@@ -20,8 +21,6 @@ public interface CouponRepository {
 
   Coupon save(Coupon coupon);
 
-  void addQueue(CacheKeyHolder<Long> key, Long userId, long currentTimeMillis);
-
   List<Long> findAllUserIdInQueue(CacheKeyHolder<Long> key, long startInclusive, long endInclusive);
 
   void saveEventCoupon(Coupon coupon);
@@ -31,4 +30,8 @@ public interface CouponRepository {
   Optional<Coupon> findEventCoupon();
 
   List<UserCoupon> findAllUserCouponsByUserIdAndOrderId(Long userId, Long orderId);
+
+  List<UserCoupon> findUserCouponsByUserIdAndCouponIdIn(List<Pair<Long, Long>> userIdAndCouponIdPairs);
+
+  void saveAllUserCoupons(List<UserCoupon> userCoupons);
 }

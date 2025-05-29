@@ -12,7 +12,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CouponListener {
+public class CouponEventListener {
 
   private final CouponService couponService;
 

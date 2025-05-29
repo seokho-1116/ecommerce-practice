@@ -56,6 +56,9 @@ dependencies {
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
+    // kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
     // DB
     runtimeOnly("com.mysql:mysql-connector-j")
 

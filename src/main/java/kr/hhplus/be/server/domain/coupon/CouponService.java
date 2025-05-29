@@ -3,13 +3,20 @@ package kr.hhplus.be.server.domain.coupon;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import kr.hhplus.be.server.domain.coupon.CouponBusinessException.CouponNotFoundException;
+import kr.hhplus.be.server.domain.coupon.CouponCommand.CouponEventCommand;
+import kr.hhplus.be.server.domain.coupon.CouponCommand.CouponIssueCommand;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.coupon.CouponDto.UserCouponInfo;
+import kr.hhplus.be.server.domain.coupon.CouponEvent.CouponIssueEvent;
+import kr.hhplus.be.server.infrastructure.coupon.CouponEventPublisher;
 import kr.hhplus.be.server.support.CacheKeyHolder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -19,6 +26,7 @@ public class CouponService {
 
   private final TransactionTemplate transactionTemplate;
   private final CouponRepository couponRepository;
+  private final CouponEventPublisher couponEventPublisher;
 
   public UserCouponInfo findUserCouponByUserCouponId(Long userCouponId) {
     return couponRepository.findUserCouponByUserCouponId(userCouponId)
@@ -41,8 +49,12 @@ public class CouponService {
     Coupon coupon = couponRepository.findById(couponId)
         .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
 
-    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
-    couponRepository.addQueue(key, userId, System.currentTimeMillis());
+    if (coupon.isNotAvailableForIssue()) {
+      throw new CouponBusinessException("쿠폰이 발급 가능한 상태가 아닙니다.");
+    }
+
+    CouponIssueEvent event = CouponIssueEvent.of(userId, coupon.getId());
+    couponEventPublisher.issueCoupon(event);
 
     return CouponIssueInfo.from(userId, coupon.getId());
   }
@@ -130,5 +142,39 @@ public class CouponService {
           userCoupon.reserve(orderId);
           couponRepository.saveUserCoupon(userCoupon);
         });
+  }
+
+  @Transactional
+  public void issueAllFromQueue(Long couponId, List<CouponIssueCommand> commands) {
+    Coupon coupon = couponRepository.findById(couponId)
+        .orElseThrow(() -> new CouponNotFoundException("쿠폰을 찾을 수 없습니다."));
+
+    if (coupon.isNotAvailableForIssue()) {
+      throw new CouponBusinessException("쿠폰이 발급 가능한 상태가 아닙니다.");
+    }
+
+    List<CouponIssueCommand> filteredCommands = commands.stream()
+        .limit(coupon.getQuantity())
+        .toList();
+
+    List<Pair<Long, Long>> userIdAndCouponIdPairs = filteredCommands.stream()
+        .map(command -> Pair.of(command.userId(), command.couponId()))
+        .toList();
+    Set<Long> alreadyIssuedUsers = couponRepository.findUserCouponsByUserIdAndCouponIdIn(
+            userIdAndCouponIdPairs).stream()
+        .map(UserCoupon::getUserId)
+        .collect(Collectors.toSet());
+
+    List<UserCoupon> newUserCoupons = filteredCommands.stream()
+        .filter(command -> !alreadyIssuedUsers.contains(command.userId()))
+        .map(command -> UserCoupon.builder()
+            .userId(command.userId())
+            .coupon(coupon)
+            .build())
+        .toList();
+    couponRepository.saveAllUserCoupons(newUserCoupons);
+
+    coupon.deductQuantity(newUserCoupons.size());
+    couponRepository.save(coupon);
   }
 }
