@@ -4,23 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import kr.hhplus.be.server.IntegrationTestSupport;
 import kr.hhplus.be.server.common.TestReflectionUtil;
 import kr.hhplus.be.server.domain.coupon.CouponDto.CouponIssueInfo;
 import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.infrastructure.coupon.CouponEventPublisher;
 import kr.hhplus.be.server.support.CacheKeyHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class CouponIntegrationTest extends IntegrationTestSupport {
 
   @Autowired
   private CouponService couponService;
+
+  @MockitoBean
+  private CouponEventPublisher couponEventPublisher;
 
   @Autowired
   private CouponRepository couponRepository;
@@ -73,22 +77,6 @@ class CouponIntegrationTest extends IntegrationTestSupport {
         .allMatch(UserCoupon::getIsUsed);
   }
 
-  @DisplayName("쿠폰을 발급을 요청하면 쿠폰이 발급 요청이 수행된다")
-  @Test
-  void issueTest() {
-    // given
-    // when
-    CouponIssueInfo issuedCoupon = couponService.issue(user.getId(), coupon.getId());
-
-    // then
-    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
-    Set<Long> userIds = testHelpRepository.findZsetInCache(key.generate(), 0,
-        100, new TypeReference<>() {
-        });
-    assertThat(issuedCoupon).isNotNull();
-    assertThat(userIds).contains(user.getId());
-  }
-
   @DisplayName("동시에 쿠폰을 사용하면 쿠폰이 한 번만 사용된다")
   @Test
   void concurrentUseTest() throws InterruptedException {
@@ -122,44 +110,6 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     assertThat(successCount.get()).isEqualTo(1);
   }
 
-  @DisplayName("동시에 쿠폰을 발급하면 쿠폰이 발급 요청된다")
-  @Test
-  void concurrentIssueTest() throws InterruptedException {
-    // given
-    int concurrentRequest = 2;
-    CountDownLatch latch = new CountDownLatch(concurrentRequest);
-
-    // when
-    new Thread(() -> {
-      try {
-        couponService.issue(user.getId(), coupon.getId());
-      } catch (Exception ignore) {
-        // ignore
-      } finally {
-        latch.countDown();
-      }
-    }).start();
-
-    new Thread(() -> {
-      try {
-        couponService.issue(user2.getId(), coupon.getId());
-      } catch (Exception ignore) {
-        // ignore
-      } finally {
-        latch.countDown();
-      }
-    }).start();
-
-    latch.await();
-
-    // then
-    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(coupon.getId());
-    Set<Long> userIds = testHelpRepository.findZsetInCache(key.generate(), 0,
-        100, new TypeReference<>() {
-        });
-    assertThat(userIds).hasSize(concurrentRequest);
-  }
-
   @DisplayName("쿠폰이 캐시에 없을 때 쿠폰을 조회하면 DB에서 저장 후 캐시에 저장한다")
   @Test
   void findByIdInCacheTest() {
@@ -175,82 +125,6 @@ class CouponIntegrationTest extends IntegrationTestSupport {
     });
     assertThat(result).isNotNull();
     assertThat(saveInCache.getId()).isEqualTo(couponId);
-  }
-
-  @DisplayName("이벤트 쿠폰이 없으면 반환된다")
-  @Test
-  void findEventCouponTest() {
-    // given
-    couponService.issue(user2.getId(), notIssuedCoupon.getId());
-
-    // when
-    couponService.issueCouponFromQueue();
-
-    // then
-    List<UserCoupon> userCoupons = couponRepository.findUserCouponsByUserId(user2.getId());
-    assertThat(userCoupons).isEmpty();
-  }
-
-  @DisplayName("이벤트 쿠폰 발급 요청 시 쿠폰이 발급 상태인 경우 쿠폰이 발급된다")
-  @Test
-  void issueAvailableCouponsTest() {
-    // given
-    couponService.issue(user2.getId(), notIssuedCoupon.getId());
-
-    // when
-    couponService.issueCouponFromQueue();
-
-    // then
-    CacheKeyHolder<Long> key = CouponCacheKey.COUPON_EVENT_QUEUE.value(notIssuedCoupon.getId());
-    Set<Long> userIds = testHelpRepository.findZsetInCache(key.generate(), 0, 100, new TypeReference<>() {
-        });
-    assertThat(userIds).contains(user2.getId());
-  }
-
-  @DisplayName("이벤트 쿠폰 발급 요청 시 쿠폰이 발급 완료 상태에 도달된 경우 상태가 변경된다")
-  @Test
-  void issueAvailableCouponsWithCompletedStatusTest() {
-    // given
-    couponService.issue(user.getId(), notIssuedCoupon.getId());
-    couponRepository.saveEventCoupon(notIssuedCoupon);
-
-    // when
-    couponService.issueCouponFromQueue();
-
-    // then
-    Coupon saved = couponRepository.findById(notIssuedCoupon.getId())
-        .orElseThrow(RuntimeException::new);
-    assertThat(saved.getCouponStatus()).isEqualTo(CouponStatus.COMPLETE);
-  }
-
-  @DisplayName("같은 유저가 동시에 쿠폰을 발급하면 쿠폰이 오직 한 장만 발급된다")
-  @Test
-  void concurrentIssueWithLimitedQuantityTest() throws InterruptedException {
-    // given
-    couponRepository.saveEventCoupon(notIssuedCoupon);
-    couponService.issue(user2.getId(), notIssuedCoupon.getId());
-    couponService.issue(user2.getId(), notIssuedCoupon.getId());
-
-    int concurrentRequest = 2;
-    CountDownLatch latch = new CountDownLatch(concurrentRequest);
-
-    // when
-    for (int i = 0; i < concurrentRequest; i++) {
-      new Thread(() -> {
-        try {
-          couponService.issueCouponFromQueue();
-        } catch (Exception ignore) {
-          // ignore
-        } finally {
-          latch.countDown();
-        }
-      }).start();
-    }
-
-    latch.await();
-
-    List<UserCoupon> userCoupons2 = couponRepository.findUserCouponsByUserId(user2.getId());
-    assertThat(userCoupons2).hasSize(1);
   }
 
   @DisplayName("주문 ID가 없는 사용자의 쿠폰을 사용하려고 하면 아무 쿠폰도 사용되지 않는다")

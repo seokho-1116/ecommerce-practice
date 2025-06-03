@@ -5,6 +5,7 @@ import java.util.Optional;
 import kr.hhplus.be.server.domain.payment.PaymentBusinessException.PaymentIllegalStateException;
 import kr.hhplus.be.server.domain.payment.PaymentCommand.PaymentSuccessCommand;
 import kr.hhplus.be.server.domain.payment.PaymentDto.PaymentInfo;
+import kr.hhplus.be.server.domain.payment.PaymentEvent.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
+  private final PaymentEventPublisher paymentEventPublisher;
 
   @Transactional
   public void pay(PaymentSuccessCommand command) {
@@ -25,6 +27,8 @@ public class PaymentService {
 
     Payment saved = paymentRepository.save(payment);
 
-    PaymentInfo.from(saved);
+    PaymentInfo paymentInfo = PaymentInfo.from(saved);
+    PaymentSuccessEvent event = PaymentSuccessEvent.from(paymentInfo);
+    paymentEventPublisher.success(event);
   }
 }
