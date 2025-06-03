@@ -23,6 +23,7 @@ public class CouponTestDataGenerator {
     LocalDateTime now = LocalDateTime.now();
     return Instancio.of(Coupon.class)
         .ignore(field(Coupon::getId))
+        .set(field(Coupon::getCouponStatus), CouponStatus.AVAILABLE)
         .set(field(Coupon::getIsActive), true)
         .set(field(Coupon::getFrom), now.minusDays(3))
         .set(field(Coupon::getTo), now.plusDays(3))

@@ -440,4 +440,67 @@ class CouponTest {
     // then
     assertThat(isAvailable).isEqualTo(expected);
   }
+
+  @DisplayName("쿠폰 차감 시 쿠폰 수량이 감소한다")
+  @Test
+  void decreaseCouponQuantityTest() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(10L)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    coupon.deductQuantity(5);
+
+    // then
+    assertThat(coupon.getQuantity()).isEqualTo(5L);
+  }
+
+  @DisplayName("쿠폰 차감 시 쿠폰 수량이 음수가 되면 예외가 발생한다")
+  @Test
+  void decreaseCouponQuantityWhenNegativeTest() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(5L)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    // then
+    assertThatThrownBy(() -> coupon.deductQuantity(6))
+        .isInstanceOf(CouponIllegalStateException.class);
+  }
+
+  @DisplayName("쿠폰 차감 시 쿠폰 수량이 0이되면 쿠폰 상태를 사용 불가로 변경한다")
+  @Test
+  void decreaseCouponQuantityWhenZeroTest() {
+    // given
+    LocalDateTime from = LocalDateTime.now().minusMonths(1);
+    LocalDateTime to = LocalDateTime.now().plusMonths(1);
+    Coupon coupon = Coupon.builder()
+        .from(from)
+        .to(to)
+        .quantity(1L)
+        .couponType(CouponType.FIXED)
+        .discountAmount(1000L)
+        .build();
+
+    // when
+    coupon.deductQuantity(1);
+
+    // then
+    assertThat(coupon.getQuantity()).isZero();
+    assertThat(coupon.getCouponStatus()).isEqualTo(CouponStatus.COMPLETE);
+  }
 }
