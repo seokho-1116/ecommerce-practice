@@ -24,6 +24,10 @@ public class CouponService {
   private final CouponEventPublisher couponEventPublisher;
 
   public UserCouponInfo findUserCouponByUserCouponId(Long userCouponId) {
+    if (userCouponId == null) {
+      return null;
+    }
+
     return couponRepository.findUserCouponByUserCouponId(userCouponId)
         .map(UserCouponInfo::from)
         .orElse(null);
