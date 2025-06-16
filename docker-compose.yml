@@ -14,7 +14,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 8G
+          memory: 1G
 
   mysql_exporter:
     image: prom/mysqld-exporter
@@ -30,8 +30,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 8G
+          cpus: '1'
+          memory: 512M
 
   redis_exporter:
     image: oliver006/redis_exporter
@@ -93,6 +93,28 @@ services:
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@127.0.0.1:9093
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 8G
+
+  spring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=load
+    depends_on:
+      - mysql
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    ports:
+      - "8080:8080"
 
 volumes:
   kafka-data:
